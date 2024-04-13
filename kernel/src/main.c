@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/client.h>
-#include <utils/server.h>
+#include <conexiones.h>
 
 int main(int argc, char* argv[]) {
-    decir_hola("Kernel");
+    escucharConexiones();
     return 0;
 }

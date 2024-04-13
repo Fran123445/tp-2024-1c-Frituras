@@ -1,11 +1,12 @@
-#include"server.h"
+#include "server.h"
+
 t_log* logger;
 
-int iniciar_servidor(puerto)
+int iniciar_servidor(char* puerto)
 {
 	int socket_servidor;
 
-	struct addrinfo hints, *servinfo, *p;
+	struct addrinfo hints, *servinfo;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -22,7 +23,6 @@ int iniciar_servidor(puerto)
 	bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
 	
 	// Escuchamos las conexiones entrantes
-	listen(socket_servidor, SOMAXCONN);
 
 	freeaddrinfo(servinfo);
 	log_trace(logger, "Listo para escuchar a mi cliente");
@@ -31,6 +31,7 @@ int iniciar_servidor(puerto)
 
 int esperar_cliente(int socket_servidor)
 {
+	listen(socket_servidor, 5);
 	int socket_cliente= accept(socket_servidor, NULL, NULL);
 	log_info(logger, "Se conecto un cliente!");
 
