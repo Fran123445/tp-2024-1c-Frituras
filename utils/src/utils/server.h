@@ -10,8 +10,9 @@
 #include<commons/collections/list.h>
 #include<string.h>
 #include<assert.h>
+#include<pthread.h>
 
-
+#define MAXCONN 5
 typedef enum
 {
 	MENSAJE,
@@ -23,9 +24,12 @@ extern t_log* logger;
 void* recibir_buffer(int*, int);
 
 int iniciar_servidor(char*);
-int esperar_cliente(int);
+void esperar_cliente(int);
 t_list* recibir_paquete(int);
 void recibir_mensaje(int);
 int recibir_operacion(int);
+void* atender_cliente(int*);
+
+void iterator(char* value);
 
 #endif /* UTILS_H_ */

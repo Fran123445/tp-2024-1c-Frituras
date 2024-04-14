@@ -29,19 +29,27 @@ int iniciar_servidor(char* puerto)
 	return socket_servidor;
 }
 
-int esperar_cliente(int socket_servidor)
+void esperar_cliente(int socket_servidor)
 {
-	listen(socket_servidor, 5);
-	int socket_cliente= accept(socket_servidor, NULL, NULL);
-	log_info(logger, "Se conecto un cliente!");
-
-	return socket_cliente;
-}
+	listen(socket_servidor, MAXCONN);
+	while (1) {
+		pthread_t thread;
+		int *socket_cliente = malloc(sizeof(int));
+		*socket_cliente = accept(socket_servidor, NULL, NULL);
+		log_info(logger, "Se conecto un cliente!");
+		pthread_create(&thread,
+						NULL,
+						(void*) atender_cliente,
+						socket_cliente);
+		pthread_detach(thread);
+	}
+}	
 
 int recibir_operacion(int socket_cliente)
 {
 	int cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
+	ssize_t received = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
+	if(received > 0)
 		return cod_op;
 	else
 	{
@@ -89,4 +97,31 @@ t_list* recibir_paquete(int socket_cliente)
 	}
 	free(buffer);
 	return valores;
+}
+
+void* atender_cliente(int* cliente_fd) {
+	t_list* lista;
+    while (1) {
+		int cod_op = recibir_operacion(*cliente_fd);
+		switch (cod_op) {
+		case MENSAJE:
+			recibir_mensaje(*cliente_fd);
+			break;
+		case PAQUETE:
+			lista = recibir_paquete(*cliente_fd);
+			log_info(logger, "Me llegaron los siguientes valores:\n");
+			list_iterate(lista, (void*) iterator);
+			break;
+		case -1:
+			log_error(logger, "el cliente se desconecto. Terminando servidor");
+			return -1;
+		default:
+			log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+			break;
+		}
+	}
+}
+
+void iterator(char* value) {
+	log_info(logger,"%s", value);
 }

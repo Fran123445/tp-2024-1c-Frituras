@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <conexiones.h>
+#include <readline/readline.h>
 
 int main(int argc, char* argv[]) {
-    conectarAKernel();
+    int conexion = conectarAKernel();
+    
     return 0;
 }
