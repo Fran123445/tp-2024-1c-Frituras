@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     exit(1);
     }; 
 
-    conectarse_a(nuevo_config,"IP_KERNEL","IP_KERNEL");
+    conectarse_a(nuevo_config,"IP_KERNEL","PUERTO_KERNEL");
     
     return 0;
 }
