@@ -110,13 +110,13 @@ void liberar_conexion(int socket_cliente)
 
 }
 
-void conectarse_a(t_config* archivoConfig, char* ipArchivo, char* puertoArchivo){
+void conectarse_a(t_conexion* info){
 int conexion;
 char* ip;
 char* puerto;
 
-ip = config_get_string_value(archivoConfig, ipArchivo);
-puerto = config_get_string_value(archivoConfig, puertoArchivo);
+ip = config_get_string_value(info->nuevo_config, info->ip);
+puerto = config_get_string_value(info->nuevo_config, info->puerto);
 conexion = crear_conexion(ip, puerto);
 
 enviar_mensaje("Prueba",conexion);

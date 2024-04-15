@@ -4,7 +4,7 @@ int conexion;
 char* ip;
 char* puerto;
 
-int escucharConexiones(void) {
+int escucharConexionesCpu(void) {
 
     t_config* nuevo_config = config_create("cpu.config");
         if (nuevo_config == NULL) {

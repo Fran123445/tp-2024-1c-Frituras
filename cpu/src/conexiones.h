@@ -6,4 +6,4 @@
 #include <utils/server.h>
 #include <utils/client.h>
 
-int escucharConexiones(void);
+int escucharConexionesCpu(void);
