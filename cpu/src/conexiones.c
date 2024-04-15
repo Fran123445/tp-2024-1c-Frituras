@@ -1,10 +1,15 @@
 #include <conexiones.h>
 
+int conexion;
+char* ip;
+char* puerto;
+
 int escucharConexiones(void) {
 
-    if (nuevo_config == NULL) {
+    t_config* nuevo_config = config_create("cpu.config");
+        if (nuevo_config == NULL) {
         exit(1);
-    }; 
+        }
 
     char* puertodispatch = config_get_string_value(nuevo_config, "PUERTO_ESCUCHA_DISPATCH");
     char* puertointerrupt = config_get_string_value(nuevo_config, "PUERTO_ESCUCHA_INTERRUPT");
@@ -18,8 +23,6 @@ int escucharConexiones(void) {
 
     esperar_cliente(server_di);
 	esperar_cliente(server_it);
-
-    t_config* nuevo_config = config_create("cpu.config");
     
     // Dispatch
     pthread_t thread;
@@ -39,3 +42,5 @@ int escucharConexiones(void) {
 
 	return 0;
 }
+
+

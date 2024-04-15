@@ -3,6 +3,6 @@
 #include <utils/server.h>
 
 int main(int argc, char* argv[]) {
-    decir_hola("Memoria");
+    escucharConexiones();
     return 0;
 }
