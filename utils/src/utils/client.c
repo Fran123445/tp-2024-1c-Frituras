@@ -111,13 +111,13 @@ void liberar_conexion(int socket_cliente)
 }
 
 void conectarse_a(t_conexion* info){
-int conexion;
-char* ip;
-char* puerto;
+	int conexion;
+	char* ip;
+	char* puerto;
 
-ip = config_get_string_value(info->nuevo_config, info->ip);
-puerto = config_get_string_value(info->nuevo_config, info->puerto);
-conexion = crear_conexion(ip, puerto);
+	ip = config_get_string_value(info->config, info->ip);
+	puerto = config_get_string_value(info->config, info->puerto);
+	conexion = crear_conexion(ip, puerto);
 
-enviar_mensaje("Prueba",conexion);
+	enviar_mensaje("Prueba",conexion);
 }

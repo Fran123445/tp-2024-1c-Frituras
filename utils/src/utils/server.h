@@ -1,5 +1,5 @@
-#ifndef UTILS_H_
-#define UTILS_H_
+#ifndef SERVER_H_
+#define SERVER_H_
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -10,14 +10,10 @@
 #include<commons/collections/list.h>
 #include<string.h>
 #include<assert.h>
+#include"estructurasConexion.h"
 #include<pthread.h>
 
 #define MAXCONN 5
-typedef enum
-{
-	MENSAJE,
-	PAQUETE
-}op_code;
 
 extern t_log* logger;
 
@@ -32,4 +28,4 @@ void* atender_cliente(int*);
 
 void iterator(char* value);
 
-#endif /* UTILS_H_ */
+#endif /* SERVER_H_ */
