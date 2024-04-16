@@ -30,13 +30,31 @@ int iniciar_servidor(char* puerto)
 	return socket_servidor;
 }
 
-void esperar_cliente(int socket_servidor)
+void esperar_cliente(int socket_servidor,t_conexion_escucha* info)
 {
 	listen(socket_servidor, MAXCONN);
 	while (1) {
+
 		pthread_t thread;
 		int *socket_cliente = malloc(sizeof(int));
 		*socket_cliente = accept(socket_servidor, NULL, NULL);
+		size_t bytes;
+
+		int handshake_recibido;
+		int resultOk = 0;
+		int resultError = -1;
+
+		bytes = recv(socket_cliente, &handshake_recibido, sizeof(int), MSG_WAITALL);
+
+		if (info->handshake == handshake_recibido) 
+		{
+			bytes = send(socket_cliente, &resultOk, sizeof(int), 0);
+		} else 
+		{
+			bytes = send(socket_cliente, &resultError, sizeof(int), 0);
+			log_info(logger, "Ups! Te confundiste");
+			continue;
+		}
 		log_info(logger, "Se conecto un cliente!");
 		pthread_create(&thread,
 						NULL,
@@ -138,7 +156,8 @@ int escucharConexiones(t_conexion_escucha* info) {
     int server_fd = iniciar_servidor(puerto);
     
 	log_info(logger, "Servidor listo para recibir al cliente");
-	esperar_cliente(server_fd);
+	esperar_cliente(server_fd,info);
+
 
 	return 0;
 }

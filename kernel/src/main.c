@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
     cpuDispatch->config = nuevo_config;
     cpuDispatch->ip = "IP_CPU";
     cpuDispatch->puerto = "PUERTO_ESCUCHA_DISPATCH";
+    
 
     t_conexion_escucha* oyente = malloc(sizeof(t_conexion_escucha));
 
@@ -24,6 +25,7 @@ int main(int argc, char* argv[]) {
     oyente->puerto = "PUERTO_ESCUCHA";
     oyente->log = "servidor_kernel.log";
     oyente->nombre_modulo = "kernel";
+    oyente->handshake = KERNEL;
 
     //conectarse_a(cpuDispatch);
     escucharConexiones(oyente);

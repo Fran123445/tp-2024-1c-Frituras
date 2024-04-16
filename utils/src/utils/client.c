@@ -119,5 +119,21 @@ void conectarse_a(t_conexion* info){
 	puerto = config_get_string_value(info->config, info->puerto);
 	conexion = crear_conexion(ip, puerto);
 
-	enviar_mensaje("Prueba",conexion);
+	//handshake
+	size_t bytes;
+	int result;
+	
+	bytes = send(conexion, &info->handshake, sizeof(int), 0);
+	bytes = recv(conexion, &result, sizeof(int), MSG_WAITALL);
+
+	if (result == 0) 
+	{
+    enviar_mensaje("Conexion correcta",conexion);
+	} else 
+	{
+    exit (-1);
+	}
+
+	
 }
+

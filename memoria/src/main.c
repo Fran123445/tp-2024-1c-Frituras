@@ -1,10 +1,38 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <commons/log.h>
+#include <commons/config.h>
 #include <utils/server.h>
+#include <utils/client.h>
+
 
 int main(int argc, char* argv[]) {
+    t_config* nuevo_config = config_create("memoria.config");
+    if (nuevo_config == NULL) {
+        exit(1);
+    }; 
 
-    escucharConexiones(); // Esto hay que pasarlo de conexiones.c a server.c
+    t_conexion* kernel = malloc(sizeof(t_conexion*));
+
+    kernel->config = nuevo_config;
+    kernel->puerto = "PUERTO_KERNEL";
+    kernel->ip = "IP_KERNEL";
+    kernel->handshake = MEMORIA;
+
+    t_conexion_escucha* oyente = malloc(sizeof(t_conexion_escucha));
+
+    oyente->config = nuevo_config;
+    oyente->puerto = "PUERTO_ESCUCHA";
+    oyente->log = "servidor_memoria.log";
+    oyente->nombre_modulo = "memoria";
+    oyente->handshake = MEMORIA;
+
+    conectarse_a(kernel);
+    //escucharConexiones(); // Esto hay que pasarlo de conexiones.c a server.c
+
+    free(kernel);
+    free(oyente);
 
     return 0;
 }

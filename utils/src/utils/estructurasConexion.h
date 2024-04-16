@@ -22,6 +22,7 @@ typedef struct
 	t_config* config;
 	char* ip;
 	char* puerto;
+	int handshake;
 }t_conexion;
 
 typedef struct
@@ -30,6 +31,7 @@ typedef struct
 	char* puerto;
 	char* log;
 	char* nombre_modulo;
+	int handshake;
 }t_conexion_escucha;
 
 typedef enum
