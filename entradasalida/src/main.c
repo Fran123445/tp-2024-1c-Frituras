@@ -9,7 +9,16 @@ int main(int argc, char* argv[]) {
         exit(1);
     }; 
 
-    conectarse_a(nuevo_config,"IP_KERNEL","PUERTO_KERNEL");
+    t_conexion* kernel = malloc(sizeof(t_conexion));
+
+    kernel->config = nuevo_config;
+    kernel->ip = "IP_KERNEL";
+    kernel->puerto = "PUERTO_KERNEL";
+
+    conectarse_a(kernel);
     
+    free(kernel);
+
+
     return 0;
 }
