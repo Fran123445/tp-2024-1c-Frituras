@@ -6,5 +6,3 @@
 #include <utils/server.h>
 
 int escucharConexiones(void);
-
-void iterator(char* value);

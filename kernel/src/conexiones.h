@@ -7,5 +7,3 @@
 #include <utils/client.h>
 
 int escucharConexiones(void);
-
-void iterator(char* value);

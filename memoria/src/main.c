@@ -3,6 +3,8 @@
 #include <utils/server.h>
 
 int main(int argc, char* argv[]) {
-    escucharConexiones();
+
+    escucharConexiones(); // Esto hay que pasarlo de conexiones.c a server.c
+
     return 0;
 }

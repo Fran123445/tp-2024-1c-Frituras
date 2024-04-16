@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) {
     t_config* nuevo_config = config_create("entradasalida.config");
     if (nuevo_config == NULL) {
-    exit(1);
+        exit(1);
     }; 
 
     conectarse_a(nuevo_config,"IP_KERNEL","PUERTO_KERNEL");

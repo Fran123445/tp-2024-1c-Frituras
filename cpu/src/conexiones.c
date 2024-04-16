@@ -29,7 +29,7 @@ int escucharConexionesCpu(void) {
     pthread_create(&thread,
 						NULL,
 						(void*) esperar_cliente,
-						server_di);
+						&server_di);
 	pthread_detach(thread);
     
     // Interrupt
@@ -37,7 +37,7 @@ int escucharConexionesCpu(void) {
     pthread_create(&thread2,
 						NULL,
 						(void*) esperar_cliente,
-						server_it);
+						&server_it);
 	pthread_detach(thread2);
 
 	return 0;
