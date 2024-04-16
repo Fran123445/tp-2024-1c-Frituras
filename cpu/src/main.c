@@ -13,6 +13,14 @@ int main(int argc, char* argv[]) {
     memoria->config = nuevo_config;
     memoria->ip = "IP_MEMORIA";
     memoria->puerto = "PUERTO_MEMORIA";
+    memoria->handshake = CPU;
+
+    //Conectarse a memoria
+    pthread_t threadEnvio;
+    pthread_create(&threadEnvio,
+						NULL,
+						(void*)conectarse_a,
+						memoria);
 
     //Escuchar Conexiones
     pthread_t threadEscucha;
@@ -21,12 +29,6 @@ int main(int argc, char* argv[]) {
 						(void*)escucharConexionesCpu,
 						NULL);
 
-    //Conectarse a memoria
-    pthread_t threadEnvio;
-    pthread_create(&threadEnvio,
-						NULL,
-						(void*)conectarse_a,
-						memoria);
                 
 	pthread_join(threadEscucha,NULL);
 	pthread_join(threadEnvio,NULL);

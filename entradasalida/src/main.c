@@ -3,21 +3,25 @@
 #include <utils/client.h>
 #include <utils/server.h>
 
+//Falta agregar hilos para diferentes conexiones 
+
 int main(int argc, char* argv[]) {
     t_config* nuevo_config = config_create("entradasalida.config");
     if (nuevo_config == NULL) {
         exit(1);
     }; 
 
-    t_conexion* kernel = malloc(sizeof(t_conexion));
+    t_conexion* conexion_kernel = malloc(sizeof(t_conexion));
 
-    kernel->config = nuevo_config;
-    kernel->ip = "IP_KERNEL";
-    kernel->puerto = "PUERTO_KERNEL";
+    conexion_kernel->config = nuevo_config;
+    conexion_kernel->ip = "IP_KERNEL";
+    conexion_kernel->puerto = "PUERTO_KERNEL";
+    conexion_kernel->handshake = IO;
 
-    conectarse_a(kernel);
+
+    conectarse_a(conexion_kernel);
     
-    free(kernel);
+    free(conexion_kernel);
 
 
     return 0;

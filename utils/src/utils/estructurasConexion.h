@@ -36,7 +36,8 @@ typedef struct
 
 typedef enum
 {
-	CPU,
+	CPU_DISPATCH,
+	CPU_INTERRUPT,
 	IO,
 	KERNEL,
 	MEMORIA

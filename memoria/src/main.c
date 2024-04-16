@@ -13,13 +13,6 @@ int main(int argc, char* argv[]) {
         exit(1);
     }; 
 
-    t_conexion* kernel = malloc(sizeof(t_conexion*));
-
-    kernel->config = nuevo_config;
-    kernel->puerto = "PUERTO_KERNEL";
-    kernel->ip = "IP_KERNEL";
-    kernel->handshake = MEMORIA;
-
     t_conexion_escucha* oyente = malloc(sizeof(t_conexion_escucha));
 
     oyente->config = nuevo_config;
@@ -28,10 +21,8 @@ int main(int argc, char* argv[]) {
     oyente->nombre_modulo = "memoria";
     oyente->handshake = MEMORIA;
 
-    conectarse_a(kernel);
-    //escucharConexiones(); // Esto hay que pasarlo de conexiones.c a server.c
+    escucharConexiones(oyente);
 
-    free(kernel);
     free(oyente);
 
     return 0;

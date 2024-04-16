@@ -20,9 +20,6 @@ int escucharConexionesCpu(void) {
     int server_it = iniciar_servidor(puertointerrupt);
 
 	log_info(logger, "Servidor listo para recibir al cliente");
-
-    esperar_cliente(server_di);
-	esperar_cliente(server_it);
     
     // Dispatch
     pthread_t thread;
