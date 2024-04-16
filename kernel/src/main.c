@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "conexiones.h"
+#include <string.h>
+#include <commons/log.h>
+#include <commons/config.h>
+#include <utils/server.h>
+#include <utils/client.h>
 
 int main(int argc, char* argv[]) {
     t_config* nuevo_config = config_create("kernel.config");
@@ -14,9 +18,18 @@ int main(int argc, char* argv[]) {
     cpuDispatch->ip = "IP_CPU";
     cpuDispatch->puerto = "PUERTO_ESCUCHA_DISPATCH";
 
-    conectarse_a(cpuDispatch);
+    t_conexion_escucha* oyente = malloc(sizeof(t_conexion_escucha));
+
+    oyente->config = nuevo_config;
+    oyente->puerto = "PUERTO_ESCUCHA";
+    oyente->log = "servidor_kernel.log";
+    oyente->nombre_modulo = "kernel";
+
+    //conectarse_a(cpuDispatch);
+    escucharConexiones(oyente);
 
     free(cpuDispatch);
+    free(oyente);
 
     return 0;
 }

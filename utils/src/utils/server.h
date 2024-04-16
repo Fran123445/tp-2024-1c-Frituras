@@ -18,5 +18,6 @@ int recibir_operacion(int);
 void* atender_cliente(int*);
 
 void iterator(char* value);
+int escucharConexiones(t_conexion_escucha*);
 
 #endif /* SERVER_H_ */

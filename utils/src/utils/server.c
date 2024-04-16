@@ -1,4 +1,5 @@
 #include "server.h"
+#include "estructurasConexion.h"
 
 t_log* logger;
 
@@ -125,3 +126,20 @@ void* atender_cliente(int* cliente_fd) {
 void iterator(char* value) {
 	log_info(logger,"%s", value);
 }
+
+
+int escucharConexiones(t_conexion_escucha* info) {
+    
+
+    char* puerto = config_get_string_value(info->config, info->puerto);
+
+	logger = log_create(info->log, info->nombre_modulo, 1, LOG_LEVEL_DEBUG);
+
+    int server_fd = iniciar_servidor(puerto);
+    
+	log_info(logger, "Servidor listo para recibir al cliente");
+	esperar_cliente(server_fd);
+
+	return 0;
+}
+

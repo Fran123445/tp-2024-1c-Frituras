@@ -24,5 +24,21 @@ typedef struct
 	char* puerto;
 }t_conexion;
 
+typedef struct
+{
+	t_config* config;
+	char* puerto;
+	char* log;
+	char* nombre_modulo;
+}t_conexion_escucha;
+
+typedef enum
+{
+	CPU,
+	IO,
+	KERNEL,
+	MEMORIA
+}modulo_code;
+
 
 #endif /* ESTRUCTURAS_CON_H */
