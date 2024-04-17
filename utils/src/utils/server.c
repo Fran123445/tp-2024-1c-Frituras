@@ -44,7 +44,7 @@ void esperar_cliente(int socket_servidor,t_conexion_escucha* info){
 
 		bytes = recv(*socket_cliente, &handshake_recibido, sizeof(int), MSG_WAITALL);
 
-		if (info->handshake_escucha == handshake_recibido) 
+		if (compararHandshake(info->modulo,handshake_recibido))
 		{
 			bytes = send(*socket_cliente, &resultOk, sizeof(int), 0);
 		} else 
@@ -60,6 +60,7 @@ void esperar_cliente(int socket_servidor,t_conexion_escucha* info){
 						(void*) atender_cliente,
 						socket_cliente);
 		pthread_detach(thread);
+		
 	}
 }	
 
@@ -128,7 +129,7 @@ void* atender_cliente(int* cliente_fd) {
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
-			break;
+			return -1;
 		default:
 			log_warning(logger,"Operacion desconocida. No quieras meter la pata");
 			break;

@@ -18,6 +18,7 @@ void* serializar_paquete(t_paquete* paquete, int bytes)
 
 int crear_conexion(char *ip, char* puerto)
 {
+	t_log* error = log_create("ErrorDeConexion.log","Error de conexion",true,LOG_LEVEL_ERROR);
 	struct addrinfo hints;
 	struct addrinfo *server_info;
 
@@ -34,8 +35,11 @@ int crear_conexion(char *ip, char* puerto)
                     server_info->ai_socktype,
                     server_info->ai_protocol);
 
-	// Ahora que tenemos el socket, vamos a conectarlo
-	connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
+	// Ahora que tenemos el socket, vamos a conectarlo pero primero verificamos que se pueda conectar
+	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen)==-1){
+		log_error(error,"Conexión fallida");
+		return -1;
+	}
 
 	freeaddrinfo(server_info);
 
@@ -123,7 +127,7 @@ void conectarse_a(t_conexion* info){
 	size_t bytes;
 	int result;
 	
-	bytes = send(conexion, &info->handshake_envio, sizeof(int), 0);
+	bytes = send(conexion, &info->modulo, sizeof(int), 0);
 	bytes = recv(conexion, &result, sizeof(int), MSG_WAITALL);
 
 	if (result == 0) {
