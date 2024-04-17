@@ -3,6 +3,7 @@
 
 #include"estructurasConexion.h"
 #include<assert.h>
+#include "handshake.h"
 
 #define MAXCONN 5
 
