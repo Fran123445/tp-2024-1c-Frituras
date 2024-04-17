@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     conexion_kernel->config = nuevo_config;
     conexion_kernel->ip = "IP_KERNEL";
     conexion_kernel->puerto = "PUERTO_KERNEL";
-    conexion_kernel->handshake = IO;
+    conexion_kernel->handshake_envio = IO;
 
 
     conectarse_a(conexion_kernel);

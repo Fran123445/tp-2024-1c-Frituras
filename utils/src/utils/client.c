@@ -123,15 +123,14 @@ void conectarse_a(t_conexion* info){
 	size_t bytes;
 	int result;
 	
-	bytes = send(conexion, &info->handshake, sizeof(int), 0);
+	bytes = send(conexion, &info->handshake_envio, sizeof(int), 0);
 	bytes = recv(conexion, &result, sizeof(int), MSG_WAITALL);
 
-	if (result == 0) 
-	{
-    enviar_mensaje("Conexion correcta",conexion);
+	if (result == 0) {
+    	enviar_mensaje("Conexion correcta",conexion);
 	} else 
 	{
-    exit (-1);
+    	exit (-1);
 	}
 
 	

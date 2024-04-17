@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     memoria->config = nuevo_config;
     memoria->ip = "IP_MEMORIA";
     memoria->puerto = "PUERTO_MEMORIA";
-    memoria->handshake = CPU;
+    memoria->handshake_envio = CPU;
 
     t_conexion_escucha* oyente_dispatch = malloc(sizeof(t_conexion_escucha));
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     oyente_dispatch->puerto = "PUERTO_ESCUCHA_DISPATCH";
     oyente_dispatch->log = "servidorDispatch.log";
     oyente_dispatch->nombre_modulo = "cpuDispatch";
-    oyente_dispatch->handshake = CPU_DISPATCH;
+    oyente_dispatch->handshake_escucha = CPU_DISPATCH;
 
     t_conexion_escucha* oyente_interrupt = malloc(sizeof(t_conexion_escucha));
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     oyente_interrupt->puerto = "PUERTO_ESCUCHA_INTERRUPT";
     oyente_interrupt->log = "servidorInterrupt.log";
     oyente_interrupt->nombre_modulo = "cpuInterrupt";
-    oyente_interrupt->handshake = CPU_INTERRUPT;
+    oyente_interrupt->handshake_escucha = CPU_INTERRUPT;
 
 
     //Conectarse a memoria
@@ -44,23 +44,25 @@ int main(int argc, char* argv[]) {
 						memoria);
 
     //Escuchar Conexiones
-    pthread_t threadEscucha;
-    pthread_create(&threadEscucha,
+    pthread_t threadEscuchaDispatch;
+    pthread_create(&threadEscuchaDispatch,
 						NULL,
 						(void*)escucharConexiones,
-						NULL);
+						oyente_dispatch);
 
-    pthread_t threadEscucha2;
-    pthread_create(&threadEscucha2,
+    pthread_t threadEscuchaInterrupt;
+    pthread_create(&threadEscuchaInterrupt,
 						NULL,
 						(void*)escucharConexiones,
-						NULL);
+						oyente_interrupt);
                 
-	pthread_join(threadEscucha,NULL);
-    pthread_join(threadEscucha2,NULL);
+	pthread_join(threadEscuchaDispatch,NULL);
+    pthread_join(threadEscuchaInterrupt,NULL);
 	pthread_join(threadEnvio,NULL);
 
     free(memoria);
+    free(oyente_dispatch);
+    free(oyente_interrupt);
 
     return 0;
 }

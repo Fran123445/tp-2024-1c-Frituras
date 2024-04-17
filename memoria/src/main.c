@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     oyente->puerto = "PUERTO_ESCUCHA";
     oyente->log = "servidor_memoria.log";
     oyente->nombre_modulo = "memoria";
-    oyente->handshake = MEMORIA;
+    oyente->handshake_escucha = MEMORIA;
 
     escucharConexiones(oyente);
 

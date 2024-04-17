@@ -44,13 +44,14 @@ void esperar_cliente(int socket_servidor,t_conexion_escucha* info){
 
 		bytes = recv(socket_cliente, &handshake_recibido, sizeof(int), MSG_WAITALL);
 
-		if (info->handshake == handshake_recibido) 
+		if (info->handshake_escucha == handshake_recibido) 
 		{
 			bytes = send(socket_cliente, &resultOk, sizeof(int), 0);
 		} else 
 		{
 			bytes = send(socket_cliente, &resultError, sizeof(int), 0);
 			log_info(logger, "Ups! Te confundiste");
+			free(socket_cliente)
 			continue;
 		}
 		log_info(logger, "Se conecto un cliente!");

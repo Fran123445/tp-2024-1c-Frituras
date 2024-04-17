@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     oyente->puerto = "PUERTO_ESCUCHA";
     oyente->log = "servidor_kernel.log";
     oyente->nombre_modulo = "kernel";
-    oyente->handshake = KERNEL;
+    oyente->handshake_escucha = KERNEL;
 
     //conectarse_a(cpuDispatch);
     escucharConexiones(oyente);

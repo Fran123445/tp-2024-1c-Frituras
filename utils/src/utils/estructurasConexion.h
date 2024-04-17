@@ -20,7 +20,7 @@ typedef struct {
 	t_config* config;
 	char* ip;
 	char* puerto;
-	int handshake;
+	int handshake_envio;
 }t_conexion;
 
 typedef struct{
@@ -28,21 +28,16 @@ typedef struct{
 	char* puerto;
 	char* log;
 	char* nombre_modulo;
-	int handshake;
+	int handshake_escucha;
 }t_conexion_escucha;
 
 typedef enum{
+	CPU,
 	CPU_DISPATCH,
 	CPU_INTERRUPT,
 	IO,
 	KERNEL,
 	MEMORIA
 }modulo_code;
-
-typedef struct {
-	int* socket;
-	t_conexion_escucha* t_con_escucha;
-}t_conexion_esperacliente;
-
 
 #endif /* ESTRUCTURAS_CON_H */
