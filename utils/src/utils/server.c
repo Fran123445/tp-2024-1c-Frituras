@@ -42,16 +42,16 @@ void esperar_cliente(int socket_servidor,t_conexion_escucha* info){
 		int resultOk = 0;
 		int resultError = -1;
 
-		bytes = recv(socket_cliente, &handshake_recibido, sizeof(int), MSG_WAITALL);
+		bytes = recv(*socket_cliente, &handshake_recibido, sizeof(int), MSG_WAITALL);
 
 		if (info->handshake_escucha == handshake_recibido) 
 		{
-			bytes = send(socket_cliente, &resultOk, sizeof(int), 0);
+			bytes = send(*socket_cliente, &resultOk, sizeof(int), 0);
 		} else 
 		{
-			bytes = send(socket_cliente, &resultError, sizeof(int), 0);
+			bytes = send(*socket_cliente, &resultError, sizeof(int), 0);
 			log_info(logger, "Ups! Te confundiste");
-			free(socket_cliente)
+			free(socket_cliente);
 			continue;
 		}
 		log_info(logger, "Se conecto un cliente!");
@@ -128,7 +128,7 @@ void* atender_cliente(int* cliente_fd) {
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
-			return -1;
+			break;
 		default:
 			log_warning(logger,"Operacion desconocida. No quieras meter la pata");
 			break;
