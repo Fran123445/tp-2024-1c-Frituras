@@ -3,8 +3,7 @@
 
 t_log* logger;
 
-int iniciar_servidor(char* puerto)
-{
+int iniciar_servidor(char* puerto){
 	int socket_servidor;
 
 	struct addrinfo hints, *servinfo;
@@ -30,8 +29,7 @@ int iniciar_servidor(char* puerto)
 	return socket_servidor;
 }
 
-void esperar_cliente(int socket_servidor,t_conexion_escucha* info)
-{
+void esperar_cliente(int socket_servidor,t_conexion_escucha* info){
 	listen(socket_servidor, MAXCONN);
 	while (1) {
 
@@ -64,8 +62,7 @@ void esperar_cliente(int socket_servidor,t_conexion_escucha* info)
 	}
 }	
 
-int recibir_operacion(int socket_cliente)
-{
+int recibir_operacion(int socket_cliente){
 	int cod_op;
 	ssize_t received = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
 	if(received > 0)
@@ -77,8 +74,7 @@ int recibir_operacion(int socket_cliente)
 	}
 }
 
-void* recibir_buffer(int* size, int socket_cliente)
-{
+void* recibir_buffer(int* size, int socket_cliente){
 	void * buffer;
 
 	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
@@ -88,16 +84,14 @@ void* recibir_buffer(int* size, int socket_cliente)
 	return buffer;
 }
 
-void recibir_mensaje(int socket_cliente)
-{
+void recibir_mensaje(int socket_cliente){
 	int size;
 	char* buffer = recibir_buffer(&size, socket_cliente);
 	log_info(logger, "Me llego el mensaje %s", buffer);
 	free(buffer);
 }
 
-t_list* recibir_paquete(int socket_cliente)
-{
+t_list* recibir_paquete(int socket_cliente){
 	int size;
 	int desplazamiento = 0;
 	void * buffer;

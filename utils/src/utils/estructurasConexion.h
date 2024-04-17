@@ -11,22 +11,19 @@
 #include<string.h>
 #include<pthread.h>
 
-typedef enum
-{
+typedef enum{
 	MENSAJE,
 	PAQUETE
 }op_code;
 
-typedef struct 
-{
+typedef struct {
 	t_config* config;
 	char* ip;
 	char* puerto;
 	int handshake;
 }t_conexion;
 
-typedef struct
-{
+typedef struct{
 	t_config* config;
 	char* puerto;
 	char* log;
@@ -34,14 +31,18 @@ typedef struct
 	int handshake;
 }t_conexion_escucha;
 
-typedef enum
-{
+typedef enum{
 	CPU_DISPATCH,
 	CPU_INTERRUPT,
 	IO,
 	KERNEL,
 	MEMORIA
 }modulo_code;
+
+typedef struct {
+	int* socket;
+	t_conexion_escucha* t_con_escucha;
+}t_conexion_esperacliente;
 
 
 #endif /* ESTRUCTURAS_CON_H */
