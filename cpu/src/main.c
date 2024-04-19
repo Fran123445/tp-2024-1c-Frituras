@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
 						oyente_dispatch);
     
     
+    pthread_detach(threadEscuchaDispatch);
 
     pthread_t threadEscuchaInterrupt;
     pthread_create(&threadEscuchaInterrupt,
@@ -53,8 +54,9 @@ int main(int argc, char* argv[]) {
 						(void*)escucharConexiones,
 						oyente_interrupt);
                 
-    pthread_join(threadEscuchaInterrupt,NULL);
-    pthread_join(threadEscuchaDispatch,NULL);
+    pthread_detach(threadEscuchaInterrupt);
+    
+    while(1);
 
     free(memoria);
     free(oyente_dispatch);
