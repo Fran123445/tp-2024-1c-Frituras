@@ -51,9 +51,8 @@ int main(int argc, char* argv[]) {
 
     free(cpuDispatch);
     free(cpuInterrupt);
+    free(memoria);
     free(oyente);
-
-
 
     return 0;
 }

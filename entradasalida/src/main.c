@@ -18,10 +18,19 @@ int main(int argc, char* argv[]) {
     conexion_kernel->puerto = "PUERTO_KERNEL";
     conexion_kernel->modulo = IO;
 
-
     conectarse_a(conexion_kernel);
+
+    t_conexion* conexion_memoria = malloc(sizeof(t_conexion));
+
+    conexion_memoria->config = nuevo_config;
+    conexion_memoria->ip = "IP_MEMORIA";
+    conexion_memoria->puerto = "PUERTO_MEMORIA";
+    conexion_memoria->modulo = IO;
+
+    conectarse_a(conexion_memoria);
     
     free(conexion_kernel);
+    free(conexion_memoria);
 
 
     return 0;
