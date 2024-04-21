@@ -4,6 +4,14 @@
 #include <commons/config.h>
 #include <utils/server.h>
 #include <utils/client.h>
+#include "consola.h"
+
+void inicializarColas() {
+    colaNew = list_create();
+    colaReady = list_create();
+    colaBlocked = list_create();
+    colaExit = list_create();
+}
 
 int main(int argc, char* argv[]) {
     t_config* nuevo_config = config_create("kernel.config");
@@ -53,6 +61,13 @@ int main(int argc, char* argv[]) {
     free(cpuInterrupt);
     free(memoria);
     free(oyente);
+
+    //Ese desastre que esta ahi arriba hay que refactorizarlo
+
+    ultimoPIDAsignado = 0;
+    inicializarColas();
+    
+    solicitarInput();
 
     return 0;
 }

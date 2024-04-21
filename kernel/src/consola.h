@@ -1,12 +1,13 @@
-#ifndef ESTRUCTURAS_PROC_H
-#define ESTRUCTURAS_PROC_H
+#ifndef CONS_H
+#define CONS_H
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <commons/string.h>
 #include <readline/readline.h>
+#include <procesos.h>
 
 void solicitarInput(void);
 void interpretarInput(char*)
 
-#endif /* ESTRUCTURAS_PROC_H */
+#endif /* CONS_H */
