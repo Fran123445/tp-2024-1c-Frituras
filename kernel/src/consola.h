@@ -8,6 +8,7 @@
 #include <procesos.h>
 
 void solicitarInput(void);
-void interpretarInput(char*)
+void interpretarInput(char*);
+void listarProcesos(void);
 
 #endif /* CONS_H */

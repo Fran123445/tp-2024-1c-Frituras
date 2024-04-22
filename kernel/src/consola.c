@@ -1,5 +1,15 @@
 #include "consola.h"
 
+void listarProcesos(void) {
+    // Implementacion parcial. Falta agregar lo de los estados. 
+
+    void _mostarProceso(PCB* proceso) {
+        printf("PROCESO - %d\n", proceso->PID);
+    };
+
+    list_iterate(listadoProcesos, (void *) _mostarProceso);
+}
+
 void interpretarInput(char* input) {
 
     char** comando = string_split(input, " ");
@@ -7,9 +17,9 @@ void interpretarInput(char* input) {
     if (!strcmp(*comando, "EJECUTAR_SCRIPT")) {
         //ejecutarScript(path)
     } else if (!strcmp(*comando, "INICIAR_PROCESO")) {
-        //iniciarProceso(path)
+        iniciarProceso("path");
     } else if (!strcmp(*comando, "FINALIZAR_PROCESO")) {
-        //finalizarProceso(PID)
+        finalizarProceso(atoi(*(comando+1)));
     } else if (!strcmp(*comando, "MULTIPROGRAMACION")) {
         //asignarNivelDeMultiprogramacion(nivel)
     } else if (!strcmp(*comando, "DETENER_PLANIFICACION")) {
@@ -17,7 +27,7 @@ void interpretarInput(char* input) {
     } else if (!strcmp(*comando, "INICIAR_PLANIFICACION")) {
         //iniciarPlanificacion
     } else if (!strcmp(*comando, "PROCESO_ESTADO")) {
-        //listarProcesos()
+        listarProcesos();
     }
 
     string_array_destroy(comando);

@@ -5,12 +5,22 @@
 #include <utils/server.h>
 #include <utils/client.h>
 #include "consola.h"
+#include "procesos.h"
+
+int siguientePID;
+t_list* colaNew;
+t_list* colaReady;
+t_list* colaBlocked;
+t_list* colaExit;
+
+t_list* listadoProcesos;
 
 void inicializarColas() {
     colaNew = list_create();
     colaReady = list_create();
     colaBlocked = list_create();
     colaExit = list_create();
+    listadoProcesos = list_create();
 }
 
 int main(int argc, char* argv[]) {
@@ -55,7 +65,7 @@ int main(int argc, char* argv[]) {
     conectarse_a(memoria);
 
     //crear servidor
-    escucharConexiones(oyente);
+    //escucharConexiones(oyente);
 
     free(cpuDispatch);
     free(cpuInterrupt);
@@ -64,7 +74,7 @@ int main(int argc, char* argv[]) {
 
     //Ese desastre que esta ahi arriba hay que refactorizarlo
 
-    ultimoPIDAsignado = 0;
+    siguientePID = 0;
     inicializarColas();
     
     solicitarInput();
