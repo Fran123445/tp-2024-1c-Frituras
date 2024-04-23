@@ -8,12 +8,15 @@
 #include "procesos.h"
 
 int siguientePID;
+int gradoMultiprogramacion;
 t_list* colaNew;
 t_list* colaReady;
 t_list* colaBlocked;
 t_list* colaExit;
 
 t_list* listadoProcesos;
+
+t_log* logger;
 
 void inicializarColas() {
     colaNew = list_create();
@@ -75,8 +78,10 @@ int main(int argc, char* argv[]) {
     //Ese desastre que esta ahi arriba hay que refactorizarlo
 
     siguientePID = 0;
+    gradoMultiprogramacion = config_get_int_value(nuevo_config, "GRADO_MULTIPROGRAMACION");
     inicializarColas();
-    
+    logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
+
     solicitarInput();
 
     return 0;

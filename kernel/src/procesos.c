@@ -35,12 +35,14 @@ void iniciarProceso(char* path) {
     //Agregar el de program counter
     //Agregar el de registrosCPU
 
-    siguientePID += 1;
-
     // aca tambien va un semaforo
     // tambien "si el grado de multiprogramacion lo permite, va a ready"
     list_add(colaNew, nuevoPCB);
     list_add(listadoProcesos, nuevoPCB);
+
+    log_trace(logger, string_from_format("Se crea el proceso %d en NEW", siguientePID));
+
+    siguientePID += 1;
 }
 
 void finalizarProceso(int PID) {
@@ -55,6 +57,8 @@ void finalizarProceso(int PID) {
     colaProceso = enumEstadoACola(PCB->estado);
 
     list_remove_element(colaProceso, PCB);
+
+    log_trace(logger, string_from_format("Finaliza el proceso %d - Motivo: Finalizado por el usuario", PCB->PID));
 
     free(PCB);
 }

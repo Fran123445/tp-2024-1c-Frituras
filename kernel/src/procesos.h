@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <commons/collections/list.h>
+#include <commons/string.h>
 #include <stdint.h>
+#include <planificacion.h>
 
 typedef enum {
     NEW,
@@ -23,10 +25,6 @@ typedef struct {
 }PCB;
 
 extern int siguientePID;
-extern t_list* colaNew;
-extern t_list* colaReady;
-extern t_list* colaBlocked;
-extern t_list* colaExit;
 
 extern t_list* listadoProcesos;
 
