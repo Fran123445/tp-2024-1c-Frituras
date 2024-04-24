@@ -40,13 +40,19 @@ void iniciarProceso(char* path) {
     list_add(colaNew, nuevoPCB);
     list_add(listadoProcesos, nuevoPCB);
 
-    log_trace(logger, string_from_format("Se crea el proceso %d en NEW", siguientePID));
+    log_trace(logger, "Se crea el proceso %d en NEW", siguientePID);
 
     siguientePID += 1;
 }
 
 void finalizarProceso(int PID) {
     PCB* PCB = hallarPCB(PID);
+
+    if (PCB == NULL) {
+        log_error(logger, "El proceso %d no existe", PID);
+        return;
+    }
+
     t_list* colaProceso;
 
     // semaforos semaforos
@@ -58,7 +64,7 @@ void finalizarProceso(int PID) {
 
     list_remove_element(colaProceso, PCB);
 
-    log_trace(logger, string_from_format("Finaliza el proceso %d - Motivo: Finalizado por el usuario", PCB->PID));
+    log_trace(logger, "Finaliza el proceso %d - Motivo: Finalizado por el usuario", PCB->PID);
 
     free(PCB);
 }

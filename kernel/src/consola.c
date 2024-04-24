@@ -10,18 +10,30 @@ void listarProcesos(void) {
     list_iterate(listadoProcesos, (void *) _mostarProceso);
 }
 
+void ejecutarScript(char* path) {
+    FILE* archivoScript = fopen(path, "r");
+    char* instruccion = malloc(sizeof(char)*64);
+
+    while(fgets(instruccion, 64, archivoScript)) {
+        instruccion = string_replace(instruccion, "\n", ""); //fgets lee hasta, includio, el \n
+        interpretarInput(instruccion);
+    }
+
+    free(instruccion);
+}
+
 void interpretarInput(char* input) {
 
     char** comando = string_split(input, " ");
 
     if (!strcmp(*comando, "EJECUTAR_SCRIPT")) {
-        //ejecutarScript(path)
+        ejecutarScript(*(comando+1));
     } else if (!strcmp(*comando, "INICIAR_PROCESO")) {
         iniciarProceso("path");
     } else if (!strcmp(*comando, "FINALIZAR_PROCESO")) {
         finalizarProceso(atoi(*(comando+1)));
     } else if (!strcmp(*comando, "MULTIPROGRAMACION")) {
-        //asignarNivelDeMultiprogramacion(nivel)
+        gradoMultiprogramacion =  atoi(*(comando+1));
     } else if (!strcmp(*comando, "DETENER_PLANIFICACION")) {
         //detenerPlanificacion()
     } else if (!strcmp(*comando, "INICIAR_PLANIFICACION")) {

@@ -10,5 +10,6 @@
 void solicitarInput(void);
 void interpretarInput(char*);
 void listarProcesos(void);
+void ejecutarScript(char*); 
 
 #endif /* CONS_H */
