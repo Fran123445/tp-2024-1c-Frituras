@@ -9,21 +9,30 @@
 
 int siguientePID;
 int gradoMultiprogramacion;
-t_list* colaNew;
-t_list* colaReady;
-t_list* colaBlocked;
-t_list* colaExit;
+t_queue* colaNew;
+t_queue* colaReady;
+t_queue* colaBlocked;
+t_queue* colaExit;
 
 t_list* listadoProcesos;
 
 t_log* logger;
 
 void inicializarColas() {
-    colaNew = list_create();
-    colaReady = list_create();
-    colaBlocked = list_create();
-    colaExit = list_create();
+    colaNew = queue_create();
+    colaReady = queue_create();
+    colaBlocked = queue_create();
+    colaExit = queue_create();
     listadoProcesos = list_create();
+}
+
+void liberarMemoria() {
+    log_destroy(logger);
+    queue_destroy_and_destroy_elements(colaNew, free);
+    queue_destroy_and_destroy_elements(colaExit, free);
+    queue_destroy_and_destroy_elements(colaBlocked, free);
+    queue_destroy_and_destroy_elements(colaReady, free);
+    list_destroy(listadoProcesos);
 }
 
 int main(int argc, char* argv[]) {
@@ -63,9 +72,9 @@ int main(int argc, char* argv[]) {
     oyente->modulo = KERNEL;
 
     //crear conexiones
-    conectarse_a(cpuDispatch);
+    /*conectarse_a(cpuDispatch);
     conectarse_a(cpuInterrupt);
-    conectarse_a(memoria);
+    conectarse_a(memoria);*/
 
     //crear servidor
     //escucharConexiones(oyente);
@@ -83,6 +92,9 @@ int main(int argc, char* argv[]) {
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     solicitarInput();
+
+    config_destroy(nuevo_config);
+    liberarMemoria();
 
     return 0;
 }

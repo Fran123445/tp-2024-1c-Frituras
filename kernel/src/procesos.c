@@ -1,6 +1,6 @@
 #include <procesos.h>
 
-t_list* enumEstadoACola(int estado) {
+t_queue* enumEstadoACola(int estado) {
     switch (estado)
     {
         case NEW:
@@ -24,6 +24,24 @@ PCB* hallarPCB(int PID) {
     return list_find(listadoProcesos, (void *) _mismoPID);
 }
 
+void sacarProceso(t_queue* cola, PCB* proceso) {
+    int i;
+    t_queue* colaTemporal = queue_create();
+    PCB* aux;
+    int cantidadElementos = queue_size(cola);
+
+    for(i = 0; i < cantidadElementos; i++) {
+        aux = queue_pop(cola);
+        if (aux->PID != proceso->PID) {
+            queue_push(colaTemporal, aux);
+        }
+    }
+
+    free(cola->elements); // esto esta porque habia un leak, no se si es la mejor solucion
+    *cola = *colaTemporal;
+    free(colaTemporal);
+}
+
 void iniciarProceso(char* path) {
     PCB* nuevoPCB = malloc(sizeof(PCB));
 
@@ -37,10 +55,10 @@ void iniciarProceso(char* path) {
 
     // aca tambien va un semaforo
     // tambien "si el grado de multiprogramacion lo permite, va a ready"
-    list_add(colaNew, nuevoPCB);
+    queue_push(colaNew, nuevoPCB);
     list_add(listadoProcesos, nuevoPCB);
 
-    log_trace(logger, "Se crea el proceso %d en NEW", siguientePID);
+    log_info(logger, "Se crea el proceso %d en NEW", siguientePID);
 
     siguientePID += 1;
 }
@@ -53,7 +71,7 @@ void finalizarProceso(int PID) {
         return;
     }
 
-    t_list* colaProceso;
+    t_queue* colaProceso;
 
     // semaforos semaforos
 
@@ -62,9 +80,6 @@ void finalizarProceso(int PID) {
     // Habria que ver que hacer si el proceso esta en estado EXEC
     colaProceso = enumEstadoACola(PCB->estado);
 
-    list_remove_element(colaProceso, PCB);
-
-    log_trace(logger, "Finaliza el proceso %d - Motivo: Finalizado por el usuario", PCB->PID);
-
-    free(PCB);
+    sacarProceso(colaProceso, PCB);
+    queue_push(colaExit, PCB);
 }

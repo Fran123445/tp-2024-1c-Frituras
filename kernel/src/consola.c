@@ -14,12 +14,13 @@ void ejecutarScript(char* path) {
     FILE* archivoScript = fopen(path, "r");
     char* instruccion = malloc(sizeof(char)*64);
 
-    while(fgets(instruccion, 64, archivoScript)) {
-        instruccion = string_replace(instruccion, "\n", ""); //fgets lee hasta, includio, el \n
+    while(fgets(instruccion, 63, archivoScript)) {
+        instruccion[strlen(instruccion)-1] = '\0'; //fgets lee hasta, incluido, el \n
         interpretarInput(instruccion);
     }
 
     free(instruccion);
+    fclose(archivoScript);
 }
 
 void interpretarInput(char* input) {

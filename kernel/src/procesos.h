@@ -31,6 +31,7 @@ extern t_list* listadoProcesos;
 void iniciarProceso(char*);
 void finalizarProceso(int);
 PCB* hallarPCB(int);
-t_list* enumEstadoACola(int);
+t_queue* enumEstadoACola(int);
+void sacarProceso(t_queue*, PCB*);
 
 #endif /* PROC_H */
