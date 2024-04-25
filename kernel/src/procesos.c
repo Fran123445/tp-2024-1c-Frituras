@@ -29,6 +29,7 @@ PCB* hallarPCB(int PID) {
 }
 
 void sacarProceso(t_queue* cola, PCB* proceso) {
+    // no tengo idea de como sincronizar esto
     int i;
     t_queue* colaTemporal = queue_create();
     PCB* aux;
@@ -59,7 +60,9 @@ void iniciarProceso(char* path) {
 
     // aca tambien va un semaforo
     // tambien "si el grado de multiprogramacion lo permite, va a ready"
+    pthread_mutex_lock(&mutexNew);
     queue_push(colaNew, nuevoPCB);
+    pthread_mutex_unlock(&mutexNew);
     
     pthread_mutex_lock(&mutexListaProcesos);
     list_add(listadoProcesos, nuevoPCB);
@@ -80,18 +83,16 @@ void finalizarProceso(int PID) {
 
     t_queue* colaProceso;
 
-    // semaforos semaforos
-
-    //list_remove_element(listadoProcesos, PCB);
-
     // Habria que ver que hacer si el proceso esta en estado EXEC
     colaProceso = enumEstadoACola(PCB->estado);
 
     sacarProceso(colaProceso, PCB);
 
+    PCB->estado = EXIT;
+
     pthread_mutex_lock(&mutexExit);
     queue_push(colaExit, PCB);
     pthread_mutex_unlock(&mutexExit);
-    
+
     sem_post(&procesosEnExit);
 }

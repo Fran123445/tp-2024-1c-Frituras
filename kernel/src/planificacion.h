@@ -16,6 +16,7 @@ extern t_log* logger; // no estoy seguro de que esto se vaya a quedar aca
 extern sem_t procesosEnExit;
 extern pthread_mutex_t mutexExit;
 extern pthread_mutex_t mutexListaProcesos;
+extern pthread_mutex_t mutexNew;
 
 extern t_queue* colaNew;
 extern t_queue* colaReady;

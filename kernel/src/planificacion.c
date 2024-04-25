@@ -2,11 +2,13 @@
 
 sem_t procesosEnExit;
 pthread_mutex_t mutexExit;
+pthread_mutex_t mutexNew;
 pthread_mutex_t mutexListaProcesos;
 
 void inicializarSemaforosYMutex() {
     sem_init(&procesosEnExit, 0, 0);
     pthread_mutex_init(&mutexExit, NULL);
+    pthread_mutex_init(&mutexNew, NULL);
     pthread_mutex_init(&mutexListaProcesos, NULL);
 }
 
