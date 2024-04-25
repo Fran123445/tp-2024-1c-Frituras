@@ -5,6 +5,7 @@
 #include <commons/config.h>
 #include <utils/server.h>
 #include <utils/client.h>
+#include "registroCpu.h"
 
 int main(int argc, char* argv[]) {
     t_config* nuevo_config = config_create("cpu.config");
