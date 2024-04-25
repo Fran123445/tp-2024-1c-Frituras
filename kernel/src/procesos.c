@@ -21,7 +21,11 @@ PCB* hallarPCB(int PID) {
         return proceso->PID == PID;
     };
 
-    return list_find(listadoProcesos, (void *) _mismoPID);
+    pthread_mutex_lock(&mutexListaProcesos);
+    PCB* encontrado = list_find(listadoProcesos, (void *) _mismoPID);
+    pthread_mutex_unlock(&mutexListaProcesos);
+
+    return encontrado;
 }
 
 void sacarProceso(t_queue* cola, PCB* proceso) {
@@ -56,7 +60,10 @@ void iniciarProceso(char* path) {
     // aca tambien va un semaforo
     // tambien "si el grado de multiprogramacion lo permite, va a ready"
     queue_push(colaNew, nuevoPCB);
+    
+    pthread_mutex_lock(&mutexListaProcesos);
     list_add(listadoProcesos, nuevoPCB);
+    pthread_mutex_unlock(&mutexListaProcesos);
 
     log_info(logger, "Se crea el proceso %d en NEW", siguientePID);
 
@@ -75,11 +82,16 @@ void finalizarProceso(int PID) {
 
     // semaforos semaforos
 
-    list_remove_element(listadoProcesos, PCB);
+    //list_remove_element(listadoProcesos, PCB);
 
     // Habria que ver que hacer si el proceso esta en estado EXEC
     colaProceso = enumEstadoACola(PCB->estado);
 
     sacarProceso(colaProceso, PCB);
+
+    pthread_mutex_lock(&mutexExit);
     queue_push(colaExit, PCB);
+    pthread_mutex_unlock(&mutexExit);
+    
+    sem_post(&procesosEnExit);
 }

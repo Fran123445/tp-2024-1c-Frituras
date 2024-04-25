@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
 #include <planificacion.h>
@@ -25,8 +27,6 @@ typedef struct {
 }PCB;
 
 extern int siguientePID;
-
-extern t_list* listadoProcesos;
 
 void iniciarProceso(char*);
 void finalizarProceso(int);

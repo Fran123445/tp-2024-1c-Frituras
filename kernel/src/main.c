@@ -6,6 +6,7 @@
 #include <utils/client.h>
 #include "consola.h"
 #include "procesos.h"
+#include "planificacion.h"
 
 int siguientePID;
 int gradoMultiprogramacion;
@@ -18,12 +19,15 @@ t_list* listadoProcesos;
 
 t_log* logger;
 
+pthread_t pth_colaExit;
+
 void inicializarColas() {
     colaNew = queue_create();
     colaReady = queue_create();
     colaBlocked = queue_create();
     colaExit = queue_create();
     listadoProcesos = list_create();
+    inicializarSemaforosYMutex();
 }
 
 void liberarMemoria() {
@@ -33,6 +37,14 @@ void liberarMemoria() {
     queue_destroy_and_destroy_elements(colaBlocked, free);
     queue_destroy_and_destroy_elements(colaReady, free);
     list_destroy(listadoProcesos);
+}
+
+void crearHilos() {
+    pthread_create(&pth_colaExit,
+						NULL,
+						(void*) vaciarExit,
+						NULL);
+    pthread_detach(pth_colaExit);
 }
 
 int main(int argc, char* argv[]) {
@@ -88,8 +100,10 @@ int main(int argc, char* argv[]) {
 
     siguientePID = 0;
     gradoMultiprogramacion = config_get_int_value(nuevo_config, "GRADO_MULTIPROGRAMACION");
-    inicializarColas();
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
+
+    inicializarColas();
+    crearHilos();
 
     solicitarInput();
 
