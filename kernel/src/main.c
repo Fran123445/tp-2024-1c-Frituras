@@ -27,7 +27,6 @@ void inicializarColas() {
     colaBlocked = queue_create();
     colaExit = queue_create();
     listadoProcesos = list_create();
-    inicializarSemaforosYMutex();
 }
 
 void liberarMemoria() {
@@ -103,6 +102,7 @@ int main(int argc, char* argv[]) {
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     inicializarColas();
+    inicializarSemaforosYMutex();
     crearHilos();
 
     solicitarInput();

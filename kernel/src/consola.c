@@ -7,7 +7,9 @@ void listarProcesos(void) {
         printf("PROCESO - %d\n", proceso->PID);
     };
 
+    pthread_mutex_lock(&mutexListaProcesos);
     list_iterate(listadoProcesos, (void *) _mostarProceso);
+    pthread_mutex_unlock(&mutexListaProcesos);
 }
 
 void ejecutarScript(char* path) {
