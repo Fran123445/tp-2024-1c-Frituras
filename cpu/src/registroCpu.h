@@ -1,7 +1,6 @@
 #include <stdint.h>
 
 typedef struct {
-    uint32_t PC;
     uint8_t AX;
     uint8_t BX;
     uint8_t CX;
@@ -12,4 +11,23 @@ typedef struct {
     uint32_t EDX;
     uint32_t SI;
     uint32_t DI;
-} registros_Cpu;
+    uint32_t PC;
+} registros_cpu;
+
+typedef enum {
+  AX,
+  BX,
+  CX,
+  DX,
+  EAX,
+  EBX,
+  ECX,
+  EDX,
+  SI,
+  DI,
+  PC
+} registrosCPU;
+
+void init_cpu_registers();
+
+extern registros_cpu miCPU; 
