@@ -8,15 +8,20 @@
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
 #include <commons/log.h>
+#include <commons/string.h>
+#include <string.h>
 #include <procesos.h>
 
-extern int gradoMultiprogramacion; // esto va a pasar a ser un semaforo casi seguro
 extern t_log* logger; // no estoy seguro de que esto se vaya a quedar aca
 
+extern sem_t procesosEnNew;
 extern sem_t procesosEnExit;
+extern sem_t gradoMultiprogramacion;
 extern pthread_mutex_t mutexExit;
 extern pthread_mutex_t mutexListaProcesos;
 extern pthread_mutex_t mutexNew;
+extern pthread_mutex_t mutexReady;
+extern pthread_mutex_t mutexBlocked;
 
 extern t_queue* colaNew;
 extern t_queue* colaReady;
@@ -26,5 +31,6 @@ extern t_list* listadoProcesos;
 
 void inicializarSemaforosYMutex();
 void vaciarExit();
+void procesoNewAReady();
 
 #endif /* PLAN_H */

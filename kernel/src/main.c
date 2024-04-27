@@ -9,7 +9,6 @@
 #include "planificacion.h"
 
 int siguientePID;
-int gradoMultiprogramacion;
 t_queue* colaNew;
 t_queue* colaReady;
 t_queue* colaBlocked;
@@ -20,6 +19,7 @@ t_list* listadoProcesos;
 t_log* logger;
 
 pthread_t pth_colaExit;
+pthread_t pth_colaNew;
 
 void inicializarColas() {
     colaNew = queue_create();
@@ -44,6 +44,12 @@ void crearHilos() {
 						(void*) vaciarExit,
 						NULL);
     pthread_detach(pth_colaExit);
+
+    pthread_create(&pth_colaNew,
+						NULL,
+						(void*) procesoNewAReady,
+						NULL);
+    pthread_detach(pth_colaNew);
 }
 
 int main(int argc, char* argv[]) {
@@ -98,11 +104,10 @@ int main(int argc, char* argv[]) {
     //Ese desastre que esta ahi arriba hay que refactorizarlo
 
     siguientePID = 0;
-    gradoMultiprogramacion = config_get_int_value(nuevo_config, "GRADO_MULTIPROGRAMACION");
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     inicializarColas();
-    inicializarSemaforosYMutex();
+    inicializarSemaforosYMutex(config_get_int_value(nuevo_config, "GRADO_MULTIPROGRAMACION"));
     crearHilos();
 
     solicitarInput();

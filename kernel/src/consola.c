@@ -36,7 +36,7 @@ void interpretarInput(char* input) {
     } else if (!strcmp(*comando, "FINALIZAR_PROCESO")) {
         finalizarProceso(atoi(*(comando+1)));
     } else if (!strcmp(*comando, "MULTIPROGRAMACION")) {
-        gradoMultiprogramacion =  atoi(*(comando+1));
+        //gradoMultiprogramacion =  atoi(*(comando+1)); <- esto hay que cambiarlo
     } else if (!strcmp(*comando, "DETENER_PLANIFICACION")) {
         //detenerPlanificacion()
     } else if (!strcmp(*comando, "INICIAR_PLANIFICACION")) {

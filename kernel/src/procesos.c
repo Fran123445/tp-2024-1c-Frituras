@@ -29,7 +29,6 @@ PCB* hallarPCB(int PID) {
 }
 
 void sacarProceso(t_queue* cola, PCB* proceso) {
-    // no tengo idea de como sincronizar esto
     int i;
     t_queue* colaTemporal = queue_create();
     PCB* aux;
@@ -58,8 +57,6 @@ void iniciarProceso(char* path) {
     //Agregar el de program counter
     //Agregar el de registrosCPU
 
-    // aca tambien va un semaforo
-    // tambien "si el grado de multiprogramacion lo permite, va a ready"
     pthread_mutex_lock(&mutexNew);
     queue_push(colaNew, nuevoPCB);
     pthread_mutex_unlock(&mutexNew);
@@ -71,9 +68,13 @@ void iniciarProceso(char* path) {
     log_info(logger, "Se crea el proceso %d en NEW", siguientePID);
 
     siguientePID += 1;
+
+    sem_post(&procesosEnNew);
 }
 
 void finalizarProceso(int PID) {
+    /*  esta funcion da problemas de todos los colores 
+        asi que hay que rehacerla entera */
     PCB* PCB = hallarPCB(PID);
 
     if (PCB == NULL) {
