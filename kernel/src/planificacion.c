@@ -3,6 +3,7 @@
 sem_t procesosEnNew;
 sem_t procesosEnExit;
 sem_t gradoMultiprogramacion;
+sem_t cpuDisponible;
 pthread_mutex_t mutexExit;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
@@ -19,7 +20,6 @@ void procesosReadyLog(char** lista) {
     pthread_mutex_lock(&mutexListaProcesos);
 
     list_iterate(listadoProcesos, (void *) _agregarPIDALista);
-    //lista[strlen(*lista)-2] = '\0';
 
     pthread_mutex_unlock(&mutexListaProcesos);
 }
@@ -27,6 +27,7 @@ void procesosReadyLog(char** lista) {
 void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnNew, 0, 0);
     sem_init(&procesosEnExit, 0, 0);
+    sem_init(&cpuDisponible, 0, 1); // lo inicializo en 1 porque (entiendo) al arrancar el kernel la cpu no va a estar ocupada con nada
     sem_init(&gradoMultiprogramacion, 0, multiprogramacion);
     pthread_mutex_init(&mutexExit, NULL);
     pthread_mutex_init(&mutexNew, NULL);
@@ -76,5 +77,40 @@ void procesoNewAReady() {
         
         pthread_mutex_unlock(&mutexReady);
         pthread_mutex_unlock(&mutexNew);
+    }
+}
+
+void ejecutarSiguienteEnReady() {
+
+    while(1) {
+        sem_wait(&cpuDisponible);
+        pthread_mutex_lock(&mutexReady);
+        PCB* proceso = queue_pop(colaReady);
+        proceso->estado = EXEC;
+        pthread_mutex_unlock(&mutexReady);
+    
+        enviarProcesoACPU(proceso);
+    }
+}
+
+void enviarProcesoACPU(PCB* proceso) {
+    
+}
+
+void planificarRecibidoPorFIFO(t_dispatch* procesoRecibido) {
+    PCB* proceso = procesoRecibido->proceso;
+    switch (procesoRecibido->motivo) {
+        case INST_WAIT:
+            // todavia no me fije que hace wait
+            break;
+        case INST_SIGNAL:
+            // todavia no me fije que hace signal
+            break;
+        case SOLICITUD_IO:
+            // enviarABlocked(proceso);
+            break;
+        default:
+            // enviarAExit(proceso);
+            break;
     }
 }

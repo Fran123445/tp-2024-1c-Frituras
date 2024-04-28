@@ -8,7 +8,7 @@
 #include <semaphore.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
-#include <planificacion.h>
+#include <planificacion.h> // hay que cambiar esto para que planificacion y procesos no se incluyan mutuamente
 
 typedef enum {
     NEW,
