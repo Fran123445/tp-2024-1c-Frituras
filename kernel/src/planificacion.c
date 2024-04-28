@@ -80,7 +80,7 @@ void procesoNewAReady() {
     }
 }
 
-void ejecutarSiguienteEnReady() {
+void ejecutarSiguiente() {
 
     while(1) {
         sem_wait(&cpuDisponible);
@@ -94,7 +94,16 @@ void ejecutarSiguienteEnReady() {
 }
 
 void enviarProcesoACPU(PCB* proceso) {
-    
+    //serializar
+    //send
+}
+
+void recibirDeCPU() {
+    while(1) {
+        //recv
+        //deserializar
+        //planificar
+    }
 }
 
 void planificarRecibidoPorFIFO(t_dispatch* procesoRecibido) {
