@@ -49,8 +49,6 @@ void sacarProceso(t_queue* cola, PCB* proceso) {
 void iniciarProceso(char* path) {
     PCB* nuevoPCB = malloc(sizeof(PCB));
 
-    // poner un semaforo para sincronizar siguientePID
-
     nuevoPCB->PID = siguientePID;
     nuevoPCB->estado = NEW;
     //nuevoPCB->quantum = quantum;

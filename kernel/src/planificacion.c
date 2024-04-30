@@ -4,6 +4,7 @@ sem_t procesosEnNew;
 sem_t procesosEnExit;
 sem_t gradoMultiprogramacion;
 sem_t cpuDisponible;
+sem_t llegadaProceso;
 pthread_mutex_t mutexExit;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
@@ -29,6 +30,7 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnExit, 0, 0);
     sem_init(&cpuDisponible, 0, 1); // lo inicializo en 1 porque (entiendo) al arrancar el kernel la cpu no va a estar ocupada con nada
     sem_init(&gradoMultiprogramacion, 0, multiprogramacion);
+    sem_init(&llegadaProceso, 0, 0);
     pthread_mutex_init(&mutexExit, NULL);
     pthread_mutex_init(&mutexNew, NULL);
     pthread_mutex_init(&mutexReady, NULL);
@@ -101,6 +103,7 @@ void enviarProcesoACPU(PCB* proceso) {
 void recibirDeCPU() {
     while(1) {
         //recv
+        sem_post(&llegadaProceso); //usado en RR
         //deserializar
         //planificar
     }

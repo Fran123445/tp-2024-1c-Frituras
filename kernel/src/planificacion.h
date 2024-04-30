@@ -10,6 +10,8 @@
 #include <string.h>
 #include <procesos.h>
 
+extern sem_t llegadaProceso;
+
 void inicializarSemaforosYMutex();
 void vaciarExit();
 void procesoNewAReady();
