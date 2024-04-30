@@ -58,6 +58,64 @@ void SUM(registrosCPU registroDestino, registrosCPU registroOrigen){
     }
 }
 
+void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){ // Hay que verificar que la resta sea siempre >0 ? 
+    void *reg_destino = obtenerRegistro(registroDestino);
+    void *reg_origen = obtenerRegistro(registroOrigen);
+
+    if (reg_destino == NULL || reg_origen == NULL) {
+        printf("Error: Uno o ambos registros no válidos.\n");
+        return;
+    }
+
+    size_t tam_destino = tamanoRegistro(registroDestino);
+    size_t tam_origen = tamanoRegistro(registroOrigen);
+
+
+    switch (tam_destino) { 
+        case sizeof(uint8_t):
+            switch(tam_origen){
+                case sizeof(uint8_t):
+                    *(uint8_t *)reg_destino -= *(uint8_t *)reg_origen; break;
+                case sizeof(uint32_t):
+                    *(uint8_t *)reg_destino -= *(uint32_t *)reg_origen; break; // Se puede hacer esto?
+            }
+            break;
+        case sizeof(uint32_t):
+            switch(tam_origen){
+                case sizeof(uint8_t):
+                    *(uint32_t *)reg_destino -= *(uint8_t *)reg_origen; break;
+                case sizeof(uint32_t):
+                    *(uint32_t *)reg_destino -= *(uint32_t *)reg_origen; break;
+            }
+            break;
+    }
+}
+
+void JNZ(registrosCPU registro, int instruccion){
+    void *reg= obtenerRegistro(registro);
+
+    if (reg == NULL) {  
+        printf("Error: Registro inválido.\n"); 
+        return;
+    }
+
+    size_t tam_reg = tamanoRegistro(registro);
+
+    switch (tam_reg) {
+        case sizeof(uint8_t):
+                if(*(uint8_t *)reg != 0){
+                   miCPU.PC = (uint32_t)instruccion; 
+                }
+            break;
+        case sizeof(uint32_t):
+                if(*(uint32_t *)reg != 0){
+                   miCPU.PC = (uint32_t)instruccion; 
+                }
+            break;
+    }
+}
+
+
 void* obtenerRegistro(registrosCPU registro) {
     switch (registro) {  // Podríamos cambiarlo a una lista si querés evitar usar switch, seguramente sea más eficiente en cuanto a recursos y deberíamos hacerlo.
         case AX: return &miCPU.AX;
@@ -75,6 +133,13 @@ void* obtenerRegistro(registrosCPU registro) {
         default:
             return NULL;
     }
+
+    //listaDirDeRegistros[11] = [&miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX, &miCPU.EAX, &miCPU.EBX,
+    //                           &miCPU.ECX, &miCPU.EDX, &miCPU.SI, &miCPU.DI, &miCPU.PC];
+    //return listaDirDeRegistros[registro];
+    
+    //No estoy seguro de cómo funcionan los Enum así que no se si funciona así, además de que este caso no contempla el "NULL".
+    //Pero como decía más arriba, si no van a mandarnos a probar cosas con errores sintácticos, entonces esto es más eficiente.
 }
 
 size_t tamanioRegistro(registrosCPU registro) {
