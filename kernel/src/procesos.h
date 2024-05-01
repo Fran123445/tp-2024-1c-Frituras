@@ -59,10 +59,19 @@ extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
+// Crea un nuevo PCB y lo envia a la cola NEW
 void iniciarProceso(char*);
+
+// Envia a EXIT el proceso con el PID enviado por parametro
 void finalizarProceso(int);
+
+// Busca un PCB en base a un PID
 PCB* hallarPCB(int);
+
+// Devuelve la cola correspondiente al estado enviado
 t_queue* enumEstadoACola(int);
+
+// Saca el PCB enviado por parametro de la cola enviada por parametro.
 void sacarProceso(t_queue*, PCB*);
 
 #endif /* PROC_H */
