@@ -40,24 +40,18 @@ int main(int argc, char* argv[]) {
 
     //Escuchar Conexiones
     pthread_t threadEscuchaDispatch;
-    pthread_create(&threadEscuchaDispatch,
-						NULL,
-						(void*)escucharConexiones,
-						oyente_dispatch);
+    pthread_create(&threadEscuchaDispatch,NULL,(void*)escucharConexiones,oyente_dispatch);
     
-    
-
     pthread_t threadEscuchaInterrupt;
-    pthread_create(&threadEscuchaInterrupt,
-						NULL,
-						(void*)escucharConexiones,
-						oyente_interrupt);
-                
+    pthread_create(&threadEscuchaInterrupt,NULL,(void*)escucharConexiones,oyente_interrupt);
+
+    pthread_join(threadEscuchaDispatch,NULL); 
+
     pthread_join(threadEscuchaInterrupt,NULL);
-    pthread_join(threadEscuchaDispatch,NULL);
+    
 
     free(memoria);
-    free(oyente_dispatch);
+    
     free(oyente_interrupt);
 
     return 0;
