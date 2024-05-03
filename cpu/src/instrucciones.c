@@ -1,7 +1,14 @@
-#include "registroCpu.h"
+#include "cpu.h"
+
 
 void* obtenerRegistro(registrosCPU);
 size_t tamanioRegistro(registrosCPU);
+
+void* lista_de_registros[11] = {
+        &miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX,
+        &miCPU.EAX, &miCPU.EBX, &miCPU.ECX, &miCPU.EDX,
+        &miCPU.SI, &miCPU.DI, &miCPU.PC
+    };
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
@@ -11,7 +18,7 @@ void SET(registrosCPU registro, int valor){
         return;
     }
 
-    size_t tam_reg = tamanoRegistro(registro);
+    size_t tam_reg = tamanioRegistro(registro);
 
 
     switch (tam_reg) {
@@ -34,8 +41,8 @@ void SUM(registrosCPU registroDestino, registrosCPU registroOrigen){
         return;
     }
 
-    size_t tam_destino = tamanoRegistro(registroDestino);
-    size_t tam_origen = tamanoRegistro(registroOrigen);
+    size_t tam_destino = tamanioRegistro(registroDestino);
+    size_t tam_origen = tamanioRegistro(registroOrigen);
 
 
     switch (tam_destino) {  // Seguramente haya alguna manera más eficiente de hacerlo, habría que buscar
@@ -67,8 +74,8 @@ void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){ // Hay que 
         return;
     }
 
-    size_t tam_destino = tamanoRegistro(registroDestino);
-    size_t tam_origen = tamanoRegistro(registroOrigen);
+    size_t tam_destino = tamanioRegistro(registroDestino);
+    size_t tam_origen = tamanioRegistro(registroOrigen);
 
 
     switch (tam_destino) { 
@@ -99,7 +106,7 @@ void JNZ(registrosCPU registro, int instruccion){
         return;
     }
 
-    size_t tam_reg = tamanoRegistro(registro);
+    size_t tam_reg = tamanioRegistro(registro);
 
     switch (tam_reg) {
         case sizeof(uint8_t):
@@ -113,40 +120,4 @@ void JNZ(registrosCPU registro, int instruccion){
                 }
             break;
     }
-}
-
-
-void* obtenerRegistro(registrosCPU registro) {
-    switch (registro) {  // Podríamos cambiarlo a una lista si querés evitar usar switch, seguramente sea más eficiente en cuanto a recursos y deberíamos hacerlo.
-        case AX: return &miCPU.AX;
-        case BX: return &miCPU.BX;
-        case CX: return &miCPU.CX;
-        case DX: return &miCPU.DX;
-        case EAX: return &miCPU.EAX;
-        case EBX: return &miCPU.EBX;
-        case ECX: return &miCPU.ECX;
-        case EDX: return &miCPU.EDX;
-        case SI: return &miCPU.SI;
-        case DI: return &miCPU.DI;
-        case PC: return &miCPU.PC;
-
-        default:
-            return NULL;
-    }
-
-    //listaDirDeRegistros[11] = [&miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX, &miCPU.EAX, &miCPU.EBX,
-    //                           &miCPU.ECX, &miCPU.EDX, &miCPU.SI, &miCPU.DI, &miCPU.PC];
-    //return listaDirDeRegistros[registro];
-    
-    //No estoy seguro de cómo funcionan los Enum así que no se si funciona así, además de que este caso no contempla el "NULL".
-    //Pero como decía más arriba, si no van a mandarnos a probar cosas con errores sintácticos, entonces esto es más eficiente.
-}
-
-size_t tamanioRegistro(registrosCPU registro) {
-    if (registro >= AX && registro <= DX) {
-        return sizeof(uint8_t);
-    } else {
-        return sizeof(uint32_t);
-    }
-    // En las funciones que invocan a esto, siempre antes se verifica que el registro exista, así que no hace falta que lo verifique acá también.
 }

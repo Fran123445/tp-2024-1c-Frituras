@@ -1,33 +1,39 @@
-#include <stdint.h>
+#ifndef REGISTROCPU_H_
+#define REGISTROCPU_H_
 
-typedef struct {
-    uint8_t AX;
-    uint8_t BX;
-    uint8_t CX;
-    uint8_t DX;
-    uint32_t EAX;
-    uint32_t EBX;
-    uint32_t ECX;
-    uint32_t EDX;
-    uint32_t SI;
-    uint32_t DI;
-    uint32_t PC;
-} registros_cpu;
+#include <stdio.h>
+#include <stdint.h> // Incluye esta línea si utilizas tipos de datos como uint8_t o uint32_t
+#include <stddef.h>
 
+// Declaraciones de tipos de datos
 typedef enum {
-  AX,
-  BX,
-  CX,
-  DX,
-  EAX,
-  EBX,
-  ECX,
-  EDX,
-  SI,
-  DI,
-  PC
+    AX,
+    BX,
+    CX,
+    DX,
+    EAX,
+    EBX,
+    ECX,
+    EDX,
+    SI,
+    DI,
+    PC
 } registrosCPU;
 
-void init_cpu_registers();
+typedef struct {
+    // Definición de los registros de la CPU
+    uint8_t AX, BX, CX, DX;
+    uint32_t EAX, EBX, ECX, EDX;
+    uint32_t SI, DI, PC;
+} registros_cpu;
 
-extern registros_cpu miCPU; 
+// Declaraciones de funciones
+void inicializar_registros_cpu();
+void* obtenerRegistro(registrosCPU registro);
+size_t tamanioRegistro(registrosCPU registro);
+
+// Declaraciones de variables globales externas
+extern registros_cpu miCPU;
+extern void* lista_de_registros[11];
+
+#endif /* REGISTROCPU_H_ */
