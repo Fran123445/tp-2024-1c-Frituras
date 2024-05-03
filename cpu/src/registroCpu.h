@@ -27,13 +27,8 @@ typedef struct {
     uint32_t SI, DI, PC;
 } registros_cpu;
 
-// Declaraciones de funciones
-void inicializar_registros_cpu();
-void* obtenerRegistro(registrosCPU registro);
-size_t tamanioRegistro(registrosCPU registro);
 
 // Declaraciones de variables globales externas
 extern registros_cpu miCPU;
-extern void* lista_de_registros[11];
 
 #endif /* REGISTROCPU_H_ */

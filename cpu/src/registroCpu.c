@@ -1,5 +1,6 @@
 #include "registroCpu.h"
 
+registros_cpu miCPU; 
 
 void inicializar_registros_cpu() {
     miCPU.AX = 0;
@@ -20,6 +21,12 @@ void inicializar_registros_cpu() {
 
 
 void* obtenerRegistro(registrosCPU registro) {
+    void* lista_de_registros[11] = {
+        &miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX,
+        &miCPU.EAX, &miCPU.EBX, &miCPU.ECX, &miCPU.EDX,
+        &miCPU.SI, &miCPU.DI, &miCPU.PC
+    };
+
     if(registro >= 0 && registro < 11){
         return(lista_de_registros[registro]);
     }
@@ -45,5 +52,5 @@ size_t tamanioRegistro(registrosCPU registro) {
     // En las funciones que invocan a esto, siempre antes se verifica que el registro exista, así que no hace falta que lo verifique acá también.
 }
 
-void init_cpu_registers();
-registros_cpu miCPU; 
+
+

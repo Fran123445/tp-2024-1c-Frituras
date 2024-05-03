@@ -1,14 +1,6 @@
-#include "cpu.h"
+#include "instrucciones.h"
+#include "registroCpu.h"
 
-
-void* obtenerRegistro(registrosCPU);
-size_t tamanioRegistro(registrosCPU);
-
-void* lista_de_registros[11] = {
-        &miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX,
-        &miCPU.EAX, &miCPU.EBX, &miCPU.ECX, &miCPU.EDX,
-        &miCPU.SI, &miCPU.DI, &miCPU.PC
-    };
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);

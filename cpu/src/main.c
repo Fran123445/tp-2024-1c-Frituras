@@ -5,7 +5,7 @@
 #include <commons/config.h>
 #include <utils/server.h>
 #include <utils/client.h>
-#include "instrucciones.c"
+#include "instrucciones.h"
 
 int main(int argc, char* argv[]) {
     /*
