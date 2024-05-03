@@ -10,7 +10,6 @@
 #include <commons/collections/queue.h>
 #include <commons/log.h>
 #include <commons/string.h>
-//#include <planificacion.h> // hay que cambiar esto para que planificacion y procesos no se incluyan mutuamente
 
 typedef enum {
     NEW,

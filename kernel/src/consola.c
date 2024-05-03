@@ -1,15 +1,47 @@
 #include "consola.h"
 
+char* enumEstadoAString(estado_proceso estado) {
+    char* string;
+
+    // podria haber puesto un return en cada case, pero gcc me tiraba un warning
+    // y me molestaba
+    switch (estado)
+    {
+        case NEW: string = "NEW";
+        case READY: string = "READY";
+        case BLOCKED: string = "BLOCKED";
+        case EXEC: string = "EXEC";
+        case EXIT: string = "EXIT";
+    }
+
+    return string;
+}
+
 void listarProcesos(void) {
-    // Implementacion parcial. Falta agregar lo de los estados. 
+
+    estado_proceso estadoAnterior = -1; // lo inicializo en -1 para que printee en la primera iteracion
+
+    // ordena por estado y PID ascendente
+    bool _criterioEstados(PCB* p1, PCB* p2) {
+        return p1->estado <= p2->estado && p1->PID < p2->PID;
+    }
 
     void _mostarProceso(PCB* proceso) {
-        printf("PROCESO - %d\n", proceso->PID);
+        if (estadoAnterior != proceso->estado) {
+            printf("\n%s\n\n", enumEstadoAString(proceso->estado));
+        }
+
+        printf("PID: %d\n", proceso->PID);
+        estadoAnterior = proceso->estado;
     };
 
     pthread_mutex_lock(&mutexListaProcesos);
-    list_iterate(listadoProcesos, (void *) _mostarProceso);
+    t_list* listaOrdenadaPorEstado = list_sorted(listadoProcesos, (void *) _criterioEstados);
     pthread_mutex_unlock(&mutexListaProcesos);
+
+    list_iterate(listaOrdenadaPorEstado, (void *) _mostarProceso);
+
+    list_destroy(listaOrdenadaPorEstado);
 }
 
 void ejecutarScript(char* path) {
