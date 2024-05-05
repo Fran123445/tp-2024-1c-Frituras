@@ -52,6 +52,7 @@ void vaciarExit() {
 
         free(proceso);
 
+        log_info(logger, "FINALIZA EL PROCESO"); //faltan cosas
     }
 }
 
