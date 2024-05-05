@@ -41,15 +41,17 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
 void vaciarExit() {
     while(1) {
         sem_wait(&procesosEnExit);
-        pthread_mutex_lock(&mutexExit);
-        pthread_mutex_lock(&mutexListaProcesos);
 
+        pthread_mutex_lock(&mutexExit);
         PCB* proceso = queue_pop(colaExit);
+        pthread_mutex_unlock(&mutexExit);
+
+        pthread_mutex_lock(&mutexListaProcesos);
         list_remove_element(listadoProcesos, proceso);
+        pthread_mutex_unlock(&mutexListaProcesos);
+
         free(proceso);
 
-        pthread_mutex_unlock(&mutexListaProcesos);
-        pthread_mutex_unlock(&mutexExit);
     }
 }
 
@@ -64,10 +66,13 @@ void procesoNewAReady() {
         listaReady[0] = '\0';
 
         pthread_mutex_lock(&mutexNew);
-        pthread_mutex_lock(&mutexReady);
-        
         proceso = queue_pop(colaNew);
+        pthread_mutex_unlock(&mutexNew);
+
+        pthread_mutex_lock(&mutexReady);
         queue_push(colaReady, proceso);
+        pthread_mutex_unlock(&mutexReady);
+
         proceso->estado = READY;
 
         /* no debe ser ni la forma mas eficiente ni la mas elegante
@@ -77,8 +82,6 @@ void procesoNewAReady() {
 
         log_info(logger, "Cola READY: [%s]", listaReady);
         
-        pthread_mutex_unlock(&mutexReady);
-        pthread_mutex_unlock(&mutexNew);
     }
 }
 

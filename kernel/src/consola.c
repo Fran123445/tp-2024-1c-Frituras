@@ -7,11 +7,11 @@ char* enumEstadoAString(estado_proceso estado) {
     // y me molestaba
     switch (estado)
     {
-        case NEW: string = "NEW";
-        case READY: string = "READY";
-        case BLOCKED: string = "BLOCKED";
-        case EXEC: string = "EXEC";
-        case EXIT: string = "EXIT";
+        case NEW: string = "NEW"; break;
+        case READY: string = "READY"; break;
+        case BLOCKED: string = "BLOCKED"; break;
+        case EXEC: string = "EXEC"; break;
+        case EXIT: string = "EXIT"; break;
     }
 
     return string;
@@ -61,6 +61,7 @@ void interpretarInput(char* input) {
 
     char** comando = string_split(input, " ");
 
+    // esto se podria hacer usando un diccionario y seguramente quedaria mucho mas lindo
     if (!strcmp(*comando, "EJECUTAR_SCRIPT")) {
         ejecutarScript(*(comando+1));
     } else if (!strcmp(*comando, "INICIAR_PROCESO")) {
