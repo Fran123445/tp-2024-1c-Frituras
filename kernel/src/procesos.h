@@ -11,34 +11,6 @@
 #include <commons/log.h>
 #include <commons/string.h>
 
-typedef enum {
-    NEW,
-    READY,
-    BLOCKED,
-    EXEC,
-    EXIT
-}estado_proceso;
-
-typedef struct {
-    int PID;
-    uint32_t programCounter;
-    int quantum;
-    int estado;
-    // Falta registrosCPU
-}PCB;
-
-typedef enum {
-    INST_EXIT,
-    INST_WAIT,
-    INST_SIGNAL,
-    SOLICITUD_IO
-}motivo_dispatch;
-
-typedef struct {
-    PCB* proceso;
-    motivo_dispatch motivo;
-}t_dispatch; //despues hay que moverlo a utils para que la CPU tambien acceda a la estructura esta (el enum lo mismo)
-
 extern t_log* logger; // no estoy seguro de que esto se vaya a quedar aca
 
 extern sem_t procesosEnNew;
