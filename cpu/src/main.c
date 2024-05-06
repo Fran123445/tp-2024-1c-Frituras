@@ -8,7 +8,7 @@
 #include "instrucciones.h"
 
 int main(int argc, char* argv[]) {
-    /*
+    
     t_config* nuevo_config = config_create("cpu.config");
     if (nuevo_config == NULL) {
         exit(1);
@@ -59,19 +59,11 @@ int main(int argc, char* argv[]) {
     pthread_detach(threadEscuchaInterrupt);
     
     while(1);
-*/
-    // Suponiendo que ya has inicializado la estructura miCPU
-     inicializar_registros_cpu();
-    // Asignar el valor 10 al registro CX
-    SET(CX, 10);
 
-    // Verificar si el valor se ha asignado correctamente
-    printf("Valor de CX: %d\n", miCPU.CX);
 
-/*
     free(memoria);
     free(oyente_dispatch);
     free(oyente_interrupt);
-*/
+
     return 0;
 }

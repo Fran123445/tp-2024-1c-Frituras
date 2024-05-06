@@ -2,7 +2,7 @@
 #define REGISTROCPU_H_
 
 #include <stdio.h>
-#include <stdint.h> // Incluye esta línea si utilizas tipos de datos como uint8_t o uint32_t
+#include <stdint.h> 
 #include <stddef.h>
 
 // Declaraciones de tipos de datos

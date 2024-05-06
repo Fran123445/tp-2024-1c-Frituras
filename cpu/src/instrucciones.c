@@ -5,7 +5,7 @@
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
 
-    if (reg_a_setear == NULL) { // Tengo entendido que no van a haber errores en lo que nos van a pasar para probar, podríamos evitar esto. 
+    if (reg_a_setear == NULL) { 
         printf("Error: Registro inválido.\n"); 
         return;
     }
@@ -21,7 +21,6 @@ void SET(registrosCPU registro, int valor){
             *(uint32_t *)reg_a_setear = (uint32_t)valor;
             break;
     }
-    //*(uint8_t *)reg_a_setear se utiliza para convertir el puntero genérico void *reg_a_setear a un puntero específico de tipo uint8_t *, lo cual es válido porque reg_a_setear apunta a un registro de 8 bits (AX, BX, CX, DX). Después de la conversión, la expresión dereferencia el puntero uint8_t * para obtener el valor almacenado en la dirección de memoria a la que apunta reg_a_setear.
 }
 
 void SUM(registrosCPU registroDestino, registrosCPU registroOrigen){
@@ -37,13 +36,13 @@ void SUM(registrosCPU registroDestino, registrosCPU registroOrigen){
     size_t tam_origen = tamanioRegistro(registroOrigen);
 
 
-    switch (tam_destino) {  // Seguramente haya alguna manera más eficiente de hacerlo, habría que buscar
+    switch (tam_destino) {  
         case sizeof(uint8_t):
             switch(tam_origen){
                 case sizeof(uint8_t):
                     *(uint8_t *)reg_destino += *(uint8_t *)reg_origen; break;
                 case sizeof(uint32_t):
-                    *(uint8_t *)reg_destino += *(uint32_t *)reg_origen; break; // Se puede hacer esto?
+                    *(uint8_t *)reg_destino += *(uint32_t *)reg_origen; break; 
             }
             break;
         case sizeof(uint32_t):
@@ -57,7 +56,7 @@ void SUM(registrosCPU registroDestino, registrosCPU registroOrigen){
     }
 }
 
-void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){ // Hay que verificar que la resta sea siempre >0 ? 
+void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){ 
     void *reg_destino = obtenerRegistro(registroDestino);
     void *reg_origen = obtenerRegistro(registroOrigen);
 

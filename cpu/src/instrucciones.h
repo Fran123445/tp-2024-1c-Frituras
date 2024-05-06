@@ -1,12 +1,11 @@
 #ifndef CPU_H_
 #define CPU_H_
 
-#include <stddef.h> // Agrega esta línea si usas size_t
+#include <stddef.h> 
 #include <stdio.h>
 #include "registroCpu.h"
 
 
-// Prototipos de funciones
 void inicializar_registros_cpu();
 void* obtenerRegistro(registrosCPU registro);
 size_t tamanioRegistro(registrosCPU registro);
