@@ -30,6 +30,6 @@ typedef enum {
 typedef struct {
     PCB* proceso;
     motivo_dispatch motivo;
-}t_dispatch; //despues hay que moverlo a utils para que la CPU tambien acceda a la estructura esta (el enum lo mismo)
+}t_dispatch;
 
 #endif /* PCB_H */
