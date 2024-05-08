@@ -16,21 +16,6 @@ typedef enum{
 	PAQUETE
 }op_code;
 
-typedef struct {
-	t_config* config;
-	char* ip;
-	char* puerto;
-	int modulo;
-}t_conexion;
-
-typedef struct{
-	t_config* config;
-	char* puerto;
-	char* log;
-	char* nombre_modulo;
-	int modulo;
-}t_conexion_escucha;
-
 typedef enum{
 	CPU,
 	CPU_DISPATCH,
@@ -39,5 +24,10 @@ typedef enum{
 	KERNEL,
 	MEMORIA
 }modulo_code;
+
+typedef struct{
+	int socket_servidor;
+	modulo_code modulo;
+}t_conexion_escucha;
 
 #endif /* ESTRUCTURAS_CON_H */
