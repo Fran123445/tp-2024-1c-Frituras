@@ -16,7 +16,7 @@ void* serializar_paquete(t_paquete* paquete, int bytes)
 	return magic;
 }
 
-int crear_conexion(char *ip, char* puerto)
+int crear_conexion(char *ip, char* puerto, modulo_code modulo)
 {
 	t_log* error = log_create("ErrorDeConexion.log","Error de conexion",true,LOG_LEVEL_ERROR);
 	struct addrinfo hints;
@@ -39,6 +39,19 @@ int crear_conexion(char *ip, char* puerto)
 	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen)==-1){
 		log_error(error,"Conexión fallida");
 		return -1;
+	}
+
+	size_t bytes;
+	int result;
+	
+	bytes = send(socket_cliente, &modulo, sizeof(int), 0);
+	bytes = recv(socket_cliente, &result, sizeof(int), MSG_WAITALL);
+
+	if (result == 0) {
+    	enviar_mensaje("Conexion correcta", socket_cliente);
+	} else 
+	{
+    	exit (-1);
 	}
 
 	freeaddrinfo(server_info);
@@ -111,32 +124,5 @@ void eliminar_paquete(t_paquete* paquete)
 void liberar_conexion(int socket_cliente)
 {
 	close(socket_cliente);
-
-}
-
-void conectarse_a(t_conexion* info){
-	int conexion;
-	char* ip;
-	char* puerto;
-
-	ip = config_get_string_value(info->config, info->ip);
-	puerto = config_get_string_value(info->config, info->puerto);
-	conexion = crear_conexion(ip, puerto);
-
-	//handshake
-	size_t bytes;
-	int result;
-	
-	bytes = send(conexion, &info->modulo, sizeof(int), 0);
-	bytes = recv(conexion, &result, sizeof(int), MSG_WAITALL);
-
-	if (result == 0) {
-    	enviar_mensaje("Conexion correcta",conexion);
-	} else 
-	{
-    	exit (-1);
-	}
-
-	
 }
 
