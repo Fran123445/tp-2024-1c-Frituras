@@ -8,7 +8,7 @@
 
 #define MAXCONN 5
 
-extern t_log* logger;
+extern t_log* loggerServ;
 
 void* recibir_buffer(int*, int);
 

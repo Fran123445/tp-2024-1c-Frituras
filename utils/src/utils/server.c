@@ -1,10 +1,10 @@
 #include "server.h"
 #include "estructurasConexion.h"
 
-t_log* logger;
+t_log* loggerServ;
 
 int iniciar_servidor(char* puerto, t_log* log){
-    logger = log;
+    loggerServ = log;
 
 	int socket_servidor;
 
@@ -28,7 +28,7 @@ int iniciar_servidor(char* puerto, t_log* log){
 	listen(socket_servidor, MAXCONN);
 
 	freeaddrinfo(servinfo);
-	log_trace(logger, "Listo para escuchar a mi cliente");
+	log_trace(loggerServ, "Listo para escuchar a mi cliente");
 	return socket_servidor;
 }
 
@@ -48,10 +48,10 @@ int esperar_cliente(int socket_servidor, modulo_code modulo){
 	} else 
 	{
 		bytes = send(socket_cliente, &resultError, sizeof(int), 0);
-		log_info(logger, "Ups! Te confundiste");
+		log_info(loggerServ, "Ups! Te confundiste");
 	}
 	
-	log_info(logger, "Se conecto un cliente!");
+	log_info(loggerServ, "Se conecto un cliente!");
 
 	return socket_cliente;
 }
@@ -81,7 +81,7 @@ void* recibir_buffer(int* size, int socket_cliente){
 void recibir_mensaje(int socket_cliente){
 	int size;
 	char* buffer = recibir_buffer(&size, socket_cliente);
-	log_info(logger, "Me llego el mensaje %s", buffer);
+	log_info(loggerServ, "Me llego el mensaje %s", buffer);
 	free(buffer);
 }
 
@@ -116,19 +116,19 @@ void* atender_cliente(int cliente_fd) {
 			break;
 		case PAQUETE:
 			lista = recibir_paquete(cliente_fd);
-			log_info(logger, "Me llegaron los siguientes valores:\n");
+			log_info(loggerServ, "Me llegaron los siguientes valores:\n");
 			list_iterate(lista, (void*) iterator);
 			break;
 		case -1:
-			log_error(logger, "el cliente se desconecto. Terminando servidor");
+			log_error(loggerServ, "el cliente se desconecto. Terminando servidor");
 			return -1;
 		default:
-			log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+			log_warning(loggerServ,"Operacion desconocida. No quieras meter la pata");
 			break;
 		}
 	}
 }
 
 void iterator(char* value) {
-	log_info(logger,"%s", value);
+	log_info(loggerServ,"%s", value);
 }
