@@ -1,5 +1,5 @@
 #include "instrucciones.h"
-#include "registroCpu.h"
+#include <utils/pcb.h>
 
 
 void SET(registrosCPU registro, int valor){

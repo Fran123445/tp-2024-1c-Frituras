@@ -3,7 +3,7 @@
 
 #include <stddef.h> 
 #include <stdio.h>
-#include "registroCpu.h"
+#include <utils/pcb.h>
 
 
 void inicializar_registros_cpu();

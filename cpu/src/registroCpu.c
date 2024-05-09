@@ -1,4 +1,4 @@
-#include "registroCpu.h"
+#include <utils/pcb.h>
 
 registros_cpu miCPU; 
 
