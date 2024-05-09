@@ -13,7 +13,8 @@ void SET(registrosCPU registro, int valor);
 void SUM(registrosCPU registroDestino, registrosCPU registroOrigen);
 void SUB(registrosCPU registroDestino, registrosCPU registroOrigen);
 void JNZ(registrosCPU registro, int instruccion);
-
+void IO_GEN_SLEEP(char* interfaz,int valor);
+void EXIT();
 
 
 #endif /* CPU_H_ */

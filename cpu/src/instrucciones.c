@@ -112,3 +112,12 @@ void JNZ(registrosCPU registro, int instruccion){
             break;
     }
 }
+
+void IO_GEN_SLEEP(char* interfaz,int valor){
+    
+}
+
+void EXIT(){
+    pcb.estado = EXIT;
+    //enviar_pcb(PCB, conexion_kernel);
+}
