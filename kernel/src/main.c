@@ -7,6 +7,7 @@
 #include "consola.h"
 #include "procesos.h"
 #include "planificacion.h"
+#include "conexiones.h"
 
 int siguientePID;
 t_queue* colaNew;
@@ -53,66 +54,42 @@ void crearHilos() {
 }
 
 int main(int argc, char* argv[]) {
-    t_config* nuevo_config = config_create("kernel.config");
-    if (nuevo_config == NULL) {
+    t_config* config = config_create("kernel.config");
+    if (config == NULL) {
         exit(1);
     }; 
 
-    t_conexion* cpuDispatch = malloc(sizeof(t_conexion));
+    t_log* logServidor = log_create("ServidorKernel", "Kernel", false, LOG_LEVEL_TRACE);
 
-    cpuDispatch->config = nuevo_config;
-    cpuDispatch->ip = "IP_CPU";
-    cpuDispatch->puerto = "PUERTO_CPU_DISPATCH";
-    cpuDispatch->modulo = KERNEL;
+    pthread_t esperarClientes;
 
-    t_conexion* cpuInterrupt = malloc(sizeof(t_conexion));
+    int servidorIO = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"), logServidor);
 
-    cpuInterrupt->config = nuevo_config;
-    cpuInterrupt->ip = "IP_CPU";
-    cpuInterrupt->puerto = "PUERTO_CPU_INTERRUPT";
-    cpuInterrupt->modulo = KERNEL;
+    t_conexion_escucha* servidorKernel = malloc(sizeof(t_conexion_escucha));
+    servidorKernel->modulo = KERNEL;
+    servidorKernel->socket_servidor = servidorIO;
 
-    t_conexion* memoria = malloc(sizeof(t_conexion));
+    pthread_create(&esperarClientes,
+                    NULL,
+                    (void*) esperarClientesIO,
+                    servidorKernel);
+    pthread_detach(esperarClientes);
 
-    memoria->config = nuevo_config;
-    memoria->ip = "IP_MEMORIA";
-    memoria->puerto = "PUERTO_MEMORIA";
-    memoria->modulo = KERNEL;
-    
+    char* ipCPU = config_get_string_value(config, "IP_CPU");
+    int socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"), KERNEL);
+    int socketCPUInterrupt = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_INTERRUPT"), KERNEL);
 
-    t_conexion_escucha* oyente = malloc(sizeof(t_conexion_escucha));
-
-    oyente->config = nuevo_config;
-    oyente->puerto = "PUERTO_ESCUCHA";
-    oyente->log = "servidor_kernel.log";
-    oyente->nombre_modulo = "kernel";
-    oyente->modulo = KERNEL;
-
-    //crear conexiones
-    /*conectarse_a(cpuDispatch);
-    conectarse_a(cpuInterrupt);
-    conectarse_a(memoria);*/
-
-    //crear servidor
-    //escucharConexiones(oyente);
-
-    free(cpuDispatch);
-    free(cpuInterrupt);
-    free(memoria);
-    free(oyente);
-
-    //Ese desastre que esta ahi arriba hay que refactorizarlo
 
     siguientePID = 0;
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     inicializarColas();
-    inicializarSemaforosYMutex(config_get_int_value(nuevo_config, "GRADO_MULTIPROGRAMACION"));
+    inicializarSemaforosYMutex(config_get_int_value(config, "GRADO_MULTIPROGRAMACION"));
     crearHilos();
 
     solicitarInput();
 
-    config_destroy(nuevo_config);
+    config_destroy(config);
     liberarMemoria();
 
     return 0;
