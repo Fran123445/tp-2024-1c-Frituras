@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
     pthread_t threadEscuchaDispatch;
     pthread_create(&threadEscuchaDispatch,NULL,(void*)escucharConexiones,oyente_dispatch);
     
+<<<<<<< HEAD
     pthread_t threadEscuchaInterrupt;
     pthread_create(&threadEscuchaInterrupt,NULL,(void*)escucharConexiones,oyente_interrupt);
 
@@ -49,6 +50,20 @@ int main(int argc, char* argv[]) {
 
     pthread_join(threadEscuchaInterrupt,NULL);
     
+=======
+    
+    pthread_detach(threadEscuchaDispatch);
+
+    pthread_t threadEscuchaInterrupt;
+    pthread_create(&threadEscuchaInterrupt,
+						NULL,
+						(void*)escucharConexiones,
+						oyente_interrupt);
+                
+    pthread_detach(threadEscuchaInterrupt);
+    
+    while(1);
+>>>>>>> main
 
     free(memoria);
     

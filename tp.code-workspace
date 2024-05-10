@@ -5,7 +5,11 @@
 			"*.h": "c",
 			"random": "c",
 			"cstdlib": "c",
+<<<<<<< HEAD
 			"atomic": "c"
+=======
+			"functional": "c"
+>>>>>>> main
 		},
 		"C_Cpp.errorSquiggles": "disabled",
 	},

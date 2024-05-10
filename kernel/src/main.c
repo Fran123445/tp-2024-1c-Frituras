@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <commons/log.h>
 #include <commons/config.h>
 #include <utils/server.h>
 #include <utils/client.h>
@@ -46,14 +45,14 @@ int main(int argc, char* argv[]) {
     conectarse_a(cpuDispatch);
     conectarse_a(cpuInterrupt);
     conectarse_a(memoria);
+
     //crear servidor
     escucharConexiones(oyente);
 
     free(cpuDispatch);
     free(cpuInterrupt);
+    free(memoria);
     free(oyente);
-
-
 
     return 0;
 }
