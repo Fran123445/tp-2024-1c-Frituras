@@ -11,8 +11,8 @@ typedef struct {
 } t_interfaz_generica;
 
 void iniciarInterfazIO(t_conexion* conexion, t_interfaz_generica* interfaz, t_config* config, char* nombre ){
+    
     //IO
-
     t_interfaz_generica interfaz;
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
 
@@ -38,6 +38,7 @@ void iniciarInterfazIO(t_conexion* conexion, t_interfaz_generica* interfaz, t_co
 }
 
 int main(int argc, char* argv[]) {
+    
     t_config* nuevo_config = config_create("entradasalida.config");
     if (nuevo_config == NULL) {
         exit(1);
@@ -50,13 +51,13 @@ int main(int argc, char* argv[]) {
     conexion_kernel->puerto = "PUERTO_KERNEL";
     conexion_kernel->modulo = IO;
 
-
-    // Iniciar la interfaz
-
+    //Crear Conexion
     conectarse_a(conexion_kernel);
 
+    // Iniciar la interfaz    
     iniciarInterfazIO(conexion_kernel);// Ver cuando updateamos las conexiones
     
+    //Libero
     free(conexion_kernel);
 
     return 0;
