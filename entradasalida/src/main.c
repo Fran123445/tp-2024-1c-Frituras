@@ -9,33 +9,34 @@ typedef struct {
     int unidades_trabajo;
 } t_interfaz_generica;
 
-void iniciarInterfazGenerica(int socket, t_config* config, char* nombre ){
-    
-    //IO
+void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
+
     t_interfaz_generica interfaz;
 
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
 
     interfaz.nombre = nombre;
 
-    //Falta Unidades_TRABAJO
-    send(socket,interfaz.nombre, strlen(interfaz.nombre)+1,0);
+    int resultado = 1; // esto existe unicamente porque send necesita una direccion a algo
+
+    send(socket, nombre, strlen(nombre)+1, 0);
 
     while (1) {
-       ssize_t reciv = recv(socket,interfaz.unidades_trabajo,sizeof(int),0);
+       ssize_t reciv = recv(socket, &interfaz.unidades_trabajo, sizeof(int), 0);
 
         if (reciv < 0) {
-            return -1;
+            exit(-1);
         }
-        sleep(tiempo_pausa * interfaz->unidades_trabajo);
-        send(socket, true,sizeof(bool),0);
+
+        sleep(tiempo_pausa * interfaz.unidades_trabajo);
+        send(socket, &resultado ,sizeof(bool),0);
     }
 
 }
 
 int main(int argc, char* argv[]) {
-    
-    t_config* nuevo_config = config_create(argv[1]);
+
+    t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
     }; 
@@ -44,12 +45,9 @@ int main(int argc, char* argv[]) {
 
     char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
 
-    if(!strcmp(*tipo,"IO_GEN_SLEEP")){
-        iniciarInterfazGenerica(conexion_kernel);
+    if(!strcmp(tipo,"IO_GEN_SLEEP")){
+        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
     }
-
-    //Libero
-    free(conexion_kernel);
 
     return 0;
 }
