@@ -6,21 +6,19 @@ void enviarInterrupcion() {
     //send
 }
 
-void esperarQuantumCompleto(int quantum) {
-    sleep(quantum);
+void esperarQuantumCompleto(int* quantum) {
+    sleep(*quantum);
     enviarInterrupcion();
 
     procesoInterrumpido = 1;
 }
 
-void esperarFinQuantum(int quantum) {
+void esperarFinQuantum(int* quantum) {
     pthread_t esperaQuantum;
     pthread_create(&esperaQuantum,
 						NULL,
 						(void*) esperarQuantumCompleto,
-						&quantum);      /* El & es porque si no me tira un warning por un tema de
-                                        punteros. No se si esta bien o si cuando lo probemos va
-                                        a hacer que reviente todo */
+						quantum);
 
     sem_wait(&llegadaProceso);
 
