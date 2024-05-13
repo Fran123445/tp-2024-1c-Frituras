@@ -12,10 +12,10 @@
 int siguientePID;
 t_queue* colaNew;
 t_queue* colaReady;
-t_queue* colaBlocked;
 t_queue* colaExit;
 
 t_list* listadoProcesos;
+t_list* interfacesConectadas;
 
 t_log* logger;
 
@@ -25,8 +25,8 @@ pthread_t pth_colaNew;
 void inicializarColas() {
     colaNew = queue_create();
     colaReady = queue_create();
-    colaBlocked = queue_create();
     colaExit = queue_create();
+    interfacesConectadas = list_create();
     listadoProcesos = list_create();
 }
 
@@ -34,8 +34,8 @@ void liberarMemoria() {
     log_destroy(logger);
     queue_destroy_and_destroy_elements(colaNew, free);
     queue_destroy_and_destroy_elements(colaExit, free);
-    queue_destroy_and_destroy_elements(colaBlocked, free);
     queue_destroy_and_destroy_elements(colaReady, free);
+    list_destroy(interfacesConectadas); //seguramente tenga que hager un destroy and destroy eleements
     list_destroy(listadoProcesos);
 }
 

@@ -17,20 +17,20 @@ void esperarClientesIO(t_conexion_escucha* params) {
 }
 
 void administrarConexionIO(int socket_cliente) {
-    t_IOConectado* dispositivo = malloc(sizeof(t_IOConectado));
+    t_IOConectado* interfaz = malloc(sizeof(t_IOConectado));
 
     // provisorio, seguramente esto cambie
-    recv(socket_cliente, dispositivo->nombreDispositivo, sizeof(int), MSG_WAITALL);
+    recv(socket_cliente, interfaz->nombreInterfaz, sizeof(int), MSG_WAITALL);
 
-    dispositivo->cola = queue_create();
-    sem_init(&dispositivo->semaforo, 0, 0);
+    interfaz->cola = queue_create();
+    sem_init(&interfaz->semaforo, 0, 0);
 
     while(recv(socket_cliente, /* no se */, sizeof(/* no se */), MSG_WAITALL) > 0) {
-        sem_wait(&dispositivo->semaforo);
+        sem_wait(&interfaz->semaforo);
 
     }
 
-    queue_destroy(dispositivo->cola);
-    sem_destroy(&dispositivo->semaforo);
-    free(dispositivo);
+    queue_destroy(interfaz->cola);
+    sem_destroy(&interfaz->semaforo);
+    free(interfaz);
 }

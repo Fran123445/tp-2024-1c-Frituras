@@ -13,7 +13,7 @@ pthread_mutex_t mutexListaProcesos;
 
 void procesosReadyLog(char** lista) {
     void _agregarPIDALista(PCB* proceso) {
-        if(proceso->estado == READY) {
+        if(proceso->estado == ESTADO_READY) {
             string_append_with_format(lista, "%d, ", proceso->PID);
         }
     };
@@ -74,7 +74,7 @@ void procesoNewAReady() {
         queue_push(colaReady, proceso);
         pthread_mutex_unlock(&mutexReady);
 
-        proceso->estado = READY;
+        proceso->estado = ESTADO_READY;
 
         /* no debe ser ni la forma mas eficiente ni la mas elegante
         para hacer este log, pero funciona */
@@ -92,7 +92,7 @@ void ejecutarSiguiente() {
         sem_wait(&cpuDisponible);
         pthread_mutex_lock(&mutexReady);
         PCB* proceso = queue_pop(colaReady);
-        proceso->estado = EXEC;
+        proceso->estado = ESTADO_EXEC;
         pthread_mutex_unlock(&mutexReady);
     
         enviarProcesoACPU(proceso);
@@ -113,20 +113,17 @@ void recibirDeCPU() {
     }
 }
 
-void planificarRecibidoPorFIFO(t_dispatch* procesoRecibido) {
-    PCB* proceso = procesoRecibido->proceso;
-    switch (procesoRecibido->motivo) {
-        case INST_WAIT:
+void planificarRecibidoPorFIFO(t_dispatch* dispatch) {
+    PCB* proceso = dispatch->proceso;
+    switch (dispatch->instruccion->tipo) {
+        case WAIT:
             // todavia no me fije que hace wait
             break;
-        case INST_SIGNAL:
+        case SIGNAL:
             // todavia no me fije que hace signal
             break;
-        case SOLICITUD_IO:
-            // enviarABlocked(proceso);
-            break;
         default:
-            // enviarAExit(proceso);
+            log_error(logger, "Instruccion no válida");
             break;
     }
 }

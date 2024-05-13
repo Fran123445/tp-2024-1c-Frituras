@@ -7,11 +7,11 @@ char* enumEstadoAString(estado_proceso estado) {
     // y me molestaba
     switch (estado)
     {
-        case NEW: string = "NEW"; break;
-        case READY: string = "READY"; break;
-        case BLOCKED: string = "BLOCKED"; break;
-        case EXEC: string = "EXEC"; break;
-        case EXIT: string = "EXIT"; break;
+        case ESTADO_NEW: string = "NEW"; break;
+        case ESTADO_READY: string = "READY"; break;
+        case ESTADO_BLOCKED: string = "BLOCKED"; break;
+        case ESTADO_EXEC: string = "EXEC"; break;
+        case ESTADO_EXIT: string = "EXIT"; break;
     }
 
     return string;

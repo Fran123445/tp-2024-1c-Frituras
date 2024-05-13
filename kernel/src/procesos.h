@@ -25,14 +25,14 @@ extern pthread_mutex_t mutexBlocked;
 
 extern t_queue* colaNew;
 extern t_queue* colaReady;
-extern t_queue* colaBlocked;
 extern t_queue* colaExit;
+extern t_list* interfacesConectadas;
 extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
 typedef struct {
-    int nombreDispositivo;
+    int nombreInterfaz;
     t_queue* cola;
     sem_t semaforo;
 } t_IOConectado;

@@ -3,13 +3,13 @@
 t_queue* enumEstadoACola(int estado) {
     switch (estado)
     {
-        case NEW:
+        case ESTADO_NEW:
             return colaNew;
-        case BLOCKED:
-            return colaBlocked;
-        case EXIT:
+        //case ESTADO_BLOCKED:
+        //    return colaBlocked; Tengo que ver que hacer con esto
+        case ESTADO_EXIT:
             return colaExit;
-        case READY:
+        case ESTADO_READY:
             return colaReady;
         default:
             return NULL;
@@ -50,7 +50,7 @@ void iniciarProceso(char* path) {
     PCB* nuevoPCB = malloc(sizeof(PCB));
 
     nuevoPCB->PID = siguientePID;
-    nuevoPCB->estado = NEW;
+    nuevoPCB->estado = ESTADO_NEW;
     //nuevoPCB->quantum = quantum;
     //Agregar el de program counter
     //Agregar el de registrosCPU
@@ -71,27 +71,5 @@ void iniciarProceso(char* path) {
 }
 
 void finalizarProceso(int PID) {
-    /*  esta funcion da problemas de todos los colores 
-        asi que hay que rehacerla entera */
-    PCB* PCB = hallarPCB(PID);
-
-    if (PCB == NULL) {
-        log_error(logger, "El proceso %d no existe", PID);
-        return;
-    }
-
-    t_queue* colaProceso;
-
-    // Habria que ver que hacer si el proceso esta en estado EXEC
-    colaProceso = enumEstadoACola(PCB->estado);
-
-    sacarProceso(colaProceso, PCB);
-
-    PCB->estado = EXIT;
-
-    pthread_mutex_lock(&mutexExit);
-    queue_push(colaExit, PCB);
-    pthread_mutex_unlock(&mutexExit);
-
-    sem_post(&procesosEnExit);
+    /*  eventualmente se rehará */
 }
