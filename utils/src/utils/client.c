@@ -31,10 +31,7 @@ int crear_conexion(char *ip, char* puerto, modulo_code modulo)
 	bytes = send(socket_cliente, &modulo, sizeof(int), 0);
 	bytes = recv(socket_cliente, &result, sizeof(int), MSG_WAITALL);
 
-	if (result == 0) {
-    	enviar_mensaje("Conexion correcta", socket_cliente);
-	} else 
-	{
+	if (result != 0) {
     	exit (-1);
 	}
 
