@@ -10,15 +10,7 @@
 
 extern t_log* loggerServ;
 
-void* recibir_buffer(int*, int);
-
 int iniciar_servidor(char* puerto, t_log* logger);
 int esperar_cliente(int socket_servidor, modulo_code modulo);
-t_list* recibir_paquete(int);
-void recibir_mensaje(int);
-int recibir_operacion(int);
-void* atender_cliente(int);
-
-void iterator(char* value);
 
 #endif /* SERVER_H_ */
