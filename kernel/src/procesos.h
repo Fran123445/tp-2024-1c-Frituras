@@ -14,6 +14,8 @@
 
 extern t_log* logger; // no estoy seguro de que esto se vaya a quedar aca
 
+extern int quantumInicial;
+
 extern sem_t procesosEnNew;
 extern sem_t procesosEnExit;
 extern sem_t gradoMultiprogramacion;

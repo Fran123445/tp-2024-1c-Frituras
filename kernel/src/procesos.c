@@ -28,6 +28,23 @@ PCB* hallarPCB(int PID) {
     return encontrado;
 }
 
+registros_cpu inicializarRegistrosCPU() {
+    registros_cpu reg;
+    reg.AX = 0;
+    reg.BX = 0;
+    reg.CX = 0;
+    reg.DX = 0;
+    reg.EAX = 0;
+    reg.EBX = 0;
+    reg.ECX = 0;
+    reg.EDX = 0;
+    reg.SI = 0;
+    reg.DI = 0;
+    reg.PC = 0;
+
+    return reg;
+}
+
 void sacarProceso(t_queue* cola, PCB* proceso) {
     int i;
     t_queue* colaTemporal = queue_create();
@@ -51,16 +68,17 @@ void iniciarProceso(char* path) {
 
     nuevoPCB->PID = siguientePID;
     nuevoPCB->estado = ESTADO_NEW;
-    //nuevoPCB->quantum = quantum;
-    //Agregar el de program counter
-    //Agregar el de registrosCPU
+    nuevoPCB->quantum = quantumInicial;
+    nuevoPCB->programCounter = 0;
+    nuevoPCB->registros = inicializarRegistrosCPU();
 
-    pthread_mutex_lock(&mutexNew);
-    queue_push(colaNew, nuevoPCB);
-    pthread_mutex_unlock(&mutexNew);
-    
     pthread_mutex_lock(&mutexListaProcesos);
+    pthread_mutex_lock(&mutexNew);
+    
+    queue_push(colaNew, nuevoPCB);
     list_add(listadoProcesos, nuevoPCB);
+
+    pthread_mutex_unlock(&mutexNew);
     pthread_mutex_unlock(&mutexListaProcesos);
 
     log_info(logger, "Se crea el proceso %d en NEW", siguientePID);

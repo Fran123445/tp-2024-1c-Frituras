@@ -10,6 +10,7 @@
 #include "conexiones.h"
 
 int siguientePID;
+int quantumInicial;
 t_queue* colaNew;
 t_queue* colaReady;
 t_queue* colaExit;
@@ -81,6 +82,7 @@ int main(int argc, char* argv[]) {
 
 
     siguientePID = 0;
+    quantumInicial = config_get_int_value(config, "QUANTUM");
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     inicializarColas();
