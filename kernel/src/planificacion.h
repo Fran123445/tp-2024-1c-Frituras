@@ -10,6 +10,9 @@
 #include <string.h>
 #include <procesos.h>
 
+extern int socketCPUDispatch;
+extern int socketCPUInterrupt;
+
 extern sem_t llegadaProceso;
 
 void inicializarSemaforosYMutex();

@@ -67,14 +67,14 @@ void procesoNewAReady() {
         listaReady[0] = '\0';
 
         pthread_mutex_lock(&mutexNew);
-        proceso = queue_pop(colaNew);
-        pthread_mutex_unlock(&mutexNew);
-
         pthread_mutex_lock(&mutexReady);
-        queue_push(colaReady, proceso);
-        pthread_mutex_unlock(&mutexReady);
 
+        proceso = queue_pop(colaNew);
+        queue_push(colaReady, proceso);
         proceso->estado = ESTADO_READY;
+
+        pthread_mutex_unlock(&mutexReady);
+        pthread_mutex_unlock(&mutexNew);
 
         /* no debe ser ni la forma mas eficiente ni la mas elegante
         para hacer este log, pero funciona */
@@ -100,8 +100,11 @@ void ejecutarSiguiente() {
 }
 
 void enviarProcesoACPU(PCB* proceso) {
-    //serializar
-    //send
+    t_paquete* paquete = crear_paquete();
+    paquete->codigo_operacion = ENVIO_PCB;
+    agregar_a_paquete(paquete, proceso, sizeof(PCB));
+    enviar_paquete(paquete, socketCPUDispatch);
+    eliminar_paquete(paquete);
 }
 
 void recibirDeCPU() {
