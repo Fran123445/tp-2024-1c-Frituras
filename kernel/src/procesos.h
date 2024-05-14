@@ -10,9 +10,12 @@
 #include <commons/collections/queue.h>
 #include <commons/log.h>
 #include <commons/string.h>
+#include <utils/serializacion.h>
 #include <utils/pcb.h>
 
 extern t_log* logger; // no estoy seguro de que esto se vaya a quedar aca
+
+extern int socketMemoria;;
 
 extern int quantumInicial;
 

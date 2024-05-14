@@ -9,6 +9,10 @@
 #include "planificacion.h"
 #include "conexiones.h"
 
+int socketCPUDispatch;
+int socketCPUInterrupt;
+int socketMemoria;
+
 int siguientePID;
 int quantumInicial;
 t_queue* colaNew;
@@ -77,8 +81,9 @@ int main(int argc, char* argv[]) {
     pthread_detach(esperarClientes);
 
     char* ipCPU = config_get_string_value(config, "IP_CPU");
-    int socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"), KERNEL);
-    int socketCPUInterrupt = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_INTERRUPT"), KERNEL);
+    socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"), KERNEL);
+    socketCPUInterrupt = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_INTERRUPT"), KERNEL);
+    socketMemoria = crear_conexion(config_get_string_value(config, "IP_MEMORIA"), config_get_string_value(config, "PUERTO_MEMORIA"), KERNEL);
 
 
     siguientePID = 0;
