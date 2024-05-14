@@ -12,6 +12,8 @@ typedef enum {
     CONECTARIOGENERICA,
 
     // Kernel - CPU
+    ENVIO_PCB,
+
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
@@ -42,5 +44,12 @@ t_paquete* crear_paquete(void);
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 void* recibir_buffer(int*, int);
+void eliminar_paquete(t_paquete* paquete);
+
+int buffer_read_int(t_buffer* buffer);
+uint32_t buffer_read_uint32(t_buffer* buffer);
+char* buffer_read_string(t_buffer* buffer);
+PCB* buffer_read_pcb(t_buffer* buffer);
+
 
 #endif /* SER_H */
