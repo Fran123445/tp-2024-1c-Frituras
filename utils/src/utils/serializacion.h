@@ -12,6 +12,16 @@ typedef enum {
     CONECTARIOGENERICA,
 
     // Kernel - CPU
+    //Kernel - Memoria
+    CREACION_PROCESO, //Acá Kernel me envia path
+    FIN_PROCESO,
+    //CPU o IO - Memoria
+    ACCESO_ESPACIO_USUARIO,
+    //Memoria de Instrucciones - CPU
+    ENVIO_DE_INSTRUCCIONES,
+    // Cualquier módulo a Memoria
+    AJUSTAR_SIZE_PROCESO,
+    ACCESO_TABLAS_PAGINAS,
 
 }op_code;
 
