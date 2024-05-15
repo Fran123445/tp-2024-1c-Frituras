@@ -148,6 +148,11 @@ t_instruccion* buffer_read_instruccion(t_buffer* buffer) {
 	return inst;
 }
 
+void liberar_buffer(t_buffer* buffer) {
+	free(buffer->stream);
+	free(buffer);
+}
+
 int recibir_operacion(int socket_cliente)
 {
 	int cod_op;
