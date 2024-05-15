@@ -69,9 +69,12 @@ typedef enum{
 //Estructura de una instruccion: tiene el tipo, 3 argumentos void porque pueden ser numeros y/o registros(ejemplo set ax 10 -- sub ax cx -- resize 128 -- io_gen_sleep int3 4)
 //interfaz es un char* para poder pasarle que interfaz es, y archivo va a pasar un nombre del archivo.
 typedef struct {
-    t_tipoInstruccion tipo;   
-    void* arg1;      
-    void* arg2;                
+    t_tipoInstruccion tipo;
+    int sizeArg1;
+    void* arg1;
+    int sizeArg2;    
+    void* arg2;
+    int sizeArg3;
     void* arg3;                        
     char* interfaz;       
     char* archivo;       

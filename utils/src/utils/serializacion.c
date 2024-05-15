@@ -40,6 +40,27 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio)
 	paquete->buffer->size += tamanio + sizeof(int);
 }
 
+void agregar_int_a_paquete(t_paquete* paquete, int valor) {
+	agregar_a_paquete(paquete, &valor, sizeof(int));
+}
+
+void agregar_string_a_paquete(t_paquete* paquete, char* string) {
+	agregar_a_paquete(paquete, string, strlen(string)+1);
+}
+
+void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccion) {
+	agregar_int_a_paquete(paquete, instruccion->tipo);
+	agregar_a_paquete(paquete, instruccion->arg1, instruccion->sizeArg1);
+	agregar_a_paquete(paquete, instruccion->arg2, instruccion->sizeArg2);
+	agregar_a_paquete(paquete, instruccion->arg3, instruccion->sizeArg3);
+	agregar_string_a_paquete(paquete, instruccion->interfaz);
+	agregar_string_a_paquete(paquete, instruccion->archivo);
+}
+
+void agregar_PCB_a_paquete(t_paquete* paquete, PCB* pcb) {
+	agregar_a_paquete(paquete, pcb, sizeof(PCB));
+}
+
 void enviar_paquete(t_paquete* paquete, int socket_cliente)
 {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
@@ -58,12 +79,12 @@ void eliminar_paquete(t_paquete* paquete)
 	free(paquete);
 }
 
-void* recibir_buffer(int* size, int socket_cliente){
-	void * buffer;
+t_buffer* recibir_buffer(int socket_cliente){
+	t_buffer* buffer = malloc(sizeof(t_buffer));
 
-	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
-	buffer = malloc(*size);
-	recv(socket_cliente, buffer, *size, MSG_WAITALL);
+	recv(socket_cliente, &(buffer->size), sizeof(int), MSG_WAITALL);
+	buffer->stream = malloc(buffer->size);
+	recv(socket_cliente, buffer->stream, buffer->size, MSG_WAITALL);
 
 	return buffer;
 }
@@ -105,11 +126,41 @@ char* buffer_read_string(t_buffer* buffer) {
 }
 
 PCB* buffer_read_pcb(t_buffer* buffer) {
-    PCB* pcb = malloc(sizeof(PCB));
-    pcb->PID = buffer_read_int(buffer);
-    pcb->programCounter = buffer_read_uint32(buffer);
-    pcb->quantum = buffer_read_int(buffer);
-    pcb->estado = buffer_read_int(buffer);
+	PCB* pcb = malloc(sizeof(PCB));
+	buffer_read(buffer, pcb);
 
     return pcb;
+}
+
+t_instruccion* buffer_read_instruccion(t_buffer* buffer) {
+	t_instruccion* inst = malloc(sizeof(t_instruccion));
+	inst->arg1 = malloc(128);
+	inst->arg2 = malloc(128);
+	inst->arg3 = malloc(128);
+
+	inst->tipo = buffer_read_int(buffer);
+	buffer_read(buffer, inst->arg1);
+	buffer_read(buffer, inst->arg2);
+	buffer_read(buffer, inst->arg3);
+	inst->interfaz = buffer_read_string(buffer);
+	inst->archivo = buffer_read_string(buffer);
+
+	return inst;
+}
+
+void liberar_buffer(t_buffer* buffer) {
+	free(buffer->stream);
+	free(buffer);
+}
+
+int recibir_operacion(int socket_cliente)
+{
+	int cod_op;
+	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
+		return cod_op;
+	else
+	{
+		close(socket_cliente);
+		return -1;
+	}
 }
