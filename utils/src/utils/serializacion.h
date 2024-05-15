@@ -46,10 +46,16 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente);
 void* recibir_buffer(int*, int);
 void eliminar_paquete(t_paquete* paquete);
 
+void agregar_int_a_paquete(t_paquete* paquete, int valor);
+void agregar_string_a_paquete(t_paquete* paquete, char* string);
+void agregar_PCB_a_paquete(t_paquete* paquete, PCB* pcb);
+void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccion);
+
 int buffer_read_int(t_buffer* buffer);
 uint32_t buffer_read_uint32(t_buffer* buffer);
 char* buffer_read_string(t_buffer* buffer);
 PCB* buffer_read_pcb(t_buffer* buffer);
+t_instruccion* buffer_read_instruccion(t_buffer* buffer);
 
 
 #endif /* SER_H */
