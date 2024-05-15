@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include <string.h>
 #include<netdb.h>
+#include <unistd.h>
 
 typedef enum {
     PAQUETE,
@@ -46,7 +47,7 @@ typedef struct
 t_paquete* crear_paquete(void);
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
-void* recibir_buffer(int*, int);
+t_buffer* recibir_buffer(int socket_cliente);
 void eliminar_paquete(t_paquete* paquete);
 int recibir_operacion(int socket_cliente);
 
