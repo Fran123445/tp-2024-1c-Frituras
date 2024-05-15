@@ -9,10 +9,13 @@
 typedef enum {
     PAQUETE,
     // Kernel - IO
-    CONECTARIOGENERICA,
+    CONEXION_IOGENERICA,
+    CONEXION_STDIN,
+    CONEXION_STDOUT,
 
     // Kernel - CPU
     ENVIO_PCB,
+    INTERRUPCION,
 
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
@@ -45,6 +48,7 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 void* recibir_buffer(int*, int);
 void eliminar_paquete(t_paquete* paquete);
+int recibir_operacion(int socket_cliente);
 
 void agregar_int_a_paquete(t_paquete* paquete, int valor);
 void agregar_string_a_paquete(t_paquete* paquete, char* string);
