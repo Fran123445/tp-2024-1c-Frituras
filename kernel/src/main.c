@@ -44,20 +44,6 @@ void liberarMemoria() {
     list_destroy(listadoProcesos);
 }
 
-void crearHilos() {
-    pthread_create(&pth_colaExit,
-						NULL,
-						(void*) vaciarExit,
-						NULL);
-    pthread_detach(pth_colaExit);
-
-    pthread_create(&pth_colaNew,
-						NULL,
-						(void*) procesoNewAReady,
-						NULL);
-    pthread_detach(pth_colaNew);
-}
-
 int main(int argc, char* argv[]) {
     t_config* config = config_create("kernel.config");
     if (config == NULL) {
@@ -92,7 +78,6 @@ int main(int argc, char* argv[]) {
 
     inicializarColas();
     inicializarSemaforosYMutex(config_get_int_value(config, "GRADO_MULTIPROGRAMACION"));
-    crearHilos();
 
     solicitarInput();
 

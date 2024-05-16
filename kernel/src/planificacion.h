@@ -23,10 +23,18 @@ void vaciarExit();
 // Espera a que lleguen procesos a la cola NEW para pasarlos a READY si el grado de multiprogramacion lo permite
 void procesoNewAReady();
 
+// Saca el primer proceso de Ready y lo cambia a estado EXEC
+PCB* sacarSiguienteDeReady();
+
+void enviarProcesoACPU(PCB*);
+
 // Espera a que la CPU se encuentre disponible y le envia el siguiente proceso en READY para que lo ejecute
 void ejecutarSiguiente();
-void enviarProcesoACPU(PCB*);
-void planificarRecibidoPorFIFO(t_dispatch*); /* esta funcion puede o no que cambie. Depende de como plantee RR */
 
+// Recibe un t_dispatch y planifica en funcion de lo que solicita
+void planificarRecibido(t_dispatch* dispatch);
+
+// Inicia los hilos para la planificacion por FIFO
+void planificacionPorFIFO();
 
 #endif /* PLAN_H */

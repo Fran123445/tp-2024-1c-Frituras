@@ -86,17 +86,13 @@ void procesoNewAReady() {
     }
 }
 
-void ejecutarSiguiente() {
+PCB* sacarSiguienteDeReady() {
+    pthread_mutex_lock(&mutexReady);
+    PCB* proceso = queue_pop(colaReady);
+    proceso->estado = ESTADO_EXEC;
+    pthread_mutex_unlock(&mutexReady);
 
-    while(1) {
-        sem_wait(&cpuDisponible);
-        pthread_mutex_lock(&mutexReady);
-        PCB* proceso = queue_pop(colaReady);
-        proceso->estado = ESTADO_EXEC;
-        pthread_mutex_unlock(&mutexReady);
-    
-        enviarProcesoACPU(proceso);
-    }
+    return proceso;
 }
 
 void enviarProcesoACPU(PCB* proceso) {
@@ -107,26 +103,71 @@ void enviarProcesoACPU(PCB* proceso) {
     eliminar_paquete(paquete);
 }
 
-void recibirDeCPU() {
+void ejecutarSiguiente() {
     while(1) {
-        //recv
-        sem_post(&llegadaProceso); //usado en RR
-        //deserializar
-        //planificar
+        sem_wait(&cpuDisponible);
+        PCB* proceso = sacarSiguienteDeReady();
+        enviarProcesoACPU(proceso);
     }
 }
 
-void planificarRecibidoPorFIFO(t_dispatch* dispatch) {
+void recibirDeCPU() {
+    while(1) {
+        recibir_operacion(socketCPUDispatch);
+        t_buffer* buffer = recibir_buffer(socketCPUDispatch);
+        t_dispatch* proceso = buffer_read_dispatch(buffer); // Falta hacerla
+        planificarRecibido(proceso);
+        liberar_buffer(buffer);
+    }
+}
+
+void planificarRecibido(t_dispatch* dispatch) {
     PCB* proceso = dispatch->proceso;
-    switch (dispatch->instruccion->tipo) {
+    t_instruccion* inst = dispatch->instruccion;
+    switch (inst->tipo) {
+        case IO_GEN_SLEEP:
+            break;
         case WAIT:
             // todavia no me fije que hace wait
             break;
         case SIGNAL:
             // todavia no me fije que hace signal
             break;
+        case EXIT:
+            break;
         default:
             log_error(logger, "Instruccion no válida");
             break;
     }
+}
+
+void planificacionPorFIFO() {
+    pthread_t pth_colaExit;
+    pthread_t pth_colaNew;
+    pthread_t pth_colaReady;
+    pthread_t pth_recibirProc;
+
+    pthread_create(&pth_colaExit,
+						NULL,
+						(void*) vaciarExit,
+						NULL);
+    pthread_detach(pth_colaExit);
+
+    pthread_create(&pth_colaNew,
+						NULL,
+						(void*) procesoNewAReady,
+						NULL);
+    pthread_detach(pth_colaNew);
+
+    pthread_create(&pth_colaReady,
+						NULL,
+						(void*) ejecutarSiguiente,
+						NULL);
+    pthread_detach(pth_colaReady);
+
+    pthread_create(&pth_recibirProc,
+						NULL,
+						(void*) recibirDeCPU,
+						NULL);
+    pthread_detach(pth_recibirProc);
 }

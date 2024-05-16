@@ -46,7 +46,5 @@ void administrarInterfazGenerica(int socket_cliente) {
     // esto lo tengo que cambiar
     while(recv(socket_cliente, /* no se */, sizeof(/* no se */), MSG_WAITALL) > 0) {
         sem_wait(&interfaz->semaforo);
-    }
-
-    
+    }    
 }

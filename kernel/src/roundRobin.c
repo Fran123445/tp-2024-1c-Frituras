@@ -40,6 +40,14 @@ void enviarProcesoACPU_RR(PCB* proceso) {
     pthread_create(&quantum,
 						NULL,
 						(void*) esperarFinQuantum,
-						&proceso->quantum); // lo mismo de arriba
+						&(proceso->quantum));
     pthread_detach(quantum);
+}
+
+void ejercutarSiguienteRR() {
+    while(1) {
+        sem_wait(&cpuDisponible);
+        PCB* proceso = sacarSiguienteDeReady();    
+        enviarProcesoACPU_RR(proceso);
+    }
 }
