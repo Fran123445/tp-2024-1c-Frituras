@@ -1,4 +1,4 @@
-#include "conexiones.h"
+#include "interfaces.h"
 
 void esperarClientesIO(t_conexion_escucha* params) {
     while(1) {
@@ -9,7 +9,7 @@ void esperarClientesIO(t_conexion_escucha* params) {
 
         void (*func)(int);
 
-        switch(recibir_operacion(socket_cliente)) {
+        switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_IOGENERICA:
                 func = &administrarInterfazGenerica;
                 break;
@@ -20,7 +20,7 @@ void esperarClientesIO(t_conexion_escucha* params) {
                 // A implementar
                 break;
             default:
-                log_error("Conexión inválida de una interfaz");
+                log_error(logger, "Conexión inválida de una interfaz");
                 break;
         }
         
@@ -38,7 +38,7 @@ void administrarInterfazGenerica(int socket_cliente) {
     t_buffer* buffer = recibir_buffer(socket_cliente);
 
     interfaz->nombreInterfaz = buffer_read_string(buffer);
-    interfaz->tipoInterfaz = INTERFAZ_GENERICA;
+    interfaz->tipo = INTERFAZ_GENERICA;
     interfaz->cola = queue_create();
     pthread_mutex_init(&(interfaz->mutex), NULL);
     sem_init(&(interfaz->semaforo), 0, 0);

@@ -7,7 +7,7 @@
 #include "consola.h"
 #include "procesos.h"
 #include "planificacion.h"
-#include "conexiones.h"
+#include "interfaces.h"
 
 int socketCPUDispatch;
 int socketCPUInterrupt;

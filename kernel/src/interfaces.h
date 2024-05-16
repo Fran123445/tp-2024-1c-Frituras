@@ -8,8 +8,9 @@
 #include <utils/server.h>
 #include <utils/serializacion.h>
 #include <commons/collections/queue.h>
+#include <commons/log.h>
 
-
+extern t_log* logger;
 typedef enum {
     INTERFAZ_GENERICA,
     INTERFAZ_STDIN,
