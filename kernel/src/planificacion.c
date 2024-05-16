@@ -102,7 +102,7 @@ void ejecutarSiguiente() {
 void enviarProcesoACPU(PCB* proceso) {
     t_paquete* paquete = crear_paquete();
     paquete->codigo_operacion = ENVIO_PCB;
-    agregar_a_paquete(paquete, proceso, sizeof(PCB));
+    agregar_PCB_a_paquete(paquete, proceso);
     enviar_paquete(paquete, socketCPUDispatch);
     eliminar_paquete(paquete);
 }

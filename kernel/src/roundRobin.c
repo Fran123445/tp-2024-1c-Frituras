@@ -3,7 +3,10 @@
 bool procesoInterrumpido;
 
 void enviarInterrupcion() {
-    //send
+    t_paquete* paquete = crear_paquete();
+    paquete->codigo_operacion = INTERRUPCION;
+    enviar_paquete(paquete, socketCPUInterrupt);
+    eliminar_paquete(paquete);
 }
 
 void esperarQuantumCompleto(int* quantum) {
