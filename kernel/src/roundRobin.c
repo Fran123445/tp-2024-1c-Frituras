@@ -2,29 +2,31 @@
 
 bool procesoInterrumpido;
 
-void enviarInterrupcion() {
+void enviarInterrupcion(int PID) {
     t_paquete* paquete = crear_paquete();
     paquete->codigo_operacion = INTERRUPCION;
+    agregar_int_a_paquete(paquete, PID);
     enviar_paquete(paquete, socketCPUInterrupt);
     eliminar_paquete(paquete);
 }
 
-void esperarQuantumCompleto(int* quantum) {
-    sleep(*quantum);
-    enviarInterrupcion();
+void esperarQuantumCompleto(PCB* proceso) {
+    sleep(proceso->quantum);
+    enviarInterrupcion(proceso->PID);
 
     procesoInterrumpido = 1;
 }
 
-void esperarFinQuantum(int* quantum) {
+void esperarFinQuantum(PCB* proceso) {
     pthread_t esperaQuantum;
     pthread_create(&esperaQuantum,
 						NULL,
 						(void*) esperarQuantumCompleto,
-						quantum);
+						proceso);
 
     sem_wait(&llegadaProceso);
 
+    // esto es por si el proceso termina o no de ejecutarse antes que se cumpla el quantum
     if (procesoInterrumpido) {
         pthread_join(esperaQuantum, NULL);
         return;
@@ -40,7 +42,7 @@ void enviarProcesoACPU_RR(PCB* proceso) {
     pthread_create(&quantum,
 						NULL,
 						(void*) esperarFinQuantum,
-						&(proceso->quantum));
+						proceso);
     pthread_detach(quantum);
 }
 
