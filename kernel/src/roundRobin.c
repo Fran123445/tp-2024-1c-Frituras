@@ -53,3 +53,42 @@ void ejercutarSiguienteRR() {
         enviarProcesoACPU_RR(proceso);
     }
 }
+
+void recibirDeCPURR() {
+    while(1) {
+        recibir_operacion(socketCPUDispatch);
+        sem_post(&llegadaProceso);
+        leerBufferYPlanificar();
+    }
+}
+
+void planificacionPorRR() {
+    pthread_t pth_colaExit;
+    pthread_t pth_colaNew;
+    pthread_t pth_colaReady;
+    pthread_t pth_recibirProc;
+
+    pthread_create(&pth_colaExit,
+						NULL,
+						(void*) vaciarExit,
+						NULL);
+    pthread_detach(pth_colaExit);
+
+    pthread_create(&pth_colaNew,
+						NULL,
+						(void*) procesoNewAReady,
+						NULL);
+    pthread_detach(pth_colaNew);
+
+    pthread_create(&pth_colaReady,
+						NULL,
+						(void*) ejecutarSiguienteRR,
+						NULL);
+    pthread_detach(pth_colaReady);
+
+    pthread_create(&pth_recibirProc,
+						NULL,
+						(void*) recibirDeCPURR,
+						NULL);
+    pthread_detach(pth_recibirProc);
+}

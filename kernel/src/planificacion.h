@@ -34,6 +34,9 @@ void ejecutarSiguiente();
 // Recibe un t_dispatch y planifica en funcion de lo que solicita
 void planificarRecibido(t_dispatch* dispatch);
 
+// Lee el t_dispatch del buffer y llama a planificarRecibido
+void leerBufferYPlanificar();
+
 // Inicia los hilos para la planificacion por FIFO
 void planificacionPorFIFO();
 

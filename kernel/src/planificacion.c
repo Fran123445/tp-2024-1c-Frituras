@@ -111,13 +111,17 @@ void ejecutarSiguiente() {
     }
 }
 
+void leerBufferYPlanificar() {
+    t_buffer* buffer = recibir_buffer(socketCPUDispatch);
+    t_dispatch* proceso = buffer_read_dispatch(buffer);
+    planificarRecibido(proceso);
+    liberar_buffer(buffer);
+}
+
 void recibirDeCPU() {
     while(1) {
         recibir_operacion(socketCPUDispatch);
-        t_buffer* buffer = recibir_buffer(socketCPUDispatch);
-        t_dispatch* proceso = buffer_read_dispatch(buffer); // Falta hacerla
-        planificarRecibido(proceso);
-        liberar_buffer(buffer);
+        leerBufferYPlanificar();
     }
 }
 

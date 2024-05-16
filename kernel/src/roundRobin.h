@@ -19,4 +19,6 @@ void enviarProcesoACPU_RR(PCB*);
 // Envia una interrupcion a la CPU
 void enviarInterrupcion();
 
+void ejecutarSiguienteRR();
+
 void planificacionPorRR();
