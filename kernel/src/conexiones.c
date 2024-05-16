@@ -7,30 +7,46 @@ void esperarClientesIO(t_conexion_escucha* params) {
 
         *socket_cliente = esperar_cliente(params->socket_servidor, params->modulo);
 
+        void (*func)(int);
+
+        switch(recibir_operacion(socket_cliente)) {
+            case CONEXION_IOGENERICA:
+                func = &administrarInterfazGenerica;
+                break;
+            case CONEXION_STDIN:
+                // A implementar
+                break;
+            case CONEXION_STDOUT:
+                // A implementar
+                break;
+            default:
+                log_error("Conexión inválida de una interfaz");
+                break;
+        }
         
         pthread_create(&hilo,
                         NULL,
-                        (void*) administrarConexionIO,
+                        (void*) func,
                         socket_cliente);
         pthread_detach(hilo);
     }
 }
 
-void administrarConexionIO(int socket_cliente) {
+void administrarInterfazGenerica(int socket_cliente) {
     t_IOConectado* interfaz = malloc(sizeof(t_IOConectado));
 
-    // provisorio, seguramente esto cambie
-    recv(socket_cliente, interfaz->nombreInterfaz, sizeof(int), MSG_WAITALL);
+    t_buffer* buffer = recibir_buffer(socket_cliente);
 
+    interfaz->nombreInterfaz = buffer_read_string(buffer);
+    interfaz->tipoInterfaz = INTERFAZ_GENERICA;
     interfaz->cola = queue_create();
-    sem_init(&interfaz->semaforo, 0, 0);
+    pthread_mutex_init(&(interfaz->mutex), NULL);
+    sem_init(&(interfaz->semaforo), 0, 0);
 
+    // esto lo tengo que cambiar
     while(recv(socket_cliente, /* no se */, sizeof(/* no se */), MSG_WAITALL) > 0) {
         sem_wait(&interfaz->semaforo);
-
     }
 
-    queue_destroy(interfaz->cola);
-    sem_destroy(&interfaz->semaforo);
-    free(interfaz);
+    
 }

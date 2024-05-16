@@ -4,11 +4,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <threads.h>
-#include <utils/server.h>
-#include <procesos.h>
 #include <semaphore.h>
+#include <utils/server.h>
+#include <utils/serializacion.h>
+#include <commons/collections/queue.h>
+
+
+typedef enum {
+    INTERFAZ_GENERICA,
+    INTERFAZ_STDIN,
+    INTERFAZ_STDOUT
+} tipoInterfaz;
+
+typedef struct {
+    char* nombreInterfaz;
+    tipoInterfaz tipo;
+    t_queue* cola;
+    pthread_mutex_t mutex;
+    sem_t semaforo;
+} t_IOConectado;
 
 void esperarClientesIO(t_conexion_escucha* params);
-void administrarConexionIO(int socket_cliente);
+void administrarInterfazGenerica(int socket_cliente);
 
 #endif /* CONN_H */

@@ -36,12 +36,6 @@ extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
-typedef struct {
-    int nombreInterfaz;
-    t_queue* cola;
-    sem_t semaforo;
-} t_IOConectado;
-
 // Crea un nuevo PCB y lo envia a la cola NEW
 void iniciarProceso(char*);
 
