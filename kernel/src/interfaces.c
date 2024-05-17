@@ -43,8 +43,62 @@ void administrarInterfazGenerica(int socket_cliente) {
     pthread_mutex_init(&(interfaz->mutex), NULL);
     sem_init(&(interfaz->semaforo), 0, 0);
 
-    // esto lo tengo que cambiar
-    while(recv(socket_cliente, /* no se */, sizeof(/* no se */), MSG_WAITALL) > 0) {
+    list_add(interfacesConectadas, interfaz);
+
+    t_solicitudIOGenerica* solicitud;
+
+    while (1) {
+        t_paquete* paquete = crear_paquete();
         sem_wait(&interfaz->semaforo);
-    }    
+
+        pthread_mutex_lock(&interfaz->mutex);
+        solicitud = queue_pop(interfaz->cola);
+        pthread_mutex_unlock(&interfaz->mutex);
+
+        agregar_int_a_paquete(paquete, solicitud->unidadesTrabajo);
+        enviar_paquete(paquete, socket_cliente);
+        eliminar_paquete(paquete);
+
+        if (recibir_operacion(socket_cliente) < 0) {
+            log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
+            //enviarAExit(proceso);
+            break;
+        }
+
+        free(solicitud);
+        //enviarAReady(proceso)
+    } 
+}
+
+bool comprobarOperacionValida(t_IOConectado* interfaz, t_tipoInstruccion inst) {
+
+    bool opValida;
+
+    switch (interfaz->tipo) {
+        case INTERFAZ_GENERICA:
+            opValida = inst == IO_GEN_SLEEP;
+            break;
+        case INTERFAZ_STDIN:
+            opValida = inst == IO_STDIN_READ;
+        case INTERFAZ_STDOUT:
+            opValida = inst == IO_STDOUT_WRITE;
+        // Falta todo lo de FS
+        default:
+            opValida = false;
+            break;
+    }
+
+    return opValida;
+}
+
+t_IOConectado* hallarInterfazConectada(char* nombre) {
+
+    bool _mismoNombre(t_IOConectado* interfaz) {
+        return !strcmp(nombre, interfaz->nombreInterfaz);
+    };
+
+    //hay que poner un mutex
+    t_IOConectado* interfaz = list_find(interfacesConectadas, (void *) _mismoNombre);
+
+    return interfaz;
 }

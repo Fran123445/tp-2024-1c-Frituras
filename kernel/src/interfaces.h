@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <threads.h>
 #include <semaphore.h>
-#include <utils/server.h>
-#include <utils/serializacion.h>
 #include <commons/collections/queue.h>
 #include <commons/log.h>
+#include <utils/server.h>
+#include <utils/serializacion.h>
+#include <procesos.h>
 
 extern t_log* logger;
 typedef enum {
@@ -25,7 +26,14 @@ typedef struct {
     sem_t semaforo;
 } t_IOConectado;
 
+typedef struct {
+    PCB* proceso;
+    int unidadesTrabajo;
+} t_solicitudIOGenerica;
+
 void esperarClientesIO(t_conexion_escucha* params);
 void administrarInterfazGenerica(int socket_cliente);
+t_IOConectado* hallarInterfazConectada(char* nombre);
+bool comprobarOperacionValida(t_IOConectado* interfaz, t_tipoInstruccion inst);
 
 #endif /* CONN_H */

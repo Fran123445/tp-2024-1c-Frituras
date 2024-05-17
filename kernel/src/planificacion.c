@@ -128,8 +128,17 @@ void recibirDeCPU() {
 void planificarRecibido(t_dispatch* dispatch) {
     PCB* proceso = dispatch->proceso;
     t_instruccion* inst = dispatch->instruccion;
+    t_IOConectado* interfaz;
     switch (inst->tipo) {
         case IO_GEN_SLEEP:
+            interfaz = hallarInterfazConectada(inst->interfaz);
+            if (comprobarOperacionValida(interfaz, inst->tipo)) {
+                t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
+                solicitud->proceso = proceso;
+                solicitud->unidadesTrabajo = (int) inst->arg1; 
+            } else {
+                //enviarAExit(proceso);
+            }
             break;
         case WAIT:
             // todavia no me fije que hace wait

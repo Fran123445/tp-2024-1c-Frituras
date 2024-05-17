@@ -9,6 +9,7 @@
 #include <commons/string.h>
 #include <string.h>
 #include <procesos.h>
+#include <interfaces.h>
 
 extern int socketCPUDispatch;
 extern int socketCPUInterrupt;
