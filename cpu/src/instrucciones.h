@@ -4,6 +4,7 @@
 #include <stddef.h> 
 #include <stdio.h>
 #include <utils/pcb.h>
+#include <utils/client.h>
 
 
 void inicializar_registros_cpu();

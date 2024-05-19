@@ -1,4 +1,4 @@
-#include "instrucciones.h"
+/*#include "instrucciones.h"
 #include <math.h>
 
 
@@ -32,3 +32,4 @@ uint32_t obtener_desplazamineto_segmento(uint32_t direccion_logica)
 {
 	return direccion_logica - numero_pagina * tamanio_pagina;
 }
+*/

@@ -5,18 +5,19 @@ logger_cpu = log_create(LOG_FILE_PATH, "CPU", true, LOG_LEVEL_INFO);
 
 
 
-void fetch(PCB pcb, t_conexion_escucha* oyente_interrupt){
+void fetch(PCB pcb, int socket_memoria){
     uint32_t pc = pcb.programCounter;
     
-    t_instruccion instruccionEncontrada = obtener_instruccionDeMemoria(pc);
+    t_instruccion instruccionEncontrada = obtener_instruccionDeMemoria(socket_memoria,pc);
 
     pcb->programCounter++;
 
     decode_execute(instruccionEncontrada,pcb,oyente_interrupt);
 }
 
-void obtener_instruccionDeMemoria(uint32_t pc){
-
+void obtener_instruccionDeMemoria(int socket_memoria,uint32_t pc){
+    t_paquete* paquete = crear_paquete();
+    
 }
 
 void decode_execute(t_instruccion instruccion,PCB pcb,t_conexion_escucha* oyente_interrupt){
