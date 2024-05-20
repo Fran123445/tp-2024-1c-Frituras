@@ -3,8 +3,7 @@
 bool procesoInterrumpido;
 
 void enviarInterrupcion(int PID) {
-    t_paquete* paquete = crear_paquete();
-    paquete->codigo_operacion = INTERRUPCION;
+    t_paquete* paquete = crear_paquete(INTERRUPCION);
     agregar_int_a_paquete(paquete, PID);
     enviar_paquete(paquete, socketCPUInterrupt);
     eliminar_paquete(paquete);

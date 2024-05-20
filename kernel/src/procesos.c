@@ -81,8 +81,7 @@ void iniciarProceso(char* path) {
     pthread_mutex_unlock(&mutexNew);    
     pthread_mutex_unlock(&mutexListaProcesos);
 
-    t_paquete* paquete = crear_paquete();
-    paquete->codigo_operacion = CREACION_PROCESO;
+    t_paquete* paquete = crear_paquete(CREACION_PROCESO);
     agregar_a_paquete(paquete, &siguientePID, sizeof(int));
     agregar_a_paquete(paquete, path, strlen(path)+1);
     enviar_paquete(paquete, socketMemoria);
