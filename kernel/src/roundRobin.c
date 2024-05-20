@@ -45,7 +45,7 @@ void enviarProcesoACPU_RR(PCB* proceso) {
     pthread_detach(quantum);
 }
 
-void ejercutarSiguienteRR() {
+void ejecutarSiguienteRR() {
     while(1) {
         sem_wait(&cpuDisponible);
         PCB* proceso = sacarSiguienteDeReady();    

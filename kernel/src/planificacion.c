@@ -149,7 +149,8 @@ void planificarRecibido(t_dispatch* dispatch) {
             if (comprobarOperacionValida(interfaz, inst->tipo)) {
                 t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
                 solicitud->proceso = proceso;
-                solicitud->unidadesTrabajo = (int) inst->arg1; 
+                solicitud->unidadesTrabajo = *(int*) inst->arg1; 
+
             } else {
                 //enviarAExit(proceso);
             }
