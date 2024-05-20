@@ -13,7 +13,18 @@
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
 
-extern t_log* logger; // no estoy seguro de que esto se vaya a quedar aca
+typedef enum {
+    SUCCESS,
+    INVALID_RESOURCE,
+    INVALID_WRITE
+} motivo_exit;
+
+typedef struct {
+    PCB* proceso;
+    motivo_exit motivo;
+} procesoEnExit;
+
+extern t_log* logger;
 
 extern int socketMemoria;;
 
@@ -22,11 +33,11 @@ extern int quantumInicial;
 extern sem_t procesosEnNew;
 extern sem_t procesosEnExit;
 extern sem_t gradoMultiprogramacion;
-extern pthread_mutex_t mutexExit;
-extern pthread_mutex_t mutexListaProcesos;
 extern pthread_mutex_t mutexNew;
 extern pthread_mutex_t mutexReady;
-extern pthread_mutex_t mutexBlocked;
+extern pthread_mutex_t mutexExit;
+extern pthread_mutex_t mutexListaProcesos;
+extern pthread_mutex_t mutexListaInterfaces;
 
 extern t_queue* colaNew;
 extern t_queue* colaReady;
@@ -35,6 +46,9 @@ extern t_list* interfacesConectadas;
 extern t_list* listadoProcesos;
 
 extern int siguientePID;
+
+// Devuelve un string con el nombre del dato enumerado 
+char* enumEstadoAString(estado_proceso);
 
 // Crea un nuevo PCB y lo envia a la cola NEW
 void iniciarProceso(char*);

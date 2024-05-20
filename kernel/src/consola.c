@@ -1,21 +1,5 @@
 #include "consola.h"
 
-char* enumEstadoAString(estado_proceso estado) {
-    char* string;
-
-    // podria haber puesto un return en cada case, pero gcc me tiraba un warning
-    // y me molestaba
-    switch (estado)
-    {
-        case ESTADO_NEW: string = "NEW"; break;
-        case ESTADO_READY: string = "READY"; break;
-        case ESTADO_BLOCKED: string = "BLOCKED"; break;
-        case ESTADO_EXEC: string = "EXEC"; break;
-        case ESTADO_EXIT: string = "EXIT"; break;
-    }
-
-    return string;
-}
 
 void listarProcesos(void) {
 

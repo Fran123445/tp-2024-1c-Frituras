@@ -8,8 +8,23 @@ sem_t llegadaProceso;
 pthread_mutex_t mutexExit;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
-pthread_mutex_t mutexBlocked;
 pthread_mutex_t mutexListaProcesos;
+pthread_mutex_t mutexListaInterfaces;
+
+void cambiarEstado(PCB* proceso, estado_proceso estado) {
+    
+    estado_proceso estadoAnterior = proceso->estado;
+    proceso->estado = estado;
+    log_info(logger, "“PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
+
+}
+
+void enviarAExit(PCB* pcb, motivo_exit motivo) {
+    procesoEnExit* aExit = malloc(sizeof(procesoEnExit));
+    aExit->proceso = pcb;
+    aExit->motivo = motivo;
+
+}
 
 void procesosReadyLog(char** lista) {
     void _agregarPIDALista(PCB* proceso) {
@@ -34,8 +49,8 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     pthread_mutex_init(&mutexExit, NULL);
     pthread_mutex_init(&mutexNew, NULL);
     pthread_mutex_init(&mutexReady, NULL);
-    pthread_mutex_init(&mutexBlocked, NULL);
     pthread_mutex_init(&mutexListaProcesos, NULL);
+    pthread_mutex_init(&mutexListaInterfaces, NULL);
 }
 
 void vaciarExit() {

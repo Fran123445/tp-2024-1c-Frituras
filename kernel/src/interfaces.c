@@ -43,12 +43,14 @@ void administrarInterfazGenerica(int socket_cliente) {
     pthread_mutex_init(&(interfaz->mutex), NULL);
     sem_init(&(interfaz->semaforo), 0, 0);
 
+    pthread_mutex_lock(&mutexListaInterfaces);
     list_add(interfacesConectadas, interfaz);
+    pthread_mutex_unlock(&mutexListaInterfaces);
 
     t_solicitudIOGenerica* solicitud;
 
     while (1) {
-        t_paquete* paquete = crear_paquete();
+        t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
         sem_wait(&interfaz->semaforo);
 
         pthread_mutex_lock(&interfaz->mutex);
@@ -97,8 +99,9 @@ t_IOConectado* hallarInterfazConectada(char* nombre) {
         return !strcmp(nombre, interfaz->nombreInterfaz);
     };
 
-    //hay que poner un mutex
+    pthread_mutex_lock(&mutexListaInterfaces);
     t_IOConectado* interfaz = list_find(interfacesConectadas, (void *) _mismoNombre);
+    pthread_mutex_unlock(&mutexListaInterfaces);
 
     return interfaz;
 }

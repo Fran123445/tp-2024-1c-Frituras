@@ -8,9 +8,6 @@
 #include <planificacion.h>
 #include <procesos.h>
 
-// Devuelve un string con el nombre del dato enumerado 
-char* enumEstadoAString(estado_proceso);
-
 // Solicita input por consola al usuario
 void solicitarInput(void);
 
