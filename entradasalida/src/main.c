@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <utils/client.h>
 #include <utils/server.h>
-
+#include <utils/serializacion.h>
 //Falta agregar hilos para diferentes conexiones 
 typedef struct {
     char* nombre;
     int unidades_trabajo;
 } t_interfaz_generica;
+
 
 void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
@@ -17,19 +18,27 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
     interfaz.nombre = nombre;
 
-    int resultado = 1; // esto existe unicamente porque send necesita una direccion a algo
-
-    send(socket, nombre, strlen(nombre)+1, 0);
+    t_paquete* paquete = crear_paquete();
+    agregar_string_a_paquete(paquete, nombre);
+    enviar_paquete(paquete ,socket);
+    eliminar_paquete(paquete);
 
     while (1) {
-       ssize_t reciv = recv(socket, &interfaz.unidades_trabajo, sizeof(int), 0);
+       ssize_t reciv = recibir_operacion(socket);
 
         if (reciv < 0) {
             exit(-1);
         }
+        
+        t_buffer* buffer = recibir_buffer(socket);
+        int unidades_trabajo = buffer_read_int(buffer);
+        sleep(tiempo_pausa * unidades_trabajo);
 
-        sleep(tiempo_pausa * interfaz.unidades_trabajo);
-        send(socket, &resultado ,sizeof(bool),0);
+        t_paquete* paquete = crear_paquete();
+        paquete->codigo_operacion = OPERACION_FINALIZADA;
+        enviar_paquete(paquete ,socket);
+        eliminar_paquete(paquete);
+
     }
 
 }
