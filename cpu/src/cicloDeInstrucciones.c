@@ -1,49 +1,42 @@
-#include "instrucciones.h"
-#define INSTRUCCION 1 //para verificar si se recibio una instruccion
+#include "cicloDeInstruccion.h"
 
-t_log* logger_cpu;
-logger_cpu = log_create(LOG_FILE_PATH, "CPU", true, LOG_LEVEL_INFO);
 
-int recibir_operacion(int socket_cliente) {
-    int cod_op;
-    if (recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0) {
-        return cod_op;
-    } else {
-        close(socket_cliente);
-        return -1;
-    }
-}
+//t_log* logger_cpu = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
 
-void fetch(PCB pcb, int socket_memoria){
-    uint32_t pc = pcb.programCounter;
+
+t_instruccion* fetch(PCB* pcb, int socket_memoria){
+    uint32_t pc = pcb->programCounter;
     
-    t_instruccion instruccionEncontrada = obtener_instruccionDeMemoria(socket_memoria,pc);
+    enviar_PC_a_memoria(socket_memoria,pc);
+    t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria(socket_memoria);
 
     pcb->programCounter++;
 
-    decode_execute(instruccionEncontrada,pcb);
+    return instruccionEncontrada;
 }
 
-void obtener_instruccionDeMemoria(int socket_memoria,uint32_t pc){
-    t_paquete* paquete = crear_paquete();
+void enviar_PC_a_memoria(int socket_memoria,uint32_t pc){
+    t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete,socket_memoria);
     eliminar_paquete(paquete);
+}
 
-    int cod_op = recibir_operacion(socket_memoria);
-    if (cod_op == INSTRUCCION) { //verificar si se recibio una instruccion
+t_instruccion* obtener_instruccion_de_memoria(int socket_memoria){
+    op_code cod_op = recibir_operacion(socket_memoria);
+    if (cod_op == ENVIO_DE_INSTRUCCIONES) { 
         t_buffer* buffer = recibir_buffer(socket_memoria);
         t_instruccion* instruccion = buffer_read_instruccion(buffer);
         liberar_buffer(buffer);
         return instruccion;
-    } else { //caso de que no se recibio bien una instruccion
-        log_error(logger_cpu, "Error al recibir instrucción de la memoria");
+    } else { 
+        //log_error(logger_cpu, "Error al recibir instrucción de la memoria");
         return NULL;
     } 
         
 }
 
-void decode_execute(t_instruccion instruccion,PCB pcb,t_conexion_escucha* oyente_interrupt){
+void decode_execute(t_instruccion instruccion){
     switch (instruccion.tipo)
     {
     case SET:
@@ -93,7 +86,7 @@ void decode_execute(t_instruccion instruccion,PCB pcb,t_conexion_escucha* oyente
     case IO_FS_CREATE:
         IO_FS_CREATE(instruccion.interfaz, instruccion.archivo);
         break;
-    /*
+    
     case IO_FS_DELETE:
         IO_FS_DELETE(instruccion.interfaz, instruccion.archivo);
         break;
@@ -111,14 +104,18 @@ void decode_execute(t_instruccion instruccion,PCB pcb,t_conexion_escucha* oyente
         EXIT();
         break;
     default:
-        log_error(logger_cpu, "La instruccion es inválida");
+        //log_error(logger_cpu, "La instruccion es inválida");
         break;
     }
-    log_info(logger_cpu, "Actualización del Program Counter");
-	check_interrupt(pcb,oyente_interrupt);
+    //log_info(logger_cpu, "Actualización del Program Counter");
 }
 
-void check_interrupt(PCB pcb){
-    //implementar chequeo de interrupciones
+//void check_interrupt(PCB pcb){
+ //   if(hay_interrupcion){
+   //     t_paquete* paquete = crear_paquete(INTERRUPCION);
+   //     agregar_a_paquete(paquete, pcb, sizeof(PCB));
+   //     enviar_paquete(paquete, socket_kernel);
+    //    eliminar_paquete(paquete);
+   // }
     
-}
+//}

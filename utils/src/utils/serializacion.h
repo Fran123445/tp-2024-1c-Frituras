@@ -18,6 +18,9 @@ typedef enum {
     ENVIO_PCB,
     INTERRUPCION,
 
+    // CPU - Memoria
+    ENVIO_PC,
+
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
@@ -44,7 +47,7 @@ typedef struct
 } t_paquete;
 
 
-t_paquete* crear_paquete(void);
+t_paquete* crear_paquete(op_code operacion);
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 t_buffer* recibir_buffer(int socket_cliente);
