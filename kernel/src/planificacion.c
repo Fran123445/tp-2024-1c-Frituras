@@ -72,6 +72,11 @@ void vaciarExit() {
         list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
         pthread_mutex_unlock(&mutexListaProcesos);
 
+        t_paquete* paquete = crear_paquete(FIN_PROCESO);
+        agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
+        enviar_paquete(paquete, socketMemoria);
+        eliminar_paquete(paquete);
+
         switch(procesoAFinalizar->motivo) {
             case SUCCESS:
                 motivo = "SUCCESS"; break;
@@ -82,6 +87,9 @@ void vaciarExit() {
         }
 
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
+
+        free(procesoAFinalizar->pcb);
+        free(procesoAFinalizar);
     }
 }
 
