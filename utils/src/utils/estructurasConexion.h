@@ -10,12 +10,6 @@
 #include<netdb.h>
 #include<string.h>
 #include<pthread.h>
-
-typedef enum{
-	MENSAJE,
-	PAQUETE
-}op_code;
-
 typedef enum{
 	CPU,
 	CPU_DISPATCH,
