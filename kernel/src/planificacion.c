@@ -24,6 +24,10 @@ void enviarAExit(PCB* pcb, motivo_exit motivo) {
     aExit->proceso = pcb;
     aExit->motivo = motivo;
 
+    pthread_mutex_lock(&mutexExit);
+    cambiarEstado(pcb, ESTADO_EXIT);
+    queue_push(colaExit, aExit);
+    pthread_mutex_unlock(&mutexExit);
 }
 
 void procesosReadyLog(char** lista) {
@@ -54,20 +58,30 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
 }
 
 void vaciarExit() {
+
+    char* motivo;
+
     while(1) {
         sem_wait(&procesosEnExit);
 
         pthread_mutex_lock(&mutexExit);
-        PCB* proceso = queue_pop(colaExit);
+        procesoEnExit* procesoAFinalizar = queue_pop(colaExit);
         pthread_mutex_unlock(&mutexExit);
 
         pthread_mutex_lock(&mutexListaProcesos);
-        list_remove_element(listadoProcesos, proceso);
+        list_remove_element(listadoProcesos, procesoAFinalizar->proceso);
         pthread_mutex_unlock(&mutexListaProcesos);
 
-        free(proceso);
+        switch(procesoAFinalizar->motivo) {
+            case SUCCESS:
+                motivo = "SUCCESS"; break;
+            case INVALID_RESOURCE:
+                motivo = "INVALID RESOURCE"; break;
+            case INVALID_WRITE:
+                motivo = "INVALID WRITE"; break;
+        }
 
-        log_info(logger, "FINALIZA EL PROCESO"); //faltan cosas
+        log_info(logger, "“Finaliza el proceso %d - Motivo: %s>", procesoAFinalizar->proceso->PID, motivo);
     }
 }
 
@@ -101,20 +115,20 @@ void procesoNewAReady() {
     }
 }
 
-PCB* sacarSiguienteDeReady() {
-    pthread_mutex_lock(&mutexReady);
-    PCB* proceso = queue_pop(colaReady);
-    proceso->estado = ESTADO_EXEC;
-    pthread_mutex_unlock(&mutexReady);
-
-    return proceso;
-}
-
 void enviarProcesoACPU(PCB* proceso) {
     t_paquete* paquete = crear_paquete(ENVIO_PCB);
     agregar_PCB_a_paquete(paquete, proceso);
     enviar_paquete(paquete, socketCPUDispatch);
     eliminar_paquete(paquete);
+}
+
+PCB* sacarSiguienteDeReady() {
+    pthread_mutex_lock(&mutexReady);
+    PCB* proceso = queue_pop(colaReady);
+    cambiarEstado(proceso, ESTADO_EXEC);
+    pthread_mutex_unlock(&mutexReady);
+
+    return proceso;
 }
 
 void ejecutarSiguiente() {
@@ -149,7 +163,12 @@ void planificarRecibido(t_dispatch* dispatch) {
             if (comprobarOperacionValida(interfaz, inst->tipo)) {
                 t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
                 solicitud->proceso = proceso;
-                solicitud->unidadesTrabajo = *(int*) inst->arg1; 
+                solicitud->unidadesTrabajo = *(int*) inst->arg1;
+
+                pthread_mutex_lock(&interfaz->mutex);
+                queue_push(interfaz->cola, solicitud);
+                cambiarEstado(proceso, ESTADO_BLOCKED);
+                pthread_mutex_unlock(&interfaz->mutex);
 
             } else {
                 //enviarAExit(proceso);
