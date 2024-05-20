@@ -15,13 +15,13 @@ void cambiarEstado(PCB* proceso, estado_proceso estado) {
     
     estado_proceso estadoAnterior = proceso->estado;
     proceso->estado = estado;
-    log_info(logger, "“PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
+    log_info(logger, "PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
 
 }
 
 void enviarAExit(PCB* pcb, motivo_exit motivo) {
     procesoEnExit* aExit = malloc(sizeof(procesoEnExit));
-    aExit->proceso = pcb;
+    aExit->pcb = pcb;
     aExit->motivo = motivo;
 
     pthread_mutex_lock(&mutexExit);
@@ -69,7 +69,7 @@ void vaciarExit() {
         pthread_mutex_unlock(&mutexExit);
 
         pthread_mutex_lock(&mutexListaProcesos);
-        list_remove_element(listadoProcesos, procesoAFinalizar->proceso);
+        list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
         pthread_mutex_unlock(&mutexListaProcesos);
 
         switch(procesoAFinalizar->motivo) {
@@ -81,7 +81,7 @@ void vaciarExit() {
                 motivo = "INVALID WRITE"; break;
         }
 
-        log_info(logger, "“Finaliza el proceso %d - Motivo: %s>", procesoAFinalizar->proceso->PID, motivo);
+        log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
     }
 }
 
@@ -171,7 +171,7 @@ void planificarRecibido(t_dispatch* dispatch) {
                 pthread_mutex_unlock(&interfaz->mutex);
 
             } else {
-                //enviarAExit(proceso);
+                enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
             }
             break;
         case WAIT:

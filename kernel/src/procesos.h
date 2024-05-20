@@ -20,7 +20,7 @@ typedef enum {
 } motivo_exit;
 
 typedef struct {
-    PCB* proceso;
+    PCB* pcb;
     motivo_exit motivo;
 } procesoEnExit;
 
