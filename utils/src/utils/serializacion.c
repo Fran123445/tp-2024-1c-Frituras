@@ -22,10 +22,10 @@ void crear_buffer(t_paquete* paquete)
 	paquete->buffer->stream = NULL;
 }
 
-t_paquete* crear_paquete(void)
+t_paquete* crear_paquete(op_code operacion)
 {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
-	paquete->codigo_operacion = PAQUETE;
+	paquete->codigo_operacion = operacion;
 	crear_buffer(paquete);
 	return paquete;
 }
