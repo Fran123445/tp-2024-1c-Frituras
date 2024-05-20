@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     oyente_interrupt->modulo = CPU;
 
 
-    conectarse_a(memoria);
+    int socket_memoria = crear_conexion(memoria);
 
     //Escuchar Conexiones
     pthread_t threadEscuchaDispatch;
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     
     while(1);
 
-    
+
 
 
     free(memoria);

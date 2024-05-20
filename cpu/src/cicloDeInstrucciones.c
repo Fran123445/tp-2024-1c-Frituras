@@ -1,9 +1,18 @@
 #include "instrucciones.h"
+#define INSTRUCCION 1 //para verificar si se recibio una instruccion
 
 t_log* logger_cpu;
 logger_cpu = log_create(LOG_FILE_PATH, "CPU", true, LOG_LEVEL_INFO);
 
-
+int recibir_operacion(int socket_cliente) {
+    int cod_op;
+    if (recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0) {
+        return cod_op;
+    } else {
+        close(socket_cliente);
+        return -1;
+    }
+}
 
 void fetch(PCB pcb, int socket_memoria){
     uint32_t pc = pcb.programCounter;
@@ -12,12 +21,26 @@ void fetch(PCB pcb, int socket_memoria){
 
     pcb->programCounter++;
 
-    decode_execute(instruccionEncontrada,pcb,oyente_interrupt);
+    decode_execute(instruccionEncontrada,pcb);
 }
 
 void obtener_instruccionDeMemoria(int socket_memoria,uint32_t pc){
     t_paquete* paquete = crear_paquete();
-    
+    agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
+    enviar_paquete(paquete,socket_memoria);
+    eliminar_paquete(paquete);
+
+    int cod_op = recibir_operacion(socket_memoria);
+    if (cod_op == INSTRUCCION) { //verificar si se recibio una instruccion
+        t_buffer* buffer = recibir_buffer(socket_memoria);
+        t_instruccion* instruccion = buffer_read_instruccion(buffer);
+        liberar_buffer(buffer);
+        return instruccion;
+    } else { //caso de que no se recibio bien una instruccion
+        log_error(logger_cpu, "Error al recibir instrucción de la memoria");
+        return NULL;
+    } 
+        
 }
 
 void decode_execute(t_instruccion instruccion,PCB pcb,t_conexion_escucha* oyente_interrupt){
@@ -95,13 +118,7 @@ void decode_execute(t_instruccion instruccion,PCB pcb,t_conexion_escucha* oyente
 	check_interrupt(pcb,oyente_interrupt);
 }
 
-void check_interrupt(PCB pcb,t_conexion_escucha* oyente_interrupt){
+void check_interrupt(PCB pcb){
     //implementar chequeo de interrupciones
-    switch ()
-    {
-    case 
-        break;
-    default:
-        break;
-    }
+    
 }
