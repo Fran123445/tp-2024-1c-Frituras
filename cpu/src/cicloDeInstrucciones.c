@@ -36,11 +36,11 @@ t_instruccion* obtener_instruccion_de_memoria(int socket_memoria){
         
 }
 
-void decode_execute(t_instruccion instruccion){
-    switch (instruccion.tipo)
+void decode_execute(t_instruccion* instruccion){
+    switch (instruccion->tipo)
     {
     case SET:
-        SET(*(registrosCPU *)instruccion.arg1, *(int *)instruccion.arg2);
+        SET(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
     /*
     case MOV_IN:
@@ -51,13 +51,13 @@ void decode_execute(t_instruccion instruccion){
         break;
     */
     case SUM:
-        SUM(*(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
+        SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case SUB:
-        SUB(*(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
+        SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case JNZ:
-        JNZ(*(registrosCPU *)instruccion.arg1, *(int *)instruccion.arg2);
+        JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
     /*case RESIZE:
         RESIZE(*(int *)instruccion.arg1);
@@ -73,7 +73,7 @@ void decode_execute(t_instruccion instruccion){
         break;
     */
     case IO_GEN_SLEEP:
-        IO_GEN_SLEEP(instruccion.interfaz, *(int *)instruccion.arg1);
+        IO_GEN_SLEEP(instruccion->interfaz, *(int *)instruccion->arg1);
         break;
     /*
     case IO_STDIN_READ:

@@ -148,6 +148,14 @@ t_instruccion* buffer_read_instruccion(t_buffer* buffer) {
 	return inst;
 }
 
+t_dispatch* buffer_read_dispatch(t_buffer* buffer) {
+	t_dispatch* dispatch = malloc(sizeof(t_dispatch));
+	dispatch->proceso = buffer_read_pcb(buffer);
+	dispatch->instruccion = buffer_read_instruccion(buffer);
+
+	return dispatch;
+}
+
 void liberar_buffer(t_buffer* buffer) {
 	free(buffer->stream);
 	free(buffer);

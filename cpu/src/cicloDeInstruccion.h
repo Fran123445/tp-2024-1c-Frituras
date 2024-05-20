@@ -13,6 +13,6 @@
 t_instruccion* fetch(PCB *pcb, int socket_memoria);
 void enviar_PC_a_memoria(int socket_memoria,uint32_t pc);
 t_instruccion* obtener_instruccion_de_memoria(int socket_memoria);
-void decode_execute(t_instruccion instruccion);
+void decode_execute(t_instruccion* instruccion);
 
 #endif /* CPU_H_ */

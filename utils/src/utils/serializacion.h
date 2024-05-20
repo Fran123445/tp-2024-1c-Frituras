@@ -13,12 +13,12 @@ typedef enum {
     CONEXION_IOGENERICA,
     CONEXION_STDIN,
     CONEXION_STDOUT,
-
+    OPERACION_FINALIZADA,
     // Kernel - CPU
     ENVIO_PCB,
     INTERRUPCION,
 
-    // CPU - Memoria
+// CPU - Memoria
     ENVIO_PC,
 
     //Kernel - Memoria
@@ -64,7 +64,7 @@ uint32_t buffer_read_uint32(t_buffer* buffer);
 char* buffer_read_string(t_buffer* buffer);
 PCB* buffer_read_pcb(t_buffer* buffer);
 t_instruccion* buffer_read_instruccion(t_buffer* buffer);
-void liberar_buffer(t_buffer* buffer) ;
-
+t_dispatch* buffer_read_dispatch(t_buffer* buffer);
+void liberar_buffer(t_buffer* buffer);
 
 #endif /* SER_H */
