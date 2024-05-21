@@ -234,8 +234,7 @@ void planificacionPorFIFO() {
     pthread_create(&pth_colaReady,
 						NULL,
 						(void*) ejecutarSiguiente,
-						NULL);
-                        
+						NULL);              
     pthread_create(&pth_recibirProc,
 						NULL,
 						(void*) recibirDeCPU,

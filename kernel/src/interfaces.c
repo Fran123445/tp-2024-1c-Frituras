@@ -7,6 +7,11 @@ void esperarClientesIO(t_conexion_escucha* params) {
 
         *socket_cliente = esperar_cliente(params->socket_servidor, params->modulo);
 
+        if (*socket_cliente < 0) {
+            free(socket_cliente);
+            break;
+        }
+
         void (*func)(int);
 
         switch(recibir_operacion(*socket_cliente)) {

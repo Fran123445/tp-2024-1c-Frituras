@@ -37,7 +37,7 @@ void inicializarColas() {
     listadoProcesos = list_create();
 }
 
-void liberarMemoria() {    
+void liberarVariablesGlobales() {    
     finalizarHilos();
     pthread_join(pth_colaExit, NULL);
     pthread_join(pth_colaNew, NULL);
@@ -49,6 +49,9 @@ void liberarMemoria() {
     queue_destroy_and_destroy_elements(colaReady, free);
     list_destroy(interfacesConectadas); //seguramente tenga que hager un destroy and destroy eleements
     list_destroy(listadoProcesos); // si hay un proceso en exec me queda leakeando memoria, tengo que ver como lo arreglo
+    liberar_conexion(socketCPUDispatch);
+    liberar_conexion(socketCPUInterrupt);
+    liberar_conexion(socketMemoria);
 }
 
 int main(int argc, char* argv[]) {
@@ -71,7 +74,6 @@ int main(int argc, char* argv[]) {
                     NULL,
                     (void*) esperarClientesIO,
                     servidorKernel);
-    pthread_detach(esperarClientes);
 
     char* ipCPU = config_get_string_value(config, "IP_CPU");
     socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"), KERNEL);
@@ -92,7 +94,10 @@ int main(int argc, char* argv[]) {
 
     config_destroy(config);
     log_destroy(logServidor);
-    liberarMemoria();
+    shutdown(servidorIO, SHUT_RD);
+    free(servidorKernel);
+    liberarVariablesGlobales();
+    pthread_join(esperarClientes, NULL);
 
     return 0;
 

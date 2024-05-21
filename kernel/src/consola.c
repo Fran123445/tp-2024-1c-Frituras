@@ -49,7 +49,7 @@ void interpretarInput(char* input) {
     if (!strcmp(*comando, "EJECUTAR_SCRIPT")) {
         ejecutarScript(*(comando+1));
     } else if (!strcmp(*comando, "INICIAR_PROCESO")) {
-        iniciarProceso("path");
+        iniciarProceso(*(comando+1));
     } else if (!strcmp(*comando, "FINALIZAR_PROCESO")) {
         finalizarProceso(atoi(*(comando+1)));
     } else if (!strcmp(*comando, "MULTIPROGRAMACION")) {
