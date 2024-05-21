@@ -21,6 +21,8 @@ extern int socketCPUInterrupt;
 
 extern sem_t llegadaProceso;
 
+extern pthread_mutex_t mutexLogger;
+
 void inicializarSemaforosYMutex();
 
 // Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria

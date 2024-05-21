@@ -11,14 +11,16 @@ pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
 pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
+pthread_mutex_t mutexLogger;
 
 int finalizar = 0;
 
 void cambiarEstado(PCB* proceso, estado_proceso estado) {
     estado_proceso estadoAnterior = proceso->estado;
     proceso->estado = estado;
+    pthread_mutex_lock(&mutexLogger);
     log_info(logger, "PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
-
+    pthread_mutex_unlock(&mutexLogger);
 }
 
 void enviarAExit(PCB* pcb, motivo_exit motivo) {
@@ -57,6 +59,7 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     pthread_mutex_init(&mutexReady, NULL);
     pthread_mutex_init(&mutexListaProcesos, NULL);
     pthread_mutex_init(&mutexListaInterfaces, NULL);
+    pthread_mutex_init(&mutexLogger, NULL); // no se si dejarlo aca
 }
 
 void vaciarExit() {
@@ -89,7 +92,9 @@ void vaciarExit() {
                 motivo = "INVALID WRITE"; break;
         }
 
+        pthread_mutex_lock(&mutexLogger);
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
+        pthread_mutex_unlock(&mutexLogger);
 
         free(motivo);
         free(procesoAFinalizar->pcb);
@@ -125,8 +130,10 @@ void procesoNewAReady() {
         procesosReadyLog(&listaReady);
         listaReady[strlen(listaReady)-2] = '\0';
 
+        pthread_mutex_lock(&mutexLogger);
         log_info(logger, "Cola READY: [%s]", listaReady);
-
+        pthread_mutex_unlock(&mutexLogger);
+        
         free(listaReady);
 
         sem_post(&procesosEnReady);    
@@ -204,7 +211,9 @@ void planificarRecibido(t_dispatch* dispatch) {
         case EXIT:
             break;
         default:
+            pthread_mutex_lock(&mutexLogger);
             log_error(logger, "Instruccion no válida");
+            pthread_mutex_unlock(&mutexLogger);
             break;
     }
 }
@@ -229,7 +238,6 @@ void planificacionPorFIFO() {
 						NULL,
 						(void*) recibirDeCPU,
 						NULL);
-
 }
 
 void finalizarHilos() {

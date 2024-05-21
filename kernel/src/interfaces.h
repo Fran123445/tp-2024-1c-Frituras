@@ -12,6 +12,8 @@
 #include <procesos.h>
 
 extern t_log* logger;
+
+extern pthread_mutex_t mutexLogger;
 typedef enum {
     INTERFAZ_GENERICA,
     INTERFAZ_STDIN,

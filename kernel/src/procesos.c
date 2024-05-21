@@ -106,7 +106,9 @@ void iniciarProceso(char* path) {
 
     eliminar_paquete(paquete);
 
+    pthread_mutex_lock(&mutexLogger);
     log_info(logger, "Se crea el proceso %d en NEW", siguientePID);
+    pthread_mutex_unlock(&mutexLogger);
 
     siguientePID += 1;
 

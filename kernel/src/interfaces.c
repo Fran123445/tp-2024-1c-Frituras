@@ -20,7 +20,9 @@ void esperarClientesIO(t_conexion_escucha* params) {
                 // A implementar
                 break;
             default:
+                pthread_mutex_lock(&mutexLogger);
                 log_error(logger, "Conexión inválida de una interfaz");
+                pthread_mutex_unlock(&mutexLogger);
                 break;
         }
         
@@ -62,7 +64,9 @@ void administrarInterfazGenerica(int socket_cliente) {
         eliminar_paquete(paquete);
 
         if (recibir_operacion(socket_cliente) < 0) {
+            pthread_mutex_lock(&mutexLogger);
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
+            pthread_mutex_unlock(&mutexLogger);
             //enviarAExit(proceso);
             break;
         }

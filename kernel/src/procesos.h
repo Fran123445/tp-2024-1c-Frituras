@@ -13,6 +13,7 @@
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
 
+extern pthread_mutex_t mutexLogger;
 typedef enum {
     SUCCESS,
     INVALID_RESOURCE,
