@@ -82,7 +82,7 @@ typedef struct {
 
 typedef struct {
     PCB* proceso;
-    t_instruccion instruccion;
+    t_instruccion* instruccion;
 }t_dispatch;
 
 #endif /* PCB_H */
