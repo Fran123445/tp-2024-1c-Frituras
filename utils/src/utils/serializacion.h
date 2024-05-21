@@ -18,8 +18,11 @@ typedef enum {
     ENVIO_PCB,
     INTERRUPCION,
 
+    // CPU - KERNEL
+    INSTRUCCION_EXIT,
 // CPU - Memoria
     ENVIO_PC,
+    ENVIO_RESIZE,
 
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
