@@ -229,7 +229,6 @@ void planificacionPorFIFO() {
 						NULL,
 						(void*) recibirDeCPU,
 						NULL);
-    pthread_detach(pth_recibirProc);
 
 }
 

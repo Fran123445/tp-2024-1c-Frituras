@@ -48,8 +48,7 @@ void liberarMemoria() {
     queue_destroy_and_destroy_elements(colaExit, free);
     queue_destroy_and_destroy_elements(colaReady, free);
     list_destroy(interfacesConectadas); //seguramente tenga que hager un destroy and destroy eleements
-    list_destroy(listadoProcesos);
-
+    list_destroy(listadoProcesos); // si hay un proceso en exec me queda leakeando memoria, tengo que ver como lo arreglo
 }
 
 int main(int argc, char* argv[]) {
