@@ -4,3 +4,4 @@
 
 void* creacion_proceso_path(int socket_kernel);
 t_list *abrir_archivo_path(int socket_kernel);
+int creacion_proceso_pid(int socket_kernel);

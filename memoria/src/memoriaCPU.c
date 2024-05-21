@@ -2,7 +2,6 @@
 #include <utils/serializacion.h>
 #include <memoriaKernel.h>
 #include <utils/pcb.h>
-#include <main.c>
 #include <utils/semaforosCompartidos.h>
 
 int recibir_pc(int socket_cpu){
