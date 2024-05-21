@@ -66,23 +66,16 @@ void planificacionPorRR() {
 						NULL,
 						(void*) vaciarExit,
 						NULL);
-    pthread_detach(pth_colaExit);
-
     pthread_create(&pth_colaNew,
 						NULL,
 						(void*) procesoNewAReady,
 						NULL);
-    pthread_detach(pth_colaNew);
-
     pthread_create(&pth_colaReady,
 						NULL,
 						(void*) ejecutarSiguienteRR,
 						NULL);
-    pthread_detach(pth_colaReady);
-
     pthread_create(&pth_recibirProc,
 						NULL,
 						(void*) recibirDeCPURR,
 						NULL);
-    pthread_detach(pth_recibirProc);
 }

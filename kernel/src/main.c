@@ -8,6 +8,7 @@
 #include "procesos.h"
 #include "planificacion.h"
 #include "interfaces.h"
+#include "roundRobin.h"
 
 int socketCPUDispatch;
 int socketCPUInterrupt;
@@ -54,6 +55,18 @@ void liberarVariablesGlobales() {
     liberar_conexion(socketMemoria);
 }
 
+void seleccionarAlgoritmoPlanificacion(t_config* config) {
+    char* algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
+
+    if(!strcmp(algoritmo, "FIFO")) {
+        planificacionPorFIFO();
+    } else if (!strcmp(algoritmo, "RR")) {
+        planificacionPorRR();
+    } else {
+        //VRR
+    }
+}
+
 int main(int argc, char* argv[]) {
     t_config* config = config_create("kernel.config");
     if (config == NULL) {
@@ -88,7 +101,7 @@ int main(int argc, char* argv[]) {
     inicializarColas();
     inicializarSemaforosYMutex(config_get_int_value(config, "GRADO_MULTIPROGRAMACION"));
 
-    planificacionPorFIFO();
+    seleccionarAlgoritmoPlanificacion(config);
 
     solicitarInput();
 
