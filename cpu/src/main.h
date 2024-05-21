@@ -12,3 +12,4 @@ extern PCB* pcb;
 extern int socket_memoria;
 extern int socket_kernel_d;
 extern int socket_kernel_i;
+extern volatile int hay_interrupcion;

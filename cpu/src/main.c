@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     pthread_detach(threadEscuchaInterrupt);
 
     //recibo el pcb del kernel
-    pcb = recibir_pcb(servidor_dispatch);
+    pcb = recibir_pcb();
     
     
     config_destroy(config);

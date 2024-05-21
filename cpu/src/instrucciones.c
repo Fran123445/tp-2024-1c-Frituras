@@ -158,10 +158,14 @@ void RESIZE(int tamaño){
     
 }
 
+
 void IO_GEN_SLEEP(char* interfaz,int valor){
-    
+    /*
+    interfaz.unidades_trabajo = valor;
+    */
 }
 
+
 void EXIT(){
-    enviar_pcb(socket_kernel_d,INSTRUCCION_EXIT,pcb);
+    enviar_pcb(INSTRUCCION_EXIT);
 }

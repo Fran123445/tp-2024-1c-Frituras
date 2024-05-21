@@ -6,10 +6,10 @@
 #include <utils/pcb.h>
 #include <utils/serializacion.h>
 #include <pthread.h>
+#include "main.h"
 
-extern int hay_interrupcion;
 extern pthread_mutex_t mutexInterrupt;
 
-void recibir_interrupcion(int socket_kernel);
+void recibir_interrupcion();
 
 #endif /* INTERRUPCIONES_H_ */

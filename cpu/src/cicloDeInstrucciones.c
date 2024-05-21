@@ -4,10 +4,10 @@
 t_log* log_ciclo;
 
 
-PCB* recibir_pcb(int socket){
-    op_code cod_op = recibir_operacion(socket);
+PCB* recibir_pcb(){
+    op_code cod_op = recibir_operacion(socket_kernel_d);
     if(cod_op == ENVIO_PCB){
-        t_buffer* buffer = recibir_buffer(socket);
+        t_buffer* buffer = recibir_buffer(socket_kernel_d);
         PCB* pcb= buffer_read_pcb(buffer);
         liberar_buffer(buffer);
         return pcb;
@@ -15,10 +15,10 @@ PCB* recibir_pcb(int socket){
     return NULL;
 }
 
-void enviar_pcb(int socket,op_code motivo,PCB* pcb){
+void enviar_pcb(op_code motivo){
     t_paquete* paquete = crear_paquete(motivo);
     agregar_a_paquete(paquete, pcb, sizeof(PCB));
-    enviar_paquete(paquete, socket);
+    enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
 
@@ -29,22 +29,22 @@ t_instruccion* fetch(){
 
     log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pc);
 
-    enviar_PC_a_memoria(socket_memoria,pc);
-    t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria(socket_memoria);
+    enviar_PC_a_memoria(pc);
+    t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria();
 
     pcb->programCounter++;
 
     return instruccionEncontrada;
 }
 
-void enviar_PC_a_memoria(int socket_memoria,uint32_t pc){
+void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
-    enviar_paquete(paquete,socket_memoria);
+    enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
 
-t_instruccion* obtener_instruccion_de_memoria(int socket_memoria){
+t_instruccion* obtener_instruccion_de_memoria(){
     log_ciclo = log_create("ErrorRecepcionInstruccion.log","Error de recepcion de instruccion",false,LOG_LEVEL_INFO);
     op_code cod_op = recibir_operacion(socket_memoria);
     if (cod_op == ENVIO_DE_INSTRUCCIONES) { 
@@ -137,7 +137,7 @@ int check_interrupt() {
     pthread_mutex_lock(&mutexInterrupt);
     if (hay_interrupcion) {
         hay_interrupcion = 0;
-        enviar_pcb(socket_kernel_d,INTERRUPCION,pcb);
+        enviar_pcb(INTERRUPCION);
         pthread_mutex_unlock(&mutexInterrupt);
         return 1;
     } else {
@@ -153,6 +153,7 @@ void realizar_ciclo_de_instruccion(PCB* pcb, int socket_memoria, int socket_kern
         decode_execute(instruccion_a_ejecutar);
         
         if (check_interrupt()) {
+            enviar_pcb(INTERRUPCION);
             break; // Romper el bucle si hay interrupción
         }
         
