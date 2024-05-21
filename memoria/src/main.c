@@ -68,8 +68,8 @@ int main(int argc, char* argv[]) {
     pthread_create(&esperarClienteKernel, NULL, (void*) esperarClienteKernel, servidorMemoriaKernel);
     pthread_detach (esperarClienteKernel);
 
-    char* ipCPU = config_get_string_value(config,"IP_CPU");
-    int socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"),MEMORIA);
+    // char* ipCPU = config_get_string_value(config,"IP_CPU");
+   // int socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"),MEMORIA);
 
     free(servidorMemoriaParaIO);
     free(servidorMemoriaCPU);
