@@ -11,6 +11,11 @@
 #include <procesos.h>
 #include <interfaces.h>
 
+extern pthread_t pth_colaExit;
+extern pthread_t pth_colaNew;
+extern pthread_t pth_colaReady;
+extern pthread_t pth_recibirProc;
+
 extern int socketCPUDispatch;
 extern int socketCPUInterrupt;
 

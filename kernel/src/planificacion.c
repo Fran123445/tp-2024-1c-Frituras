@@ -1,6 +1,7 @@
 #include <planificacion.h>
 
 sem_t procesosEnNew;
+sem_t procesosEnReady;
 sem_t procesosEnExit;
 sem_t gradoMultiprogramacion;
 sem_t cpuDisponible;
@@ -108,7 +109,7 @@ void procesoNewAReady() {
 
         proceso = queue_pop(colaNew);
         queue_push(colaReady, proceso);
-        proceso->estado = ESTADO_READY;
+        cambiarEstado(proceso, ESTADO_READY);
 
         pthread_mutex_unlock(&mutexReady);
         pthread_mutex_unlock(&mutexNew);
@@ -119,7 +120,8 @@ void procesoNewAReady() {
         listaReady[strlen(listaReady)-2] = '\0';
 
         log_info(logger, "Cola READY: [%s]", listaReady);
-        
+
+        sem_post(&procesosEnReady);    
     }
 }
 
@@ -131,6 +133,7 @@ void enviarProcesoACPU(PCB* proceso) {
 }
 
 PCB* sacarSiguienteDeReady() {
+    sem_wait(&procesosEnReady);
     pthread_mutex_lock(&mutexReady);
     PCB* proceso = queue_pop(colaReady);
     cambiarEstado(proceso, ESTADO_EXEC);
@@ -197,11 +200,6 @@ void planificarRecibido(t_dispatch* dispatch) {
 }
 
 void planificacionPorFIFO() {
-    pthread_t pth_colaExit;
-    pthread_t pth_colaNew;
-    pthread_t pth_colaReady;
-    pthread_t pth_recibirProc;
-
     pthread_create(&pth_colaExit,
 						NULL,
 						(void*) vaciarExit,

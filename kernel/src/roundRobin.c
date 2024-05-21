@@ -62,11 +62,6 @@ void recibirDeCPURR() {
 }
 
 void planificacionPorRR() {
-    pthread_t pth_colaExit;
-    pthread_t pth_colaNew;
-    pthread_t pth_colaReady;
-    pthread_t pth_recibirProc;
-
     pthread_create(&pth_colaExit,
 						NULL,
 						(void*) vaciarExit,

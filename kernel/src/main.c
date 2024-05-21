@@ -26,6 +26,8 @@ t_log* logger;
 
 pthread_t pth_colaExit;
 pthread_t pth_colaNew;
+pthread_t pth_colaReady;
+pthread_t pth_recibirProc;
 
 void inicializarColas() {
     colaNew = queue_create();
@@ -42,6 +44,10 @@ void liberarMemoria() {
     queue_destroy_and_destroy_elements(colaReady, free);
     list_destroy(interfacesConectadas); //seguramente tenga que hager un destroy and destroy eleements
     list_destroy(listadoProcesos);
+    pthread_cancel(pth_colaExit);
+    pthread_cancel(pth_colaNew);
+    pthread_cancel(pth_colaReady);
+    pthread_cancel(pth_recibirProc);
 }
 
 int main(int argc, char* argv[]) {
@@ -79,10 +85,14 @@ int main(int argc, char* argv[]) {
     inicializarColas();
     inicializarSemaforosYMutex(config_get_int_value(config, "GRADO_MULTIPROGRAMACION"));
 
+    planificacionPorFIFO();
+
     solicitarInput();
 
     config_destroy(config);
+    log_destroy(logServidor);
     liberarMemoria();
 
     return 0;
+
 }

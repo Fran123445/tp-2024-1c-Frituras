@@ -31,6 +31,7 @@ extern int socketMemoria;;
 extern int quantumInicial;
 
 extern sem_t procesosEnNew;
+extern sem_t procesosEnReady;
 extern sem_t procesosEnExit;
 extern sem_t gradoMultiprogramacion;
 extern pthread_mutex_t mutexNew;
