@@ -59,11 +59,7 @@ int main(int argc, char* argv[]) {
                 
     pthread_detach(threadEscuchaInterrupt);
     
-    while(1);
-
-
-
-
+    
     config_destroy(config);
     free(socket_memoria);
     free(oyente_dispatch);
