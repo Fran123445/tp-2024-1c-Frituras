@@ -12,7 +12,7 @@ void esperarClientesIO(t_conexion_escucha* params) {
             break;
         }
 
-        void (*func)(int);
+        void (*func)(int*);
 
         switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_IOGENERICA:
@@ -39,10 +39,10 @@ void esperarClientesIO(t_conexion_escucha* params) {
     }
 }
 
-void administrarInterfazGenerica(int socket_cliente) {
+void administrarInterfazGenerica(int* socket_cliente) {
     t_IOConectado* interfaz = malloc(sizeof(t_IOConectado));
 
-    t_buffer* buffer = recibir_buffer(socket_cliente);
+    t_buffer* buffer = recibir_buffer(*socket_cliente);
 
     interfaz->nombreInterfaz = buffer_read_string(buffer);
     interfaz->tipo = INTERFAZ_GENERICA;
@@ -65,10 +65,10 @@ void administrarInterfazGenerica(int socket_cliente) {
         pthread_mutex_unlock(&interfaz->mutex);
 
         agregar_int_a_paquete(paquete, solicitud->unidadesTrabajo);
-        enviar_paquete(paquete, socket_cliente);
+        enviar_paquete(paquete, *socket_cliente);
         eliminar_paquete(paquete);
 
-        if (recibir_operacion(socket_cliente) < 0) {
+        if (recibir_operacion(*socket_cliente) < 0) {
             pthread_mutex_lock(&mutexLogger);
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
             pthread_mutex_unlock(&mutexLogger);

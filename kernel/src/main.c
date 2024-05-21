@@ -104,13 +104,13 @@ int main(int argc, char* argv[]) {
     seleccionarAlgoritmoPlanificacion(config);
 
     solicitarInput();
-
+    
     config_destroy(config);
-    log_destroy(logServidor);
     shutdown(servidorIO, SHUT_RD);
     free(servidorKernel);
     liberarVariablesGlobales();
     pthread_join(esperarClientes, NULL);
+    log_destroy(logServidor);
 
     return 0;
 
