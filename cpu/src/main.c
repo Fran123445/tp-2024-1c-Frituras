@@ -9,6 +9,13 @@
 
 int socket_memoria;
 
+int servidor_dispatch;
+t_conexion_escucha* oyente_dispatch;
+int servidor_interrupt;
+t_conexion_escucha* oyente_interrupt;
+
+volatile int hay_interrupcion;
+
 int main(int argc, char* argv[]) {
     
     t_config* config = config_create("cpu.config");
@@ -16,18 +23,18 @@ int main(int argc, char* argv[]) {
         exit(1);
     };
 
-    t_log* log_serv_dispatch = log_create("servidorDispatch", "CPU", true, LOG_LEVEL_TRACE);
-    t_log* log_serv_interrupt = log_create("servidorInterrupt", "CPU", true, LOG_LEVEL_TRACE);
+    t_log* log_serv_dispatch = log_create("servidorDispatch", "CPU", false, LOG_LEVEL_TRACE);
+    t_log* log_serv_interrupt = log_create("servidorInterrupt", "CPU", false, LOG_LEVEL_TRACE);
 
-    int servidor_dispatch = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_DISPATCH"),log_serv_dispatch);
+    servidor_dispatch = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_DISPATCH"),log_serv_dispatch);
 
-    t_conexion_escucha* oyente_dispatch = malloc(sizeof(t_conexion_escucha));
+    oyente_dispatch = malloc(sizeof(t_conexion_escucha));
     oyente_dispatch->socket_servidor = servidor_dispatch;
     oyente_dispatch->modulo = CPU;
 
-    int servidor_interrupt = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT"),log_serv_interrupt);
+    servidor_interrupt = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT"),log_serv_interrupt);
 
-    t_conexion_escucha* oyente_interrupt = malloc(sizeof(t_conexion_escucha));
+    oyente_interrupt = malloc(sizeof(t_conexion_escucha));
     oyente_interrupt->socket_servidor = servidor_interrupt;
     oyente_interrupt->modulo = CPU;
 
@@ -38,7 +45,7 @@ int main(int argc, char* argv[]) {
     pthread_t threadEscuchaDispatch;
     pthread_create(&threadEscuchaDispatch,
 						NULL,
-						(void*)iniciar_servidor,
+						(void*)threadEscuchaDispatch,
 						oyente_dispatch);
     
     
@@ -47,12 +54,13 @@ int main(int argc, char* argv[]) {
     pthread_t threadEscuchaInterrupt;
     pthread_create(&threadEscuchaInterrupt,
 						NULL,
-						(void*)iniciar_servidor,
+						(void*)threadEscuchaInterrupt,
 						oyente_interrupt);
                 
     pthread_detach(threadEscuchaInterrupt);
     
     while(1);
+
 
 
 

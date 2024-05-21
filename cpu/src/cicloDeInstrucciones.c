@@ -1,12 +1,34 @@
-#include "cicloDeInstruccion.h"
+#include "cicloDeInstrucciones.h"
 
 
-//t_log* logger_cpu = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
+t_log* log_ciclo;
+pthread_mutex_t mutexInterrupt;
 
+PCB* recibir_pcb(int socket){
+    op_code cod_op = recibir_operacion(socket);
+    if(cod_op == ENVIO_PCB){
+        t_buffer* buffer = recibir_buffer(socket);
+        PCB* pcb= buffer_read_pcb(buffer);
+        liberar_buffer(buffer);
+        return pcb;
+    }
+    return NULL;
+}
+
+void enviar_pcb(int socket,op_code motivo,PCB* pcb){
+    t_paquete* paquete = crear_paquete(motivo);
+    agregar_a_paquete(paquete, pcb, sizeof(PCB));
+    enviar_paquete(paquete, socket);
+    eliminar_paquete(paquete);
+}
 
 t_instruccion* fetch(PCB* pcb, int socket_memoria){
+    log_ciclo = log_create("Fetch.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
+    int pid = pcb->PID;
     uint32_t pc = pcb->programCounter;
-    
+
+    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pc);
+
     enviar_PC_a_memoria(socket_memoria,pc);
     t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria(socket_memoria);
 
@@ -23,6 +45,7 @@ void enviar_PC_a_memoria(int socket_memoria,uint32_t pc){
 }
 
 t_instruccion* obtener_instruccion_de_memoria(int socket_memoria){
+    log_ciclo = log_create("ErrorRecepcionInstruccion.log","Error de recepcion de instruccion",false,LOG_LEVEL_INFO);
     op_code cod_op = recibir_operacion(socket_memoria);
     if (cod_op == ENVIO_DE_INSTRUCCIONES) { 
         t_buffer* buffer = recibir_buffer(socket_memoria);
@@ -30,7 +53,7 @@ t_instruccion* obtener_instruccion_de_memoria(int socket_memoria){
         liberar_buffer(buffer);
         return instruccion;
     } else { 
-        //log_error(logger_cpu, "Error al recibir instrucción de la memoria");
+        log_error(log_ciclo, "Error al recibir instrucción de la memoria");
         return NULL;
     } 
         
@@ -110,12 +133,33 @@ void decode_execute(t_instruccion* instruccion){
     //log_info(logger_cpu, "Actualización del Program Counter");
 }
 
-//void check_interrupt(PCB pcb){
- //   if(hay_interrupcion){
-   //     t_paquete* paquete = crear_paquete(INTERRUPCION);
-   //     agregar_a_paquete(paquete, pcb, sizeof(PCB));
-   //     enviar_paquete(paquete, socket_kernel);
-    //    eliminar_paquete(paquete);
-   // }
-    
-//}
+int check_interrupt(PCB* pcb, int socket_kernel) {
+    pthread_mutex_lock(&mutexInterrupt);
+    if (hay_interrupcion) {
+        hay_interrupcion = 0;
+        enviar_pcb(socket_kernel,INTERRUPCION,pcb);
+        pthread_mutex_unlock(&mutexInterrupt);
+        return 1;
+    } else {
+        pthread_mutex_unlock(&mutexInterrupt);
+        return 0;
+    }
+}
+
+
+void realizar_ciclo_de_instruccion(PCB* pcb, int socket_memoria, int socket_kernel){
+    while (1) {
+        t_instruccion* instruccion_a_ejecutar = fetch(pcb, socket_memoria);
+        decode_execute(instruccion_a_ejecutar);
+        
+        if (check_interrupt(pcb, socket_kernel)) {
+            break; // Romper el bucle si hay interrupción
+        }
+        
+        // Verificar condiciones de salida (por ejemplo, instrucción EXIT)
+        if (instruccion_a_ejecutar->tipo == iEXIT) {
+            enviar_pcb(socket_kernel,INSTRUCCION_EXIT,pcb);
+            break; // Romper el bucle si el proceso ha finalizado
+        }
+    }
+}
