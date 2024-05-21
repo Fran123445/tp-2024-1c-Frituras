@@ -39,68 +39,68 @@ t_instruccion* obtener_instruccion_de_memoria(int socket_memoria){
 void decode_execute(t_instruccion* instruccion){
     switch (instruccion->tipo)
     {
-    case SET:
+    case iSET:
         SET(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
     /*
-    case MOV_IN:
+    case iMOV_IN:
         MOV_IN(*(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
         break;
-    case MOV_OUT:
+    case iMOV_OUT:
         MOV_OUT(*(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
         break;
     */
-    case SUM:
+    case iSUM:
         SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
-    case SUB:
+    case iSUB:
         SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
-    case JNZ:
+    case iJNZ:
         JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
-    /*case RESIZE:
+    /*case iRESIZE:
         RESIZE(*(int *)instruccion.arg1);
         break;
-    case COPY_STRING:
+    case iCOPY_STRING:
         COPY_STRING(*(int *)instruccion.arg1);
         break;
-    case WAIT:
+    case iWAIT:
         WAIT(instruccion.interfaz);
         break;
-    case SIGNAL:
+    case iSIGNAL:
         SIGNAL(instruccion.interfaz);
         break;
     */
-    case IO_GEN_SLEEP:
+    case iIO_GEN_SLEEP:
         IO_GEN_SLEEP(instruccion->interfaz, *(int *)instruccion->arg1);
         break;
     /*
-    case IO_STDIN_READ:
+    case iIO_STDIN_READ:
         IO_STDIN_READ(instruccion.interfaz, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
         break;
-    case IO_STDOUT_WRITE:
+    case iIO_STDOUT_WRITE:
         IO_STDOUT_WRITE(instruccion.interfaz, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
         break;
     
-    case IO_FS_CREATE:
+    case iIO_FS_CREATE:
         IO_FS_CREATE(instruccion.interfaz, instruccion.archivo);
         break;
     
-    case IO_FS_DELETE:
+    case iIO_FS_DELETE:
         IO_FS_DELETE(instruccion.interfaz, instruccion.archivo);
         break;
-    case IO_FS_TRUNCATE:
+    case iIO_FS_TRUNCATE:
         IO_FS_TRUNCATE(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1);
         break;
-    case IO_FS_WRITE:
+    case iIO_FS_WRITE:
         IO_FS_WRITE(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2, *(registrosCPU *)instruccion.arg3);
         break;
     case IO_FS_READ:
-        IO_FS_READ(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2, *(registrosCPU *)instruccion.arg3);
+        iIO_FS_READ(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2, *(registrosCPU *)instruccion.arg3);
         break;
     */
-    case EXIT:
+    case iEXIT:
         EXIT();
         break;
     default:

@@ -1,5 +1,5 @@
-#ifndef CPU_H_
-#define CPU_H_
+#ifndef CDI_H_
+#define CDI_H_
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -15,4 +15,4 @@ void enviar_PC_a_memoria(int socket_memoria,uint32_t pc);
 t_instruccion* obtener_instruccion_de_memoria(int socket_memoria);
 void decode_execute(t_instruccion* instruccion);
 
-#endif /* CPU_H_ */
+#endif /* CDI_H_ */

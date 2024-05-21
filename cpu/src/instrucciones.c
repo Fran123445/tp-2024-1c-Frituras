@@ -3,6 +3,7 @@
 
 
 registros_cpu miCPU; 
+PCB pcb;
 
 void inicializar_registros_cpu() {
     miCPU.AX = 0;
@@ -159,6 +160,6 @@ void IO_GEN_SLEEP(char* interfaz,int valor){
 }
 
 void EXIT(){
-    pcb.estado = EXIT;
+    pcb.estado = iEXIT;
     //enviar_pcb(PCB, conexion_kernel);
 }

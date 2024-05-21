@@ -10,6 +10,6 @@ void recibir_interrupcion(int socket_kernel){
     }
 }
 
-void cambiar_variable_interrupcion(void){
+int cambiar_variable_interrupcion(void){
     return 1;
 }
