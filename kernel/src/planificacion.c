@@ -12,8 +12,9 @@ pthread_mutex_t mutexReady;
 pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
 
+int finalizar = 0;
+
 void cambiarEstado(PCB* proceso, estado_proceso estado) {
-    
     estado_proceso estadoAnterior = proceso->estado;
     proceso->estado = estado;
     log_info(logger, "PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
@@ -59,11 +60,12 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
 }
 
 void vaciarExit() {
-
-    char* motivo;
-
     while(1) {
         sem_wait(&procesosEnExit);
+
+        if (finalizar) break;
+
+        char* motivo;
 
         pthread_mutex_lock(&mutexExit);
         procesoEnExit* procesoAFinalizar = queue_pop(colaExit);
@@ -89,18 +91,22 @@ void vaciarExit() {
 
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
 
+        free(motivo);
         free(procesoAFinalizar->pcb);
         free(procesoAFinalizar);
     }
 }
 
 void procesoNewAReady() {
-    PCB* proceso;
-    char* listaReady = string_new();
 
     while(1) {
         sem_wait(&gradoMultiprogramacion);
         sem_wait(&procesosEnNew);
+
+        if (finalizar) break;
+
+        PCB* proceso;
+        char* listaReady = string_new();
 
         listaReady[0] = '\0';
 
@@ -121,6 +127,8 @@ void procesoNewAReady() {
 
         log_info(logger, "Cola READY: [%s]", listaReady);
 
+        free(listaReady);
+
         sem_post(&procesosEnReady);    
     }
 }
@@ -134,6 +142,7 @@ void enviarProcesoACPU(PCB* proceso) {
 
 PCB* sacarSiguienteDeReady() {
     sem_wait(&procesosEnReady);
+    if (finalizar) return NULL;
     pthread_mutex_lock(&mutexReady);
     PCB* proceso = queue_pop(colaReady);
     cambiarEstado(proceso, ESTADO_EXEC);
@@ -146,6 +155,7 @@ void ejecutarSiguiente() {
     while(1) {
         sem_wait(&cpuDisponible);
         PCB* proceso = sacarSiguienteDeReady();
+        if (finalizar) break;
         enviarProcesoACPU(proceso);
     }
 }
@@ -204,23 +214,30 @@ void planificacionPorFIFO() {
 						NULL,
 						(void*) vaciarExit,
 						NULL);
-    pthread_detach(pth_colaExit);
 
     pthread_create(&pth_colaNew,
 						NULL,
 						(void*) procesoNewAReady,
 						NULL);
-    pthread_detach(pth_colaNew);
 
     pthread_create(&pth_colaReady,
 						NULL,
 						(void*) ejecutarSiguiente,
 						NULL);
-    pthread_detach(pth_colaReady);
-
+                        
     pthread_create(&pth_recibirProc,
 						NULL,
 						(void*) recibirDeCPU,
 						NULL);
     pthread_detach(pth_recibirProc);
+
+}
+
+void finalizarHilos() {
+    finalizar = 1;
+    sem_post(&cpuDisponible);
+    sem_post(&gradoMultiprogramacion);
+    sem_post(&procesosEnNew);
+    sem_post(&procesosEnReady);
+    sem_post(&procesosEnExit);
 }

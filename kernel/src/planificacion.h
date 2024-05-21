@@ -46,4 +46,7 @@ void leerBufferYPlanificar();
 // Inicia los hilos para la planificacion por FIFO
 void planificacionPorFIFO();
 
+// Setea el flag finalizar en 1 y hace un signal para cada semaforo
+void finalizarHilos();
+
 #endif /* PLAN_H */

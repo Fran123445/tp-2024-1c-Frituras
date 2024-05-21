@@ -37,17 +37,19 @@ void inicializarColas() {
     listadoProcesos = list_create();
 }
 
-void liberarMemoria() {
+void liberarMemoria() {    
+    finalizarHilos();
+    pthread_join(pth_colaExit, NULL);
+    pthread_join(pth_colaNew, NULL);
+    pthread_join(pth_colaReady, NULL);
+    pthread_join(pth_recibirProc, NULL);
     log_destroy(logger);
     queue_destroy_and_destroy_elements(colaNew, free);
     queue_destroy_and_destroy_elements(colaExit, free);
     queue_destroy_and_destroy_elements(colaReady, free);
     list_destroy(interfacesConectadas); //seguramente tenga que hager un destroy and destroy eleements
     list_destroy(listadoProcesos);
-    pthread_cancel(pth_colaExit);
-    pthread_cancel(pth_colaNew);
-    pthread_cancel(pth_colaReady);
-    pthread_cancel(pth_recibirProc);
+
 }
 
 int main(int argc, char* argv[]) {
