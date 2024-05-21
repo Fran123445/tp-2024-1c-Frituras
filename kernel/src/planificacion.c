@@ -96,6 +96,8 @@ void vaciarExit() {
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
         pthread_mutex_unlock(&mutexLogger);
 
+        sem_post(&gradoMultiprogramacion);
+
         free(motivo);
         free(procesoAFinalizar->pcb);
         free(procesoAFinalizar);

@@ -25,6 +25,12 @@ extern pthread_mutex_t mutexLogger;
 
 void inicializarSemaforosYMutex();
 
+// Envia un proceso a la cola exit con su respectivo motivo
+void enviarAExit(PCB* pcb, motivo_exit motivo);
+
+// Cambia el estado de un proceso y loggea el estado anterior y el nuevo
+void cambiarEstado(PCB* proceso, estado_proceso estado);
+
 // Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria
 void vaciarExit();
 

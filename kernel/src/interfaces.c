@@ -67,7 +67,7 @@ void administrarInterfazGenerica(int socket_cliente) {
             pthread_mutex_lock(&mutexLogger);
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
             pthread_mutex_unlock(&mutexLogger);
-            //enviarAExit(proceso);
+            enviarAExit(solicitud->proceso, INVALID_WRITE); // no se si es el motivo indicado, otra vez
             break;
         }
 
