@@ -22,6 +22,7 @@ typedef enum {
     INSTRUCCION_EXIT,
 // CPU - Memoria
     ENVIO_PC,
+    ENVIO_RESIZE,
 
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path

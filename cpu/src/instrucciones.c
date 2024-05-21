@@ -2,8 +2,7 @@
 #include <utils/pcb.h>
 
 
-registros_cpu miCPU; 
-PCB pcb;
+registros_cpu miCPU;
 
 void inicializar_registros_cpu() {
     miCPU.AX = 0;
@@ -155,11 +154,14 @@ void JNZ(registrosCPU registro, int instruccion){
     }
 }
 
+void RESIZE(int tamaño){
+    
+}
+
 void IO_GEN_SLEEP(char* interfaz,int valor){
     
 }
 
 void EXIT(){
-    pcb.estado = iEXIT;
-    //enviar_pcb(PCB, conexion_kernel);
+    enviar_pcb(socket_kernel_d,INSTRUCCION_EXIT,pcb);
 }

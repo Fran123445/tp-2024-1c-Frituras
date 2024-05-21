@@ -7,9 +7,9 @@
 #include <utils/serializacion.h>
 #include <pthread.h>
 
+extern int hay_interrupcion;
+extern pthread_mutex_t mutexInterrupt;
+
 void recibir_interrupcion(int socket_kernel);
-int cambiar_variable_interrupcion(void);
-
-
 
 #endif /* INTERRUPCIONES_H_ */

@@ -2,7 +2,7 @@
 
 
 t_log* log_ciclo;
-pthread_mutex_t mutexInterrupt;
+
 
 PCB* recibir_pcb(int socket){
     op_code cod_op = recibir_operacion(socket);
@@ -22,7 +22,7 @@ void enviar_pcb(int socket,op_code motivo,PCB* pcb){
     eliminar_paquete(paquete);
 }
 
-t_instruccion* fetch(PCB* pcb, int socket_memoria){
+t_instruccion* fetch(){
     log_ciclo = log_create("Fetch.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
     int pid = pcb->PID;
     uint32_t pc = pcb->programCounter;
@@ -82,10 +82,10 @@ void decode_execute(t_instruccion* instruccion){
     case iJNZ:
         JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
-    /*case iRESIZE:
-        RESIZE(*(int *)instruccion.arg1);
+    case iRESIZE:
+        RESIZE(*(int *)instruccion->arg1);
         break;
-    case iCOPY_STRING:
+    /*case iCOPY_STRING:
         COPY_STRING(*(int *)instruccion.arg1);
         break;
     case iWAIT:
@@ -133,11 +133,11 @@ void decode_execute(t_instruccion* instruccion){
     //log_info(logger_cpu, "Actualización del Program Counter");
 }
 
-int check_interrupt(PCB* pcb, int socket_kernel) {
+int check_interrupt() {
     pthread_mutex_lock(&mutexInterrupt);
     if (hay_interrupcion) {
         hay_interrupcion = 0;
-        enviar_pcb(socket_kernel,INTERRUPCION,pcb);
+        enviar_pcb(socket_kernel_d,INTERRUPCION,pcb);
         pthread_mutex_unlock(&mutexInterrupt);
         return 1;
     } else {
@@ -152,13 +152,12 @@ void realizar_ciclo_de_instruccion(PCB* pcb, int socket_memoria, int socket_kern
         t_instruccion* instruccion_a_ejecutar = fetch(pcb, socket_memoria);
         decode_execute(instruccion_a_ejecutar);
         
-        if (check_interrupt(pcb, socket_kernel)) {
+        if (check_interrupt()) {
             break; // Romper el bucle si hay interrupción
         }
         
         // Verificar condiciones de salida (por ejemplo, instrucción EXIT)
         if (instruccion_a_ejecutar->tipo == iEXIT) {
-            enviar_pcb(socket_kernel,INSTRUCCION_EXIT,pcb);
             break; // Romper el bucle si el proceso ha finalizado
         }
     }

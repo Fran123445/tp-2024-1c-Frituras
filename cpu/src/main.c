@@ -1,20 +1,14 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <commons/log.h>
-#include <commons/config.h>
-#include <utils/server.h>
-#include <utils/client.h>
-#include "instrucciones.h"
+#include "main.h"
 
 int socket_memoria;
 
-int servidor_dispatch;
+int socket_kernel_d;
 t_conexion_escucha* oyente_dispatch;
-int servidor_interrupt;
+int socket_kernel_i;
 t_conexion_escucha* oyente_interrupt;
 
 volatile int hay_interrupcion;
+PCB* pcb;
 
 int main(int argc, char* argv[]) {
     
@@ -26,16 +20,16 @@ int main(int argc, char* argv[]) {
     t_log* log_serv_dispatch = log_create("servidorDispatch", "CPU", false, LOG_LEVEL_TRACE);
     t_log* log_serv_interrupt = log_create("servidorInterrupt", "CPU", false, LOG_LEVEL_TRACE);
 
-    servidor_dispatch = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_DISPATCH"),log_serv_dispatch);
+    socket_kernel_d = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_DISPATCH"),log_serv_dispatch);
 
     oyente_dispatch = malloc(sizeof(t_conexion_escucha));
-    oyente_dispatch->socket_servidor = servidor_dispatch;
+    oyente_dispatch->socket_servidor = socket_kernel_d;
     oyente_dispatch->modulo = CPU;
 
-    servidor_interrupt = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT"),log_serv_interrupt);
+    socket_kernel_i = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT"),log_serv_interrupt);
 
     oyente_interrupt = malloc(sizeof(t_conexion_escucha));
-    oyente_interrupt->socket_servidor = servidor_interrupt;
+    oyente_interrupt->socket_servidor = socket_kernel_i;
     oyente_interrupt->modulo = CPU;
 
 
@@ -58,10 +52,13 @@ int main(int argc, char* argv[]) {
 						oyente_interrupt);
                 
     pthread_detach(threadEscuchaInterrupt);
+
+    //recibo el pcb del kernel
+    pcb = recibir_pcb(servidor_dispatch);
     
     
     config_destroy(config);
-    free(socket_memoria);
+    liberar_conexion(socket_memoria);
     free(oyente_dispatch);
     free(oyente_interrupt);
 

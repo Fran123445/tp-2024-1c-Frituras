@@ -6,9 +6,8 @@
 #include <utils/pcb.h>
 #include <utils/serializacion.h>
 #include <stdint.h>
-
-extern int hay_interrupcion;
-extern pthread_mutex_t mutexInterrupt;
+#include "interrupciones.h"
+#include "main.h"
 
 PCB* recibir_pcb(int socket_kernel);
 void enviar_pcb(int socket,op_code motivo,PCB* pcb);

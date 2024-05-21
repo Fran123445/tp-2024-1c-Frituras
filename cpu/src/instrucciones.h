@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <utils/pcb.h>
 #include <utils/serializacion.h>
+#include "main.h"
 
 
 void inicializar_registros_cpu();
