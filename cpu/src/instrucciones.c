@@ -1,5 +1,5 @@
 #include "instrucciones.h"
-#include <utils/pcb.h>
+
 
 
 registros_cpu miCPU;
@@ -168,4 +168,7 @@ void IO_GEN_SLEEP(char* interfaz,int valor){
 
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
 }
