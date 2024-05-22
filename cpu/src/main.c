@@ -1,6 +1,4 @@
 #include "main.h"
-#include "cicloDeInstrucciones.h"
-#include "interrupciones.h"
 
 int socket_memoria;
 int socket_kernel_d;
@@ -53,6 +51,8 @@ int main(int argc, char* argv[]) {
     if (config == NULL) {
         exit(1);
     }
+
+    inicializar_registros_cpu();
 
     pthread_mutex_init(&mutexInterrupt, NULL);
 

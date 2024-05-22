@@ -139,18 +139,19 @@ void JNZ(registrosCPU registro, int instruccion){
             break;
     }
 }
-
+/*
 void RESIZE(int tamaño){
     
 }
-
-
-void IO_GEN_SLEEP(char* interfaz,int valor){
-    /*
-    interfaz.unidades_trabajo = valor;
-    */
+*/
+/*
+void IO_GEN_SLEEP(t_interfaz_generica interfaz,int unidades_trabajo){
+    t_paquete* paquete = crear_paquete(ENVIAR_IO_GEN_SLEEP);
+    agregar_a_paquete(paquete, interfaz, sizeof(t_interfaz_generica));
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
 }
-
+*/
 
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);

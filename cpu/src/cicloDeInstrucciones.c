@@ -65,6 +65,7 @@ void decode_execute(t_instruccion* instruccion){
     {
     case iSET:
         SET(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
         break;
     /*
     case iMOV_IN:
@@ -76,17 +77,22 @@ void decode_execute(t_instruccion* instruccion){
     */
     case iSUM:
         SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
         break;
     case iSUB:
         SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
         break;
     case iJNZ:
         JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
         break;
+    /*
     case iRESIZE:
         RESIZE(*(int *)instruccion->arg1);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p", pcb->PID, instruccion->tipo, instruccion->arg1);
         break;
-    /*case iCOPY_STRING:
+    case iCOPY_STRING:
         COPY_STRING(*(int *)instruccion.arg1);
         break;
     case iWAIT:
@@ -95,11 +101,11 @@ void decode_execute(t_instruccion* instruccion){
     case iSIGNAL:
         SIGNAL(instruccion.interfaz);
         break;
-    */
+    
     case iIO_GEN_SLEEP:
         IO_GEN_SLEEP(instruccion->interfaz, *(int *)instruccion->arg1);
-        break;
-    /*
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);        break;
+    
     case iIO_STDIN_READ:
         IO_STDIN_READ(instruccion.interfaz, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
         break;
@@ -126,12 +132,12 @@ void decode_execute(t_instruccion* instruccion){
     */
     case iEXIT:
         EXIT();
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - No tiene parámetros", pcb->PID, instruccion->tipo);
         break;
     default:
-        //log_error(logger_cpu, "La instruccion es inválida");
+        log_error(log_ciclo, "La instruccion es inválida");
         break;
     }
-    log_ciclo = log_create("Cpu.log", "PID: %u - Ejecutando: %u - %u %u %u", pcb->PID, instruccion->tipo);
 }
 
 int check_interrupt() {

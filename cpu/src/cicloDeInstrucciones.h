@@ -1,12 +1,6 @@
 #ifndef CICLO_DE_INSTRUCCION_H_
 #define CICLO_DE_INSTRUCCION_H_
 
-#include <commons/log.h>
-#include <pthread.h>
-#include <utils/pcb.h>
-#include <utils/serializacion.h>
-#include <stdint.h>
-#include "interrupciones.h"
 #include "main.h"
 
 PCB* recibir_pcb();

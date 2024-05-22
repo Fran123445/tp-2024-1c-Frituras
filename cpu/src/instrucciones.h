@@ -1,11 +1,6 @@
 #ifndef CPU_H_
 #define CPU_H_
 
-#include <stddef.h> 
-#include <stdio.h>
-#include <utils/pcb.h>
-#include <utils/serializacion.h>
-#include "interrupciones.h"
 #include "main.h"
 
 

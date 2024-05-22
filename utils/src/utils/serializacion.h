@@ -20,7 +20,8 @@ typedef enum {
 
     // CPU - KERNEL
     INSTRUCCION_EXIT,
-// CPU - Memoria
+    ENVIAR_IO_GEN_SLEEP,
+    // CPU - Memoria
     ENVIO_PC,
     ENVIO_RESIZE,
 
