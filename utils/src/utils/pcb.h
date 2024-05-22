@@ -85,4 +85,9 @@ typedef struct {
     t_instruccion* instruccion;
 }t_dispatch;
 
+typedef struct {
+    char* nombre;
+    int unidades_trabajo;
+}t_interfaz_generica;
+
 #endif /* PCB_H */
