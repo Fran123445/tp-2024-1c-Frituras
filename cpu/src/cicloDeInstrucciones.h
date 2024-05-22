@@ -3,6 +3,7 @@
 
 #include "main.h"
 
+
 PCB* recibir_pcb();
 void enviar_pcb(op_code motivo);
 t_instruccion* fetch();

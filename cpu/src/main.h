@@ -4,16 +4,19 @@
 #include <stdint.h>
 #include <commons/log.h>
 #include <commons/config.h>
-#include <utils/server.h>
-#include <utils/client.h>
+#include <commons/log.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <stddef.h> 
 #include <utils/pcb.h>
 #include <utils/serializacion.h>
-#include <commons/log.h>
-#include <pthread.h>
+#include <utils/server.h>
+#include <utils/client.h>
+#include <utils/semaforosCompartidos.h>
 #include "instrucciones.h"
 #include "interrupciones.h"
 #include "cicloDeInstrucciones.h"
+
 
 extern PCB* pcb;
 extern int socket_memoria;

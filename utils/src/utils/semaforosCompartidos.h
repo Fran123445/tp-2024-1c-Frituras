@@ -1,3 +1,3 @@
 #include <semaphore.h>
 
-sem_t *semaforo_pc = 0;
+extern sem_t semaforo_pc;

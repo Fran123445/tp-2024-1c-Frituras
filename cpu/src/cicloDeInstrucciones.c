@@ -1,7 +1,9 @@
 #include "cicloDeInstrucciones.h"
+#include <semaphore.h>
 
 
 t_log* log_ciclo;
+
 
 
 PCB* recibir_pcb(){
@@ -17,7 +19,7 @@ PCB* recibir_pcb(){
 
 void enviar_pcb(op_code motivo){
     t_paquete* paquete = crear_paquete(motivo);
-    agregar_a_paquete(paquete, pcb, sizeof(PCB));
+    agregar_PCB_a_paquete (paquete, pcb);
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
@@ -41,6 +43,7 @@ void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
+    sem_post(&semaforo_pc);
     eliminar_paquete(paquete);
 }
 
@@ -101,11 +104,12 @@ void decode_execute(t_instruccion* instruccion){
     case iSIGNAL:
         SIGNAL(instruccion.interfaz);
         break;
-    
+    */
     case iIO_GEN_SLEEP:
-        IO_GEN_SLEEP(instruccion->interfaz, *(int *)instruccion->arg1);
-        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);        break;
-    
+        IO_GEN_SLEEP((t_interfaz_generica*)instruccion->interfaz, *(int *)instruccion->arg1);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz->nombre, instruccion->arg1);        
+        break;
+    /*
     case iIO_STDIN_READ:
         IO_STDIN_READ(instruccion.interfaz, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2);
         break;
@@ -163,9 +167,8 @@ void realizar_ciclo_de_instruccion(){
             enviar_pcb(INTERRUPCION);
             break; // Romper el bucle si hay interrupción
         }
-        
-        // Verificar condiciones de salida (por ejemplo, instrucción EXIT)
-        if (instruccion_a_ejecutar->tipo == iEXIT) {
+        // Verificar condiciones de salida 
+        if (instruccion_a_ejecutar->tipo == iEXIT){
             break; // Romper el bucle si el proceso ha finalizado
         }
     }
