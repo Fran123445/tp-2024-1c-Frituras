@@ -4,82 +4,69 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include <utils/server.h>
-#include <utils/client.h>
-#include <utils/estructurasConexion.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <conexiones.h>
+#include <memoriaCPU.h>
+#include <memoriaKernel.h>
 
 
-int main(int argc, char* argv[]) {
-    t_config* config = config_create("memoria.config");
-    if (config == NULL) {
+int socket_kernel;
+int socket_cpu;
+int socket_serv_cpu;
+int socket_serv_kernel;
+t_conexion_escucha* escucha_cpu;
+t_conexion_escucha* escucha_kernel;
+t_config* config;
+void iniciar_servidores(t_config* config){
+    t_log* log_memoria_kernel = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
+    t_log* log_memoria_cpu = log_create("memoria_cpu.log", "Memoria", true, LOG_LEVEL_TRACE);
+    
+    socket_serv_kernel = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria_kernel);
+    socket_serv_cpu = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA"), log_memoria_cpu);
+
+    socket_kernel = esperar_cliente(socket_serv_kernel, KERNEL);
+    socket_cpu = esperar_cliente(socket_serv_cpu, CPU);
+
+    escucha_cpu = malloc(sizeof(t_conexion_escucha));
+    escucha_cpu->modulo=MEMORIA;
+    escucha_cpu->socket_servidor=  socket_cpu;
+    escucha_kernel= malloc(sizeof(t_conexion_escucha));
+    escucha_kernel->socket_servidor=socket_cpu;
+    escucha_kernel->modulo= MEMORIA;
+
+}
+void* escuchar_cpu(){
+    while(1){
+        int tiempo_retardo = config_get_int_value(config, "PUERTO_ESCUCHA");
+        recibir_pc(socket_cpu);
+        mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
+
+    }
+}
+void* escuchar_kernel(){
+    while(1){
+        creacion_proceso_path(socket_kernel);
+        abrir_archivo_path(socket_kernel);
+    }
+}
+int main(int argc, char *argv[]){
+
+    t_config *config = config_create("memoria.config");
+    if (config == NULL){
         exit(1);
-    }; 
-
-// Conexion Memoria como Servidor, IO como cliente
-    t_log* logServidorMemoriaIO = log_create("servidor_memoria_io.log","Memoria",false,LOG_LEVEL_TRACE);
-    if(logServidorMemoriaIO == NULL){
-        fprintf(stderr, "Error al crear log");
-        return 1;
     }
-    pthread_t esperarClienteIO;
+    iniciar_servidores(config);
 
-    int servidorParaIO = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),logServidorMemoriaIO);
+    pthread_t hilo_kernel;
+    pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
+    pthread_t hilo_cpu;
+    pthread_create(&hilo_cpu, NULL, escuchar_cpu, NULL);
 
-    t_conexion_escucha* servidorMemoriaParaIO = malloc(sizeof(t_conexion_escucha));
-    servidorMemoriaParaIO->modulo = MEMORIA;
-    servidorMemoriaParaIO->socket_servidor= servidorParaIO;
-
-    pthread_create(&esperarClienteIO,NULL,(void*) esperarClienteIO, servidorMemoriaParaIO);
-    pthread_detach(esperarClienteIO);
-
-
-// Conexion Memoria como servidor, CPU como cliente
-    t_log* logServidorMemoriaCPU = log_create("servidor_memoria_cpu.log","Memoria",false,LOG_LEVEL_TRACE);
-    if(logServidorMemoriaCPU == NULL){
-        fprintf(stderr, "Error al crear log");
-        return 1;
-    }
-
-    pthread_t esperarClienteCPU;
-
-    int servidorParaCPU = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),logServidorMemoriaCPU);
-
-    t_conexion_escucha* servidorMemoriaCPU = malloc(sizeof(t_conexion_escucha));
-    servidorMemoriaCPU->modulo= MEMORIA;
-    servidorMemoriaCPU->socket_servidor= servidorParaCPU;
-
-    pthread_create(&esperarClienteCPU, NULL, (void*) esperarClienteCPU, servidorMemoriaCPU);
-    pthread_detach(esperarClienteCPU);
-
-// Conexion Memoria como Servidor y Kernel como cliente
-    t_log* logServidorMemoriaKernel = log_create("servidor_memoria_kernel.log","Memoria",true,LOG_LEVEL_TRACE);
-    if(logServidorMemoriaKernel == NULL){
-        fprintf (stderr, "Error al crear log");
-        return 1;
-    }
-
-    pthread_t esperarClienteKernel;
-
-    int servidorParaKernel = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"), logServidorMemoriaKernel);
-
-    t_conexion_escucha* servidorMemoriaKernel = malloc (sizeof(t_conexion_escucha));
-    servidorMemoriaKernel->modulo = MEMORIA;
-    servidorMemoriaKernel->socket_servidor= servidorParaKernel;
-
-    pthread_create(&esperarClienteKernel, NULL, (void*) esperarClienteKernel, servidorMemoriaKernel);
-    pthread_detach (esperarClienteKernel);
-
-   
-
-    free(servidorMemoriaParaIO);
-    free(servidorMemoriaCPU);
-    free(servidorMemoriaKernel);
-    log_destroy(logServidorMemoriaKernel);
-    log_destroy(logServidorMemoriaIO);
-    log_destroy(logServidorMemoriaCPU);
     config_destroy(config);
-
+    pthread_join(hilo_cpu, NULL);
+    pthread_join(hilo_kernel, NULL);
+    free(escucha_cpu);
+    free(escucha_kernel);
     return 0;
 }
-
-
-
