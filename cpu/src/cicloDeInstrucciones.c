@@ -23,7 +23,7 @@ void enviar_pcb(op_code motivo){
 }
 
 t_instruccion* fetch(){
-    log_ciclo = log_create("Fetch.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
+    log_ciclo = log_create("Cpu.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
     int pid = pcb->PID;
     uint32_t pc = pcb->programCounter;
 
@@ -60,6 +60,7 @@ t_instruccion* obtener_instruccion_de_memoria(){
 }
 
 void decode_execute(t_instruccion* instruccion){
+    log_ciclo = log_create("Cpu.log", "Instruccion Ejecutada", false, LOG_LEVEL_INFO);
     switch (instruccion->tipo)
     {
     case iSET:
@@ -130,7 +131,7 @@ void decode_execute(t_instruccion* instruccion){
         //log_error(logger_cpu, "La instruccion es inválida");
         break;
     }
-    //log_info(logger_cpu, "Actualización del Program Counter");
+    log_ciclo = log_create("Cpu.log", "PID: %u - Ejecutando: %u - %u %u %u", pcb->PID, instruccion->tipo);
 }
 
 int check_interrupt() {
@@ -147,7 +148,7 @@ int check_interrupt() {
 }
 
 
-void realizar_ciclo_de_instruccion(PCB* pcb, int socket_memoria, int socket_kernel){
+void realizar_ciclo_de_instruccion(){
     while (1) {
         t_instruccion* instruccion_a_ejecutar = fetch(pcb, socket_memoria);
         decode_execute(instruccion_a_ejecutar);

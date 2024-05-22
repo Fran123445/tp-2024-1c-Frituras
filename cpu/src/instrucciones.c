@@ -4,20 +4,6 @@
 
 registros_cpu miCPU;
 
-void inicializar_registros_cpu() {
-    miCPU.AX = 0;
-    miCPU.BX = 0;
-    miCPU.CX = 0;
-    miCPU.DX = 0;
-    miCPU.EAX = 0;
-    miCPU.EBX = 0;
-    miCPU.ECX = 0;
-    miCPU.EDX = 0;
-    miCPU.SI = 0;
-    miCPU.DI = 0;
-    miCPU.PC = 0;
-}
-
 void* obtenerRegistro(registrosCPU registro) {
     void* lista_de_registros[11] = {
         &miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX,
@@ -171,4 +157,19 @@ void EXIT(){
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
+}
+
+
+void inicializar_registros_cpu() {
+    SET(miCPU.AX, 0);
+    SET(miCPU.BX, 0);
+    SET(miCPU.CX, 0);
+    SET(miCPU.DX, 0);
+    SET(miCPU.EAX, 0);
+    SET(miCPU.EBX, 0);
+    SET(miCPU.ECX, 0);
+    SET(miCPU.EDX, 0);
+    SET(miCPU.SI, 0);
+    SET(miCPU.DI, 0);
+    SET(miCPU.PC, 0);
 }
