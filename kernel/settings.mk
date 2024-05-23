@@ -12,5 +12,5 @@ CRELEASE=-O3 -Wall -DNDEBUG -fcommon
 ARGS=
 
 # Valgrind flags
-MEMCHECK_FLAGS=--track-origins=yes
-HELGRIND_FLAGS=
+MEMCHECK_FLAGS=--track-origins=yes --log-file=memcheck.log
+HELGRIND_FLAGS= --log-file=helgrind.log
