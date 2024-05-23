@@ -36,6 +36,8 @@ t_instruccion* fetch(){
 
     pcb->programCounter++;
 
+    log_destroy(log_ciclo);
+
     return instruccionEncontrada;
 }
 
@@ -43,7 +45,6 @@ void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
-    sem_post(&semaforo_pc);
     eliminar_paquete(paquete);
 }
 
@@ -59,6 +60,7 @@ t_instruccion* obtener_instruccion_de_memoria(){
         log_error(log_ciclo, "Error al recibir instrucción de la memoria");
         return NULL;
     } 
+    log_destroy(log_ciclo);
         
 }
 
@@ -142,6 +144,7 @@ void decode_execute(t_instruccion* instruccion){
         log_error(log_ciclo, "La instruccion es inválida");
         break;
     }
+    log_destroy(log_ciclo);
 }
 
 int check_interrupt() {
