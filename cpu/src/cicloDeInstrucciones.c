@@ -109,8 +109,8 @@ void decode_execute(t_instruccion* instruccion){
         break;
     */
     case iIO_GEN_SLEEP:
-        IO_GEN_SLEEP((t_interfaz_generica*)instruccion->interfaz, *(int *)instruccion->arg1);
-        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz->nombre, instruccion->arg1);        
+        IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);        
         break;
     /*
     case iIO_STDIN_READ:

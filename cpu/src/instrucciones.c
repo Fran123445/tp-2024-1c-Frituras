@@ -142,7 +142,7 @@ void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     interfaz_a_enviar->unidades_trabajo = unidades_de_trabajo;
     
     agregar_PCB_a_paquete(paquete,pcb);
-    agregar_interfaz_generica_a_paquete(paquete, interfaz, sizeof(t_interfaz_generica));
+    agregar_interfaz_generica_a_paquete(paquete, interfaz_a_enviar);
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
     
