@@ -90,4 +90,5 @@ typedef struct {
     int unidades_trabajo;
 }t_interfaz_generica;
 
+size_t tamanioRegistro(registrosCPU registro);
 #endif /* PCB_H */
