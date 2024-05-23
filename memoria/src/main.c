@@ -1,14 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <commons/log.h>
-#include <commons/config.h>
-#include <utils/server.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <conexiones.h>
-#include <memoriaCPU.h>
-#include <memoriaKernel.h>
+#include <main.h>
 
 
 int socket_kernel;
@@ -21,7 +11,8 @@ t_config* config;
 void iniciar_servidores(t_config* config){
     t_log* log_memoria_kernel = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
     t_log* log_memoria_cpu = log_create("memoria_cpu.log", "Memoria", true, LOG_LEVEL_TRACE);
-    
+    t_log* log_memoria_io = log_create("memoria_io.log", "Memoria", true, LOG_LEVEL_TRACE);
+
     socket_serv_kernel = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria_kernel);
     socket_serv_cpu = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA"), log_memoria_cpu);
 
@@ -49,6 +40,9 @@ void* escuchar_kernel(){
         creacion_proceso_path(socket_kernel);
         abrir_archivo_path(socket_kernel);
     }
+}
+void* escuchar_io(){
+    
 }
 int main(int argc, char *argv[]){
 

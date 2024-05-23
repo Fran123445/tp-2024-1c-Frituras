@@ -9,7 +9,7 @@
 #include <conexiones.h>
 #include <memoriaCPU.h>
 #include <memoriaKernel.h>
-
+#include <estructuras.h>
 
 int socket_kernel;
 int socket_cpu;
