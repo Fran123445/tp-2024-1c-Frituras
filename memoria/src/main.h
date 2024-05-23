@@ -7,10 +7,9 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <conexiones.h>
-#include <memoriaCPU.h>
-#include <memoriaKernel.h>
 #include <estructuras.h>
-
+#include "memoriaCPU.h"
+#include "memoriaKernel.h"
 int socket_kernel;
 int socket_cpu;
 int socket_serv_cpu;

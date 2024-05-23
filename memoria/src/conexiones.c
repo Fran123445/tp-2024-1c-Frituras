@@ -6,10 +6,9 @@
 #include <utils/server.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include<memoriaCPU.h>
-#include<memoriaKernel.h>
 #include <utils/serializacion.h>
-
+#include "memoriaCPU.h"
+#include "memoriaKernel.h"
 void* esperar_clientes(t_conexion_escucha* nueva_conexion){
     while (1) {
         int* socket_cliente = malloc(sizeof(int));
