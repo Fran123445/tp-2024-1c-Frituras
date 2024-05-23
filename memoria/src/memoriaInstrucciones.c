@@ -31,6 +31,9 @@ t_tipoInstruccion obtener_tipo_instruccion (const* char ins_char){
 
 t_instruccion* volver_char_a_instruccion(char*linea){
     char* espacio = strchr(linea, ' ');
+    registrosCPU registro1;
+    registrosCPU registro2;
+    registrosCPU registro3;
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
     t_tipoInstruccion tipo_ins = obtener_tipo_instruccion(linea);
     switch(tipo_ins){
@@ -48,11 +51,18 @@ t_instruccion* volver_char_a_instruccion(char*linea){
         case SET:
             instruccion->tipo = SET;
             instruccion->sizeArg1 = tamanioRegistro(registro);
-            instruccion->arg1 = registros_cpu;
+            instruccion->arg1 = registro1;
             instruccion->sizeArg2 = sizeof(int);
             instruccion->arg2 = int;
             break;
         case MOV_IN:
+            instruccion->tipo = MOV_IN;
+            instruccion->sizeArg1 =;
+            instruccion->arg1 =;
+            instruccion->sizeArg2 = ;
+            instruccion->arg2 =;
+            instruccion->sizeArg3 = NULL;
+            instruccion->
         break;
         case MOV_OUT:
         break;

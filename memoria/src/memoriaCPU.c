@@ -1,11 +1,10 @@
 #include <commons/collections/list.h>
 #include <utils/serializacion.h>
-#include <memoriaKernel.h>
 #include <utils/pcb.h>
 #include <utils/semaforosCompartidos.h>
 #include <unistd.h>
 #include <commons/config.h>
-
+#include "memoriaKernel.h"
 int recibir_pc(int socket_cpu){
     op_code cod_op = recibir_operacion(socket_cpu);
     if (cod_op == ENVIO_PC){
