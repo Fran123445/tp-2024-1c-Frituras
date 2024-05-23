@@ -48,9 +48,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    inicializar_registros_cpu();
-
-    pthread_mutex_init(&mutexInterrupt, NULL);
+        pthread_mutex_init(&mutexInterrupt, NULL);
 
     iniciar_servidores(config);
 

@@ -188,7 +188,7 @@ void planificarRecibido(t_dispatch* dispatch) {
     t_instruccion* inst = dispatch->instruccion;
     t_IOConectado* interfaz;
     switch (inst->tipo) {
-        case IO_GEN_SLEEP:
+        case iIO_GEN_SLEEP:
             interfaz = hallarInterfazConectada(inst->interfaz);
             if (comprobarOperacionValida(interfaz, inst->tipo)) {
                 t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
@@ -204,13 +204,13 @@ void planificarRecibido(t_dispatch* dispatch) {
                 enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
             }
             break;
-        case WAIT:
+        case iWAIT:
             // todavia no me fije que hace wait
             break;
-        case SIGNAL:
+        case iSIGNAL:
             // todavia no me fije que hace signal
             break;
-        case EXIT:
+        case iEXIT:
             break;
         default:
             pthread_mutex_lock(&mutexLogger);

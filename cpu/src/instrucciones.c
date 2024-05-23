@@ -1,12 +1,10 @@
 #include "instrucciones.h"
 
-registros_cpu miCPU;
-
 void* obtenerRegistro(registrosCPU registro) {
     void* lista_de_registros[11] = {
-        &miCPU.AX, &miCPU.BX, &miCPU.CX, &miCPU.DX,
-        &miCPU.EAX, &miCPU.EBX, &miCPU.ECX, &miCPU.EDX,
-        &miCPU.SI, &miCPU.DI, &miCPU.PC
+        &pcb->registros.AX, &pcb->registros.BX, &pcb->registros.CX, &pcb->registros.DX,
+        &pcb->registros.EAX, &pcb->registros.EBX, &pcb->registros.ECX, &pcb->registros.EDX,
+        &pcb->registros.SI, &pcb->registros.DI, &pcb->registros.PC
     };
 
     if(registro >= 0 && registro < 11){
@@ -117,12 +115,12 @@ void JNZ(registrosCPU registro, int instruccion){
     switch (tam_reg) {
         case sizeof(uint8_t):
                 if(*(uint8_t *)reg != 0){
-                   SET(miCPU.PC, instruccion);
+                   SET(pcb->registros.PC, instruccion);
                 }
             break;
         case sizeof(uint32_t):
                 if(*(uint32_t *)reg != 0){
-                   SET(miCPU.PC, instruccion);
+                   SET(pcb->registros.PC, instruccion);
                 }
             break;
     }
@@ -157,19 +155,4 @@ void EXIT(){
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
-}
-
-
-void inicializar_registros_cpu() {
-    SET(miCPU.AX, 0);
-    SET(miCPU.BX, 0);
-    SET(miCPU.CX, 0);
-    SET(miCPU.DX, 0);
-    SET(miCPU.EAX, 0);
-    SET(miCPU.EBX, 0);
-    SET(miCPU.ECX, 0);
-    SET(miCPU.EDX, 0);
-    SET(miCPU.SI, 0);
-    SET(miCPU.DI, 0);
-    SET(miCPU.PC, 0);
 }
