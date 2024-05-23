@@ -16,15 +16,14 @@ typedef enum {
     OPERACION_FINALIZADA,
     // Kernel - CPU
     ENVIO_PCB,
+    //Bidireccional Kernel - CPU
     INTERRUPCION,
-
     // CPU - KERNEL
     INSTRUCCION_EXIT,
     ENVIAR_IO_GEN_SLEEP,
     // CPU - Memoria
     ENVIO_PC,
     ENVIO_RESIZE,
-
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
@@ -62,6 +61,7 @@ void agregar_int_a_paquete(t_paquete* paquete, int valor);
 void agregar_string_a_paquete(t_paquete* paquete, char* string);
 void agregar_PCB_a_paquete(t_paquete* paquete, PCB* pcb);
 void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccion);
+void agregar_interfaz_generica_a_paquete(t_paquete* paquete, t_interfaz_generica* interfaz);
 
 int buffer_read_int(t_buffer* buffer);
 uint32_t buffer_read_uint32(t_buffer* buffer);
@@ -69,6 +69,7 @@ char* buffer_read_string(t_buffer* buffer);
 PCB* buffer_read_pcb(t_buffer* buffer);
 t_instruccion* buffer_read_instruccion(t_buffer* buffer);
 t_dispatch* buffer_read_dispatch(t_buffer* buffer);
+t_interfaz_generica* buffer_read_interfaz_generica(t_buffer* buffer);
 void liberar_buffer(t_buffer* buffer);
 
 #endif /* SER_H */

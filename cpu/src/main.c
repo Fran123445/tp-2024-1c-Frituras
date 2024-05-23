@@ -21,11 +21,13 @@ void iniciar_servidores(t_config* config) {
     socket_kernel_d = esperar_cliente(socket_servidor_d, CPU);
     socket_kernel_i = esperar_cliente(socket_servidor_i, CPU);
 
+    log_destroy(log_serv_dispatch);
+    log_destroy(log_serv_interrupt);
 }
 
 void* escuchar_dispatch() {
     while (1) {
-        PCB* pcb = recibir_pcb();
+        pcb = recibir_pcb();
         realizar_ciclo_de_instruccion();
         free(pcb);
     }

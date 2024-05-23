@@ -10,9 +10,9 @@ PCB* recibir_pcb(){
     op_code cod_op = recibir_operacion(socket_kernel_d);
     if(cod_op == ENVIO_PCB){
         t_buffer* buffer = recibir_buffer(socket_kernel_d);
-        PCB* pcb= buffer_read_pcb(buffer);
+        PCB* pcb_recibido = buffer_read_pcb(buffer);
         liberar_buffer(buffer);
-        return pcb;
+        return pcb_recibido;
     }
     return NULL;
 }
@@ -36,14 +36,16 @@ t_instruccion* fetch(){
 
     pcb->programCounter++;
 
+    log_destroy(log_ciclo);
+
     return instruccionEncontrada;
 }
 
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
+    agregar_int_a_paquete(paquete, &pcb->PID);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
-    sem_post(&semaforo_pc);
     eliminar_paquete(paquete);
 }
 
@@ -59,6 +61,7 @@ t_instruccion* obtener_instruccion_de_memoria(){
         log_error(log_ciclo, "Error al recibir instrucción de la memoria");
         return NULL;
     } 
+    log_destroy(log_ciclo);
         
 }
 
@@ -142,6 +145,7 @@ void decode_execute(t_instruccion* instruccion){
         log_error(log_ciclo, "La instruccion es inválida");
         break;
     }
+    log_destroy(log_ciclo);
 }
 
 int check_interrupt() {
