@@ -137,9 +137,12 @@ void IO_GEN_SLEEP(t_interfaz_generica* interfaz,int unidades_de_trabajo){
     t_paquete* paquete = crear_paquete(ENVIAR_IO_GEN_SLEEP);
     interfaz->unidades_trabajo = unidades_de_trabajo;
     agregar_PCB_a_paquete(paquete,pcb);
-    agregar_a_paquete(paquete, interfaz, sizeof(t_interfaz_generica));
+    agregar_interfaz_generica_a_paquete(paquete, interfaz, sizeof(t_interfaz_generica));
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
 }
 
 

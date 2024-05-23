@@ -10,9 +10,9 @@ PCB* recibir_pcb(){
     op_code cod_op = recibir_operacion(socket_kernel_d);
     if(cod_op == ENVIO_PCB){
         t_buffer* buffer = recibir_buffer(socket_kernel_d);
-        PCB* pcb= buffer_read_pcb(buffer);
+        PCB* pcb_recibido = buffer_read_pcb(buffer);
         liberar_buffer(buffer);
-        return pcb;
+        return pcb_recibido;
     }
     return NULL;
 }
@@ -43,6 +43,7 @@ t_instruccion* fetch(){
 
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
+    agregar_int_a_paquete(paquete, &pcb->PID);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
