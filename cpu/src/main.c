@@ -11,15 +11,13 @@ int socket_servidor_i;
 volatile int hay_interrupcion = 0;
 PCB* pcb;
 
-sem_t semaforo_pc;
-
 void iniciar_servidores(t_config* config) {
     t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", false, LOG_LEVEL_TRACE);
     t_log* log_serv_interrupt = log_create("servidorInterrupt.log", "CPU", false, LOG_LEVEL_TRACE);
 
     socket_servidor_d = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH"), log_serv_dispatch);
     socket_servidor_i = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT"), log_serv_interrupt);
-
+    
     socket_kernel_d = esperar_cliente(socket_servidor_d, CPU);
     socket_kernel_i = esperar_cliente(socket_servidor_i, CPU);
 
@@ -47,8 +45,6 @@ int main(int argc, char* argv[]) {
     if (config == NULL) {
         exit(1);
     }
-
-    sem_init(&semaforo_pc,1,0);
 
     inicializar_registros_cpu();
 
