@@ -10,7 +10,7 @@ void SET(registrosCPU registro, int valor);
 void SUM(registrosCPU registroDestino, registrosCPU registroOrigen);
 void SUB(registrosCPU registroDestino, registrosCPU registroOrigen);
 void JNZ(registrosCPU registro, int instruccion);
-void IO_GEN_SLEEP(t_interfaz_generica* interfaz,int unidades_trabajo);
+void IO_GEN_SLEEP(char* interfaz,int unidades_trabajo);
 void EXIT();
 
 
