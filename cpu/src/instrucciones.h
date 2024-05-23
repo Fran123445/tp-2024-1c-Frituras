@@ -3,8 +3,6 @@
 
 #include "main.h"
 
-extern registros_cpu miCPU;
-
 void inicializar_registros_cpu();
 void* obtenerRegistro(registrosCPU registro);
 void SET(registrosCPU registro, int valor);
