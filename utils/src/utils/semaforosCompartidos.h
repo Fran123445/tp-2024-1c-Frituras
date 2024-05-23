@@ -1,3 +1,4 @@
 #include <semaphore.h>
 
-sem_init(&semaforo_pc, 0, 0);
+
+extern sem_t semaforo_pc;
