@@ -27,11 +27,11 @@ void enviar_pcb(op_code motivo){
 t_instruccion* fetch(){
     log_ciclo = log_create("Cpu.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
     int pid = pcb->PID;
-    uint32_t pc = pcb->programCounter;
+    miCPU.PC = pcb->programCounter;
 
-    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pc);
+    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, miCPU.PC);
 
-    enviar_PC_a_memoria(pc);
+    enviar_PC_a_memoria(miCPU.PC);
     t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria();
 
     pcb->programCounter++;

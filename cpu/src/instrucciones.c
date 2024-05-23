@@ -117,16 +117,17 @@ void JNZ(registrosCPU registro, int instruccion){
     switch (tam_reg) {
         case sizeof(uint8_t):
                 if(*(uint8_t *)reg != 0){
-                   miCPU.PC = (uint32_t)instruccion; 
+                   SET(miCPU.PC, instruccion);
                 }
             break;
         case sizeof(uint32_t):
                 if(*(uint32_t *)reg != 0){
-                   miCPU.PC = (uint32_t)instruccion; 
+                   SET(miCPU.PC, instruccion);
                 }
             break;
     }
 }
+
 /*
 void RESIZE(int tamaño){
     
@@ -144,6 +145,7 @@ void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     agregar_interfaz_generica_a_paquete(paquete, interfaz, sizeof(t_interfaz_generica));
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
+    
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
