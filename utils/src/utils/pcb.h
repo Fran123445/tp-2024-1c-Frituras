@@ -92,4 +92,5 @@ typedef struct {
 
 
 
+size_t tamanioRegistro(registrosCPU registro);
 #endif /* PCB_H */
