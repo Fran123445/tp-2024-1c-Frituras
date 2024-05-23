@@ -27,7 +27,7 @@ void iniciar_servidores(t_config* config) {
 
 void* escuchar_dispatch() {
     while (1) {
-        PCB* pcb = recibir_pcb();
+        pcb = recibir_pcb();
         realizar_ciclo_de_instruccion();
         free(pcb);
     }

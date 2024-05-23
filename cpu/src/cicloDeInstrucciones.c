@@ -10,9 +10,9 @@ PCB* recibir_pcb(){
     op_code cod_op = recibir_operacion(socket_kernel_d);
     if(cod_op == ENVIO_PCB){
         t_buffer* buffer = recibir_buffer(socket_kernel_d);
-        PCB* pcb= buffer_read_pcb(buffer);
+        PCB* pcb_recibido = buffer_read_pcb(buffer);
         liberar_buffer(buffer);
-        return pcb;
+        return pcb_recibido;
     }
     return NULL;
 }
@@ -27,11 +27,11 @@ void enviar_pcb(op_code motivo){
 t_instruccion* fetch(){
     log_ciclo = log_create("Cpu.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
     int pid = pcb->PID;
-    uint32_t pc = pcb->programCounter;
+    miCPU.PC = pcb->programCounter;
 
-    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pc);
+    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, miCPU.PC);
 
-    enviar_PC_a_memoria(pc);
+    enviar_PC_a_memoria(miCPU.PC);
     t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria();
 
     pcb->programCounter++;
@@ -43,6 +43,7 @@ t_instruccion* fetch(){
 
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
+    agregar_int_a_paquete(paquete, &pcb->PID);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
@@ -108,8 +109,8 @@ void decode_execute(t_instruccion* instruccion){
         break;
     */
     case iIO_GEN_SLEEP:
-        IO_GEN_SLEEP((t_interfaz_generica*)instruccion->interfaz, *(int *)instruccion->arg1);
-        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz->nombre, instruccion->arg1);        
+        IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);        
         break;
     /*
     case iIO_STDIN_READ:

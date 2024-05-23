@@ -81,7 +81,7 @@ typedef struct {
     void* arg2;
     int sizeArg3;
     void* arg3;                        
-    t_interfaz_generica* interfaz;       
+    char* interfaz;       
     char* archivo;       
 }t_instruccion;
 
