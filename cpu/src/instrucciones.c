@@ -1,7 +1,5 @@
 #include "instrucciones.h"
 
-
-
 registros_cpu miCPU;
 
 void* obtenerRegistro(registrosCPU registro) {
@@ -145,11 +143,11 @@ void RESIZE(int tamaño){
 }
 */
 
-void IO_GEN_SLEEP(t_interfaz_generica* interfaz,int unidades_trabajo){
+void IO_GEN_SLEEP(t_interfaz_generica* interfaz,int unidades_de_trabajo){
     t_paquete* paquete = crear_paquete(ENVIAR_IO_GEN_SLEEP);
+    interfaz->unidades_trabajo = unidades_de_trabajo;
     agregar_PCB_a_paquete(paquete,pcb);
     agregar_a_paquete(paquete, interfaz, sizeof(t_interfaz_generica));
-    agregar_int_a_paquete(paquete,unidades_trabajo);
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
