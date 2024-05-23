@@ -5,4 +5,4 @@
 #include <estructuras.h>
 
 t_tipoInstruccion obtener_tipo_instruccion (const* char ins_char);
-t_instruccion *volver_char_a_instruccion(char* linea);
+t_instruccion* volver_char_a_instruccion(char* linea);

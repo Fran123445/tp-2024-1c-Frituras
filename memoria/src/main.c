@@ -1,4 +1,4 @@
-#include <main.h>
+#include "main.h"
 
 
 int socket_kernel;
@@ -8,6 +8,7 @@ int socket_serv_kernel;
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_config* config;
+
 void iniciar_servidores(t_config* config){
     t_log* log_memoria_kernel = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
     t_log* log_memoria_cpu = log_create("memoria_cpu.log", "Memoria", true, LOG_LEVEL_TRACE);
@@ -28,8 +29,8 @@ void iniciar_servidores(t_config* config){
 
 }
 void* escuchar_cpu(){
+    int tiempo_retardo = config_get_int_value(config, "PUERTO_ESCUCHA");
     while(1){
-        int tiempo_retardo = config_get_int_value(config, "PUERTO_ESCUCHA");
         recibir_pc(socket_cpu);
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
 

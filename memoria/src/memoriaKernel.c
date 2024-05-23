@@ -2,14 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <commons/collections/list.h>
-#include <estructuras.h>
-void* creacion_proceso(int socket_kernel) {
+#include "estructuras.h"
+#include "memoriaInstrucciones.h"
+#include "main.h"
+
+
+
+proceso_memoria* creacion_proceso(int socket_kernel) {
     op_code cod_op = recibir_operacion(socket_kernel);
     if(cod_op == CREACION_PROCESO){
         proceso_memoria* proceso = malloc(sizeof(proceso_memoria));
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
-        proceso->pid=pid_proceso;
+        proceso->proceso_id=pid_proceso;
         char* path_proceso = buffer_read_string(buffer);
         proceso->path= path_proceso;
         liberar_buffer(buffer);
@@ -18,29 +23,44 @@ void* creacion_proceso(int socket_kernel) {
     return NULL;
 }
 
-t_list *abrir_archivo_path(int socket_kernel){
-    proceso_memoria* proceso = creacion_proceso_path(socket_kernel);
+void abrir_archivo_path(int socket_kernel){
+    proceso_memoria* proceso = creacion_proceso(socket_kernel);
     char* path = stdrup(proceso->path);
+
     if (path != NULL){
         FILE *file = fopen(path,"r");
         if (file == NULL){
             fprintf(stderr, "Archivo vacio");
             free(path);
         }
-        t_list *lista_pseudocodigo = list_create();
-        char buffer[1000];
-        while(fgets(buffer, sizeof(buffer),file)){
-         list_add(lista_pseudocodigo, strdup(buffer));
-        }
-        fclose(file);
-        free(path);
-        free(buffer);
-        return lista_pseudocodigo;
-    } else{
-        printf ("Error, path no valido");
-        return NULL;
-    }
 
+    char* linea = NULL;
+    size_t tamanio = 0;
+    ssize_t leidos;
+    t_list* instrucciones;
+    instrucciones = list_create();
+    t_proceso* proceso_ins = malloc(sizeof(proceso_ins));
+    proceso_ins->pid= proceso->proceso_id;
+
+    while ((leidos = getLine(&linea, &tamanio, file)) != -1){
+        if(linea[leidos - 1] == '\n'){
+            linea[leidos - 1] = '\0';
+        }
+
+        char *linea_copia = strdup(linea);
+        if (linea_copia == NULL){
+            perror("Error al copiar linea");
+            free(linea);
+            fclose(file);
+            return;
+        }
+        list_add(instrucciones, linea_copia);
+    }
+    proceso_ins->instrucciones = instrucciones;
+    list_add(lista_de_procesos_con_ins,proceso_ins);
+    free(instrucciones);
+    free(linea);
+    fclose(file);
 }
 
 

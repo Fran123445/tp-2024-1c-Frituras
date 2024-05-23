@@ -13,7 +13,14 @@
 #include <utils/serializacion.h>
 
 typedef struct{
-    int pid;
+    int proceso_id;
     char* path;
 }proceso_memoria;
+
+t_list* lista_de_procesos_con_ins; //adentro tiene t_procesos.
+
+typedef struct{
+    int pid;
+    t_list* instrucciones;
+}t_proceso;
 #endif /* ESTRUCTURAS_CON_MEM */
