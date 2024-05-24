@@ -45,25 +45,25 @@ typedef struct {
 
 //Tipos de instrucciones
 typedef enum{
-    SET,
-    MOV_IN,
-    MOV_OUT,
-    SUM,
-    SUB,
-    JNZ,
-    RESIZE,
-    COPY_STRING ,
-    WAIT, 
-    SIGNAL,
-    IO_GEN_SLEEP,
-    IO_STDIN_READ,
-    IO_STDOUT_WRITE,
-    IO_FS_CREATE,
-    IO_FS_DELETE,
-    IO_FS_TRUNCATE,
-    IO_FS_WRITE,
-    IO_FS_READ,
-    EXIT
+    iSET,
+    iMOV_IN,
+    iMOV_OUT,
+    iSUM,
+    iSUB,
+    iJNZ,
+    iRESIZE,
+    iCOPY_STRING ,
+    iWAIT, 
+    iSIGNAL,
+    iIO_GEN_SLEEP,
+    iIO_STDIN_READ,
+    iIO_STDOUT_WRITE,
+    iIO_FS_CREATE,
+    iIO_FS_DELETE,
+    iIO_FS_TRUNCATE,
+    iIO_FS_WRITE,
+    iIO_FS_READ,
+    iEXIT
 }t_tipoInstruccion;
 
 //Estructura de una instruccion: tiene el tipo, 3 argumentos void porque pueden ser numeros y/o registros(ejemplo set ax 10 -- sub ax cx -- resize 128 -- io_gen_sleep int3 4)
@@ -82,7 +82,13 @@ typedef struct {
 
 typedef struct {
     PCB* proceso;
-    t_instruccion instruccion;
+    t_instruccion* instruccion;
 }t_dispatch;
 
+typedef struct {
+    char* nombre;
+    int unidades_trabajo;
+}t_interfaz_generica;
+
+size_t tamanioRegistro(registrosCPU registro);
 #endif /* PCB_H */

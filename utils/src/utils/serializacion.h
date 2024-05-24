@@ -18,6 +18,13 @@ typedef enum {
     ENVIO_PCB,
     INTERRUPCION,
 
+    // CPU - KERNEL
+    INSTRUCCION_EXIT,
+    ENVIAR_IO_GEN_SLEEP,
+    // CPU - Memoria
+    ENVIO_PC,
+    ENVIO_RESIZE,
+
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
@@ -44,7 +51,7 @@ typedef struct
 } t_paquete;
 
 
-t_paquete* crear_paquete(void);
+t_paquete* crear_paquete(op_code operacion);
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 t_buffer* recibir_buffer(int socket_cliente);
@@ -61,7 +68,7 @@ uint32_t buffer_read_uint32(t_buffer* buffer);
 char* buffer_read_string(t_buffer* buffer);
 PCB* buffer_read_pcb(t_buffer* buffer);
 t_instruccion* buffer_read_instruccion(t_buffer* buffer);
-void liberar_buffer(t_buffer* buffer) ;
-
+t_dispatch* buffer_read_dispatch(t_buffer* buffer);
+void liberar_buffer(t_buffer* buffer);
 
 #endif /* SER_H */

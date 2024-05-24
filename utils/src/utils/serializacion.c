@@ -22,10 +22,10 @@ void crear_buffer(t_paquete* paquete)
 	paquete->buffer->stream = NULL;
 }
 
-t_paquete* crear_paquete(void)
+t_paquete* crear_paquete(op_code operacion)
 {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
-	paquete->codigo_operacion = PAQUETE;
+	paquete->codigo_operacion = operacion;
 	crear_buffer(paquete);
 	return paquete;
 }
@@ -146,6 +146,14 @@ t_instruccion* buffer_read_instruccion(t_buffer* buffer) {
 	inst->archivo = buffer_read_string(buffer);
 
 	return inst;
+}
+
+t_dispatch* buffer_read_dispatch(t_buffer* buffer) {
+	t_dispatch* dispatch = malloc(sizeof(t_dispatch));
+	dispatch->proceso = buffer_read_pcb(buffer);
+	dispatch->instruccion = buffer_read_instruccion(buffer);
+
+	return dispatch;
 }
 
 void liberar_buffer(t_buffer* buffer) {
