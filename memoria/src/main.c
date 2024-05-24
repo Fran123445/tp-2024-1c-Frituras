@@ -16,28 +16,22 @@ void iniciar_servidores(t_config* config){
     t_log* log_memoria = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
 
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria);
-    
-    socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
-    socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
-    socket_io = (int)(intptr_t)esperar_clientes_IO(escucha_io);
-
-    escucha_cpu = malloc(sizeof(t_conexion_escucha));
-    escucha_cpu->modulo=MEMORIA;
-    escucha_cpu->socket_servidor= socket_cpu;
-
-    escucha_kernel= malloc(sizeof(t_conexion_escucha));
-    escucha_kernel->socket_servidor=socket_kernel;
-    escucha_kernel->modulo= MEMORIA;
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
     escucha_io->modulo= MEMORIA;
     escucha_io->socket_servidor= socket_io;
+
+    socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_io = (int)(intptr_t)esperar_clientes_IO(escucha_io);
+
+
 }
 
 void* escuchar_cpu(void* argumento){
     t_parametros_cpu* params_cpu = (t_parametros_cpu*)argumento;
     //params_cpu usado para pasar los parámetros al hilo sin problema. ignorar warning.
-    int tiempo_retardo = config_get_int_value(config, "PUERTO_ESCUCHA");
+    int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     while(1){
         recibir_proceso_cpu(socket_cpu);
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
