@@ -37,6 +37,6 @@ typedef struct {
 void esperarClientesIO(t_conexion_escucha* params);
 void administrarInterfazGenerica(int* socket_cliente);
 t_IOConectado* hallarInterfazConectada(char* nombre);
-bool comprobarOperacionValida(t_IOConectado* interfaz, t_tipoInstruccion inst);
+bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion);
 
 #endif /* CONN_H */

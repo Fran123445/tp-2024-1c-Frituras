@@ -73,15 +73,20 @@ void administrarInterfazGenerica(int* socket_cliente) {
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
             pthread_mutex_unlock(&mutexLogger);
             enviarAExit(solicitud->proceso, INVALID_WRITE); // no se si es el motivo indicado, otra vez
+            free(solicitud);
             break;
         }
 
+        // Temporal, casi seguro que lo cambio cuando haga VRR
+        pthread_mutex_lock(&mutexReady);
+        queue_push(colaReady, solicitud->proceso);
+        pthread_mutex_unlock(&mutexReady);
+
         free(solicitud);
-        //enviarAReady(proceso)
     } 
 }
 
-bool comprobarOperacionValida(t_IOConectado* interfaz, t_tipoInstruccion inst) {
+bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion) {
 
     bool opValida;
 
