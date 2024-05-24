@@ -6,10 +6,11 @@
 
 PCB* recibir_pcb();
 void enviar_pcb(op_code motivo);
-t_instruccion* fetch();
+char* fetch();
 void enviar_PC_a_memoria(uint32_t pc);
-t_instruccion* obtener_instruccion_de_memoria();
-void decode_execute(t_instruccion* instruccion);
+char* obtener_instruccion_de_memoria();
+t_instruccion* decode(char* instruccion);
+void execute(t_instruccion* instruccion);
 int check_interrupt();
 void realizar_ciclo_de_instruccion();
 
