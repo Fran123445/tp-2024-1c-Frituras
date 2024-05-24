@@ -28,10 +28,10 @@ t_instruccion* fetch(){
     log_ciclo = log_create("Cpu.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
     int pid = pcb->PID;
  
-    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pcb->programCounter.PC);
+    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pcb->programCounter);
 
     enviar_PC_a_memoria(pcb->programCounter);
-    t_instruccion* instruccionEncontrada = obtener_instruccion_de_memoria();
+    t_instruccion* instruccionEncontrada = instrucciones[pcb->programCounter]; //obtener_instruccion_de_memoria();
 
     pcb->programCounter++;
 
