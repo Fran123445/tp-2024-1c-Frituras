@@ -1,3 +1,6 @@
 #include <utils/serializacion.h>
 
-void* esperar_clientes(t_conexion_escucha* nueva_conexion);
+
+
+extern pthread_mutex_t mutex_log_memoria_io;
+void* esperar_clientes_IO(t_conexion_escucha* nueva_conexion);

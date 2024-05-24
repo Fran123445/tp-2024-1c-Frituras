@@ -30,6 +30,7 @@ typedef enum {
     FIN_PROCESO,
     //CPU o IO - Memoria
     ACCESO_ESPACIO_USUARIO,
+    CONEXION_DIAL_FS,
     //Memoria de Instrucciones - CPU
     ENVIO_DE_INSTRUCCIONES,
     // Cualquier módulo a Memoria

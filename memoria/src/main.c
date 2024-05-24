@@ -1,12 +1,16 @@
+#include<stdint.h>
 #include "main.h"
-
-
+#include "memoriaCPU.h"
+#include "conexiones.h"
 int socket_kernel;
 int socket_cpu;
+int socket_io;
 int socket_serv_cpu;
 int socket_serv_kernel;
+int socket_serv_io;
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
+t_conexion_escucha* escucha_io;
 t_config* config;
 
 void iniciar_servidores(t_config* config){
@@ -16,16 +20,23 @@ void iniciar_servidores(t_config* config){
 
     socket_serv_kernel = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria_kernel);
     socket_serv_cpu = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA"), log_memoria_cpu);
+    socket_serv_io = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"), log_memoria_io);
 
     socket_kernel = esperar_cliente(socket_serv_kernel, KERNEL);
     socket_cpu = esperar_cliente(socket_serv_cpu, CPU);
+    socket_io = (int)(intptr_t)esperar_clientes_IO(escucha_io);
 
     escucha_cpu = malloc(sizeof(t_conexion_escucha));
     escucha_cpu->modulo=MEMORIA;
     escucha_cpu->socket_servidor=  socket_cpu;
+
     escucha_kernel= malloc(sizeof(t_conexion_escucha));
     escucha_kernel->socket_servidor=socket_cpu;
     escucha_kernel->modulo= MEMORIA;
+
+    escucha_io= malloc(sizeof(t_conexion_escucha));
+    escucha_io->modulo= MEMORIA;
+    escucha_io->socket_servidor= socket_io;
 
 }
 void* escuchar_cpu(){

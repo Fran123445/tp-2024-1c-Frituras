@@ -11,8 +11,9 @@
 #include "memoriaCPU.h"
 #include "memoriaKernel.h"
 #include "memoriaInstrucciones.h"
+
 extern int socket_kernel;
 extern int socket_cpu;
-
+extern int socket_io;
 void* escuchar_kernel();
 void* escuchar_cpu();
