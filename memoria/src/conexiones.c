@@ -23,7 +23,7 @@ void* esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
 
         switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_STDIN:
-                // A implementar
+                funcion = &funcion_io;
                 break;
             case CONEXION_STDOUT:
                 // A implementar
@@ -46,3 +46,6 @@ void* esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
     return NULL;
        }
        
+void funcion_io(int* socket_cliente){
+    // a implementar
+}
