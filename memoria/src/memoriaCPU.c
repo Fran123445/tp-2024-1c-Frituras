@@ -21,7 +21,7 @@ proceso_cpu* recibir_proceso_cpu(int socket_cpu){
     } return NULL;
 }
 
-void* mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retardo){
+void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retardo){
     proceso_cpu* proceso_de_cpu = recibir_proceso_cpu(socket_cpu);
     char* instruccion = obtener_instruccion(socket_kernel,(proceso_de_cpu->pc), (proceso_de_cpu->pid));
     t_paquete* paquete = crear_paquete(ENVIO_DE_INSTRUCCIONES);
