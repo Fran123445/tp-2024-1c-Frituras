@@ -246,11 +246,15 @@ void realizar_ciclo_de_instruccion(){
         
         execute(instruccion_a_ejecutar);
 
+
+        // Verificar condiciones de salida 
         if (check_interrupt()) {
             enviar_pcb(INTERRUPCION);
             break; // Romper el bucle si hay interrupción
         }
-        // Verificar condiciones de salida 
+        if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
+            break;
+        }
         if (instruccion_a_ejecutar->tipo == iEXIT){
             break; // Romper el bucle si el proceso ha finalizado
         }
