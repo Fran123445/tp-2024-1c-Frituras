@@ -10,6 +10,7 @@
 #include <string.h>
 #include <procesos.h>
 #include <interfaces.h>
+#include <utils/serializacion.h>
 
 extern pthread_t pth_colaExit;
 extern pthread_t pth_colaNew;
