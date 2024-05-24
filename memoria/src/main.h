@@ -17,3 +17,10 @@ extern int socket_cpu;
 extern int socket_io;
 void* escuchar_kernel();
 void* escuchar_cpu();
+
+typedef struct{
+    int socket_kernel;
+    int socket_cpu;
+    int tiempo_retardo;
+}t_parametros_cpu;
+

@@ -12,7 +12,7 @@ t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
-
+t_parametros_cpu* params_cpu;
 void iniciar_servidores(t_config* config){
     t_log* log_memoria_kernel = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
     t_log* log_memoria_cpu = log_create("memoria_cpu.log", "Memoria", true, LOG_LEVEL_TRACE);
@@ -39,12 +39,13 @@ void iniciar_servidores(t_config* config){
     escucha_io->socket_servidor= socket_io;
 
 }
-void* escuchar_cpu(){
+void* escuchar_cpu(void* argumento){
+    t_parametros_cpu* params_cpu = (t_parametros_cpu*)argumento;
+    //params_cpu usado para pasar los parámetros al hilo sin problema. ignorar warning.
     int tiempo_retardo = config_get_int_value(config, "PUERTO_ESCUCHA");
     while(1){
         recibir_proceso_cpu(socket_cpu);
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
-
     }
 }
 void* escuchar_kernel(){
@@ -66,8 +67,12 @@ int main(int argc, char *argv[]){
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
     pthread_t hilo_cpu;
-    pthread_create(&hilo_cpu, NULL, escuchar_cpu, NULL);
+    pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
 
+    pthread_t hilo_io;
+    pthread_create(&hilo_io, NULL, (void* (*)(void*)) esperar_clientes_IO, (void*) escucha_io );
+    //(void* (*)(void*)) esperar_clientes_IO es casteo ya que pthread_create espera un void* con args void*
+    // mientras q esperar cliente es voi* y espera un t_conexion_conexion escucha.
     config_destroy(config);
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
