@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <commons/config.h>
 #include "memoriaKernel.h"
-#include "buscarprocesos.h"
 #include "main.h"
 #include "memoriaInstrucciones.h"
 

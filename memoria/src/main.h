@@ -8,7 +8,9 @@
 #include <semaphore.h>
 #include "conexiones.h"
 #include "estructuras.h"
-
+#include "memoriaCPU.h"
+#include "memoriaKernel.h"
+#include "memoriaInstrucciones.h"
 extern int socket_kernel;
 extern int socket_cpu;
 

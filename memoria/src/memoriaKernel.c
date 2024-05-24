@@ -6,7 +6,7 @@
 #include "memoriaInstrucciones.h"
 #include "main.h"
 
-
+t_list* lista_de_procesos_con_ins = NULL;
 
 proceso_memoria* creacion_proceso(int socket_kernel) {
     op_code cod_op = recibir_operacion(socket_kernel);

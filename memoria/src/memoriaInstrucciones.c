@@ -1,12 +1,15 @@
-#include <utils/serializacion.h>
 #include <stdlib.h>
 #include <string.h>
 #include <commons/collections/list.h>
 #include <utils/pcb.h>
+#include<unistd.h>
+#include<netdb.h>
+#include<pthread.h>
+#include <semaphore.h>
 #include "estructuras.h"
 #include "memoriaInstrucciones.h"
-#include "main.h"
-#include "buscarprocesos.h"
+
+pthread_mutex_t mutex_lista_de_procesos_con_ins = PTHREAD_MUTEX_INITIALIZER;
 
 t_tipoInstruccion obtener_tipo_instruccion (char* ins_char){
     if (strcmp(ins_char, "SET") == 0) return iSET;
@@ -137,3 +140,14 @@ t_list* dividir_cadena_en_tokens(const char* linea){
     return lista;
 }
 
+t_proceso* hallar_proceso(int PID){
+    bool _mismoPID(t_proceso* proceso){
+        return (proceso->pid == PID);
+    };
+
+    pthread_mutex_lock(&mutex_lista_de_procesos_con_ins);
+    t_proceso* encontrado = list_find(lista_de_procesos_con_ins, (void *)_mismoPID);
+    pthread_mutex_unlock(&mutex_lista_de_procesos_con_ins);
+
+    return encontrado;
+}

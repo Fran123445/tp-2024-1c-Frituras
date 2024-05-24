@@ -31,7 +31,7 @@ void iniciar_servidores(t_config* config){
 void* escuchar_cpu(){
     int tiempo_retardo = config_get_int_value(config, "PUERTO_ESCUCHA");
     while(1){
-        recibir_pc(socket_cpu);
+        recibir_proceso_cpu(socket_cpu);
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
 
     }
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
         exit(1);
     }
     iniciar_servidores(config);
-    lista_de_procesos_con_ins = malloc(sizeof(t_list));
+    t_list* lista_de_procesos_con_ins = NULL;
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
     pthread_t hilo_cpu;
@@ -62,5 +62,6 @@ int main(int argc, char *argv[]){
     pthread_join(hilo_kernel, NULL);
     free(escucha_cpu);
     free(escucha_kernel);
+    list_destroy(lista_de_procesos_con_ins);
     return 0;
 }
