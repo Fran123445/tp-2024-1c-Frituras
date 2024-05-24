@@ -19,10 +19,11 @@ void iniciar_servidores(t_config* config){
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
     escucha_io->modulo= MEMORIA;
-    escucha_io->socket_servidor= socket_io;
+    escucha_io->socket_servidor= socket_servidor_memoria;
 
-    socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
     socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    
     socket_io = (int)(intptr_t)esperar_clientes_IO(escucha_io);
 
 
@@ -47,7 +48,7 @@ void* escuchar_kernel(){
 
 int main(int argc, char *argv[]){
 
-    t_config *config = config_create("memoria.config");
+    config = config_create("memoria.config");
     if (config == NULL){
         exit(1);
     }

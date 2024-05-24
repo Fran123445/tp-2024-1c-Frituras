@@ -27,23 +27,6 @@ void enviar_pcb(op_code motivo){
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
-
-t_instruccion* fetch(){
-    log_ciclo = log_create("Cpu.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
-    int pid = pcb->PID;
- 
-    log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pcb->programCounter);
-
-    enviar_PC_a_memoria(pcb->programCounter);
-    t_instruccion* instruccionEncontrada = instrucciones[pcb->programCounter]; //obtener_instruccion_de_memoria();
-
-    pcb->programCounter++;
-
-    log_destroy(log_ciclo);
-
-    return instruccionEncontrada;
-}
-
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_int_a_paquete(paquete, pcb->PID);
@@ -261,12 +244,14 @@ void realizar_ciclo_de_instruccion(){
         t_instruccion* instruccion_a_ejecutar = decode(instruccion_a_decodificar);
         
         execute(instruccion_a_ejecutar);
-
+        // Verificar condiciones de salida 
         if (check_interrupt()) {
             enviar_pcb(INTERRUPCION);
             break; // Romper el bucle si hay interrupción
         }
-        // Verificar condiciones de salida 
+        if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
+            break;
+        }
         if (instruccion_a_ejecutar->tipo == iEXIT){
             break; // Romper el bucle si el proceso ha finalizado
         }
