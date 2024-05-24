@@ -70,6 +70,7 @@ char* buffer_read_string(t_buffer* buffer);
 PCB* buffer_read_pcb(t_buffer* buffer);
 t_instruccion* buffer_read_instruccion(t_buffer* buffer);
 t_dispatch* buffer_read_dispatch(t_buffer* buffer);
+t_interfaz_generica* buffer_read_interfaz_generica(t_buffer* buffer);
 void liberar_buffer(t_buffer* buffer);
 
 #endif /* SER_H */
