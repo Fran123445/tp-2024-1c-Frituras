@@ -81,18 +81,18 @@ void administrarInterfazGenerica(int* socket_cliente) {
     } 
 }
 
-bool comprobarOperacionValida(t_IOConectado* interfaz, t_tipoInstruccion inst) {
+bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion) {
 
     bool opValida;
 
     switch (interfaz->tipo) {
         case INTERFAZ_GENERICA:
-            opValida = inst == IO_GEN_SLEEP;
+            opValida = operacion == ENVIAR_IO_GEN_SLEEP;
             break;
-        case INTERFAZ_STDIN:
-            opValida = inst == IO_STDIN_READ;
+        /*case INTERFAZ_STDIN:
+            opValida = operacion == IO_STDIN_READ;
         case INTERFAZ_STDOUT:
-            opValida = inst == IO_STDOUT_WRITE;
+            opValida = operacion == IO_STDOUT_WRITE;*/
         // Falta todo lo de FS
         default:
             opValida = false;

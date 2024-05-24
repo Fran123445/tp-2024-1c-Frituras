@@ -55,9 +55,9 @@ void ejecutarSiguienteRR() {
 
 void recibirDeCPURR() {
     while(1) {
-        recibir_operacion(socketCPUDispatch);
+        op_code operacion = recibir_operacion(socketCPUDispatch);
         sem_post(&llegadaProceso);
-        leerBufferYPlanificar();
+        leerBufferYPlanificar(operacion);
     }
 }
 

@@ -169,32 +169,29 @@ void ejecutarSiguiente() {
     }
 }
 
-void leerBufferYPlanificar() {
+void leerBufferYPlanificar(op_code operacion) {
     t_buffer* buffer = recibir_buffer(socketCPUDispatch);
-    t_dispatch* proceso = buffer_read_dispatch(buffer);
-    planificarRecibido(proceso);
+    planificarRecibido(operacion, buffer);
     liberar_buffer(buffer);
 }
 
 void recibirDeCPU() {
     while(1) {
-        recibir_operacion(socketCPUDispatch);
-        leerBufferYPlanificar();
+        op_code operacion = recibir_operacion(socketCPUDispatch);
+        leerBufferYPlanificar(operacion);
     }
 }
 
-void planificarRecibido(t_dispatch* dispatch) {
-    PCB* proceso = dispatch->proceso;
-    t_instruccion* inst = dispatch->instruccion;
-    t_IOConectado* interfaz;
-    switch (inst->tipo) {
-        case IO_GEN_SLEEP:
-            interfaz = hallarInterfazConectada(inst->interfaz);
-            if (comprobarOperacionValida(interfaz, inst->tipo)) {
+void planificarRecibido(op_code operacion, t_buffer* buffer) {
+    PCB* proceso = buffer_read_pcb(buffer);
+    switch (operacion) {
+        case ENVIAR_IO_GEN_SLEEP:
+            t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
+            t_IOConectado* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
+            if (comprobarOperacionValida(interfaz, operacion)) {
                 t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
                 solicitud->proceso = proceso;
-                solicitud->unidadesTrabajo = *(int*) inst->arg1;
-
+                solicitud->unidadesTrabajo = buffer_read_int(buffer);
                 pthread_mutex_lock(&interfaz->mutex);
                 queue_push(interfaz->cola, solicitud);
                 cambiarEstado(proceso, ESTADO_BLOCKED);
@@ -204,13 +201,14 @@ void planificarRecibido(t_dispatch* dispatch) {
                 enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
             }
             break;
-        case WAIT:
+        /*case WAIT:
             // todavia no me fije que hace wait
             break;
         case SIGNAL:
             // todavia no me fije que hace signal
-            break;
-        case EXIT:
+            break;*/
+        case INSTRUCCION_EXIT:
+            enviarAExit(proceso, SUCCESS);
             break;
         default:
             pthread_mutex_lock(&mutexLogger);
