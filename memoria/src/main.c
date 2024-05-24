@@ -2,43 +2,38 @@
 #include "main.h"
 #include "memoriaCPU.h"
 #include "conexiones.h"
-int socket_kernel;
-int socket_cpu;
-int socket_io;
-int socket_serv_cpu;
-int socket_serv_kernel;
-int socket_serv_io;
+int socket_kernel= 0;
+int socket_cpu = 0;
+int socket_io = 0;
+int socket_servidor_memoria;
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
 t_parametros_cpu* params_cpu;
+
 void iniciar_servidores(t_config* config){
-    t_log* log_memoria_kernel = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
-    t_log* log_memoria_cpu = log_create("memoria_cpu.log", "Memoria", true, LOG_LEVEL_TRACE);
-    t_log* log_memoria_io = log_create("memoria_io.log", "Memoria", true, LOG_LEVEL_TRACE);
+    t_log* log_memoria = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
 
-    socket_serv_kernel = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria_kernel);
-    socket_serv_cpu = iniciar_servidor(config_get_string_value(config,"PUERTO_ESCUCHA"), log_memoria_cpu);
-    socket_serv_io = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"), log_memoria_io);
-
-    socket_kernel = esperar_cliente(socket_serv_kernel, KERNEL);
-    socket_cpu = esperar_cliente(socket_serv_cpu, CPU);
+    socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria);
+    
+    socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
     socket_io = (int)(intptr_t)esperar_clientes_IO(escucha_io);
 
     escucha_cpu = malloc(sizeof(t_conexion_escucha));
     escucha_cpu->modulo=MEMORIA;
-    escucha_cpu->socket_servidor=  socket_cpu;
+    escucha_cpu->socket_servidor= socket_cpu;
 
     escucha_kernel= malloc(sizeof(t_conexion_escucha));
-    escucha_kernel->socket_servidor=socket_cpu;
+    escucha_kernel->socket_servidor=socket_kernel;
     escucha_kernel->modulo= MEMORIA;
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
     escucha_io->modulo= MEMORIA;
     escucha_io->socket_servidor= socket_io;
-
 }
+
 void* escuchar_cpu(void* argumento){
     t_parametros_cpu* params_cpu = (t_parametros_cpu*)argumento;
     //params_cpu usado para pasar los parámetros al hilo sin problema. ignorar warning.

@@ -19,11 +19,11 @@ void* esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
         free(socket_cliente);
         break;
        }
-        void (*funcion)(int*);
+        void (*funcion)(char*);
 
         switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_STDIN:
-                // A implementar
+                funcion = printf("Hola");
                 break;
             case CONEXION_STDOUT:
                 // A implementar

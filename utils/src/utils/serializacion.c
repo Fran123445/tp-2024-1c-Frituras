@@ -102,7 +102,6 @@ void buffer_read(t_buffer* buffer, void* data) {
     uint32_t nuevo_size = buffer->size - size_data - sizeof(int);
     void* nuevo_stream = malloc(nuevo_size);
     memcpy(nuevo_stream, buffer->stream + size_data + sizeof(int), nuevo_size);
-
     free(buffer->stream);
     buffer->size = nuevo_size;
     buffer->stream = nuevo_stream;
