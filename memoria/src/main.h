@@ -10,7 +10,7 @@
 #include "estructuras.h"
 #include "memoriaCPU.h"
 #include "memoriaKernel.h"
-#include "memoriaInstrucciones.h"
+#include "memoriaDeInstrucciones.h"
 
 extern int socket_kernel;
 extern int socket_cpu;

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <commons/collections/list.h>
 #include "estructuras.h"
-#include "memoriaInstrucciones.h"
+#include "memoriaDeInstrucciones.h"
 #include "main.h"
 
 t_list* lista_de_procesos_con_ins = NULL;
@@ -57,7 +57,7 @@ void abrir_archivo_path(int socket_kernel){
         list_add(instrucciones, linea_copia);
     }
     proceso_ins->instrucciones = instrucciones;
-    list_add(lista_de_procesos_con_ins,proceso_ins);
+    list_add(lista_de_procesos_con_ins,proceso_ins); // guardo en la lista de los procesos el proceso!
     free(instrucciones);
     free(linea);
     fclose(file);

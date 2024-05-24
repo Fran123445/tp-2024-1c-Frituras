@@ -5,7 +5,7 @@
 #include <commons/config.h>
 #include "memoriaKernel.h"
 #include "main.h"
-#include "memoriaInstrucciones.h"
+#include "memoriaDeInstrucciones.h"
 
 proceso_cpu* recibir_proceso_cpu(int socket_cpu){
     op_code cod_op = recibir_operacion(socket_cpu);
@@ -21,21 +21,12 @@ proceso_cpu* recibir_proceso_cpu(int socket_cpu){
     } return NULL;
 }
 
-void* mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retardo){   
-   while(true){ 
+void* mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retardo){
     proceso_cpu* proceso_de_cpu = recibir_proceso_cpu(socket_cpu);
-    if(proceso_de_cpu == NULL){
-        break;
-    }
-    t_proceso* proceso_a_mandar = hallar_proceso(proceso_de_cpu->pid);
-    list_get(proceso_a_mandar->instrucciones,(proceso_de_cpu->pc));
-    t_instruccion* instruccion = obtener_instruccion(socket_kernel,(proceso_de_cpu->pc), (proceso_de_cpu->pid));
-    usleep(tiempo_retardo*1000);
+    char* instruccion = obtener_instruccion(socket_kernel,(proceso_de_cpu->pc), (proceso_de_cpu->pid));
     t_paquete* paquete = crear_paquete(ENVIO_DE_INSTRUCCIONES);
-    agregar_instruccion_a_paquete(paquete,instruccion);
-    enviar_paquete(paquete, socket_cpu);   
-    eliminar_paquete(paquete);     
-    }
+    agregar_string_a_paquete(paquete,instruccion);
+    enviar_paquete(paquete, socket_cpu);
+    eliminar_paquete(paquete);
 }
-
 
