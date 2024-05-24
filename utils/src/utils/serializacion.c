@@ -61,6 +61,11 @@ void agregar_PCB_a_paquete(t_paquete* paquete, PCB* pcb) {
 	agregar_a_paquete(paquete, pcb, sizeof(PCB));
 }
 
+void agregar_interfaz_generica_a_paquete(t_paquete* paquete, t_interfaz_generica* interfaz) {
+    agregar_string_a_paquete(paquete, interfaz->nombre);
+    agregar_int_a_paquete(paquete, interfaz->unidades_trabajo);
+}
+
 void enviar_paquete(t_paquete* paquete, int socket_cliente)
 {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
@@ -154,6 +159,15 @@ t_dispatch* buffer_read_dispatch(t_buffer* buffer) {
 	dispatch->instruccion = buffer_read_instruccion(buffer);
 
 	return dispatch;
+}
+
+t_interfaz_generica* buffer_read_interfaz_generica(t_buffer* buffer) {
+    t_interfaz_generica* interfaz = malloc(sizeof(t_interfaz_generica));
+
+    interfaz->nombre = buffer_read_string(buffer);
+    interfaz->unidades_trabajo = buffer_read_int(buffer);
+
+    return interfaz;
 }
 
 void liberar_buffer(t_buffer* buffer) {
