@@ -16,7 +16,7 @@
 #include "interrupciones.h"
 #include "cicloDeInstrucciones.h"
 
-
+extern t_instruccion* instrucciones[4];
 extern PCB* pcb;
 extern int socket_memoria;
 extern int socket_kernel_d;
