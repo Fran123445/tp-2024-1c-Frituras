@@ -8,7 +8,10 @@
 #include<string.h>
 #include<pthread.h>
 #include <utils/serializacion.h>
+#include <semaphore.h>
 #include "estructuras.h"
 #include "main.h"
 
-bool comparar_pid(int num, t_proceso* proceso);
+extern pthread_mutex_t mutex_lista_procesos;
+
+t_proceso* hallar_proceso(int PID);

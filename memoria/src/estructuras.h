@@ -23,4 +23,9 @@ typedef struct{
     int pid;
     t_list* instrucciones;
 }t_proceso;
+
+typedef struct{
+    int pid;
+    uint32_t pc;
+}proceso_cpu;
 #endif /* ESTRUCTURAS_CON_MEM */

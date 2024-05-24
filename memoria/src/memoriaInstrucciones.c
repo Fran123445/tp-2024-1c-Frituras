@@ -8,7 +8,7 @@
 #include "main.h"
 #include "buscarprocesos.h"
 
-t_tipoInstruccion obtener_tipo_instruccion (const* char ins_char){
+t_tipoInstruccion obtener_tipo_instruccion (char* ins_char){
     if (strcmp(ins_char, "SET") == 0) return iSET;
     if (strcmp(ins_char, "MOV_IN") == 0) return iMOV_IN;
     if (strcmp(ins_char, "MOV_OUT") == 0) return iMOV_OUT;
@@ -48,75 +48,80 @@ registrosCPU string_a_registro(const char* registro) {
     printf("Error: Registro '%s' no válido.\n", registro);
     exit(1);
 }
-void* obtener_instruccion(int socket_kernel, int pc, int pid){
+t_instruccion* obtener_instruccion(int socket_kernel, int pc, int pid){
     t_proceso* proceso = hallar_proceso(pid);
     t_list* lista_instrucciones = proceso->instrucciones;
     char* instruccion_char = list_get(lista_instrucciones, pc);
     free(lista_instrucciones);
-    t_list* dividir_cadena_en_tokens(instruccion_char);
-    t_tipoInstruccion tipo_de_instruccion = malloc(sizeof(t_tipoInstruccion));
-    tipo_de_instruccion = obtener_tipo_instruccion(list_get(dividir_cadena_en_tokens(instruccion_char),0));
+    t_list* lista = dividir_cadena_en_tokens(instruccion_char);
+    t_tipoInstruccion tipo_de_instruccion = obtener_tipo_instruccion(list_get(lista,0));
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
+    int valor;
+    int*valor_ptr = malloc(sizeof(int));
     switch(tipo_de_instruccion){
         case iSET:
-            instruccion = crear_instruccion(tipo_de_instruccion, 
-                            tamanioRegistro(string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1))),
-                            string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1)),
-                            sizeof(int), atoi(list_get(dividir_cadena_en_tokens(instruccion_char),2)),
-                            NULL, NULL, NULL, NULL);
-                            
-            break;
-        case iMOV_IN:
-            // a implementar 
-            break;
-        case iMOV_OUT:
-            //crear_instruccion();
+            valor = atoi(list_get(lista,2));
+            if(valor_ptr == NULL){
+                perror("error de memoria");
+                exit(EXIT_FAILURE);
+            }
+            *valor_ptr = valor;
+            instruccion->tipo = iSET;
+            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->sizeArg2 = sizeof(int);
+            instruccion->arg2 = valor_ptr;
+            instruccion->sizeArg3 = 0;
             break;
         case iSUM:
-        instruccion = crear_instruccion(tipo_de_instruccion,
-                    tamanioRegistro(string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1))),
-                    string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1)),
-                    tamanioRegistro(string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),2))), 
-                    string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),2)),
-                    NULL, NULL, NULL, NULL);
+            instruccion->tipo = iSUM;
+            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->arg2 = (void*) string_a_registro(list_get(lista,2));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->sizeArg3 = 0;
+            break;
         case iSUB:
-        instruccion = crear_instruccion(tipo_de_instruccion,
-                    tamanioRegistro(string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1))),
-                    string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1)),
-                    sizeof(int), list_get(dividir_cadena_en_tokens(instruccion_char),2),
-                    NULL, NULL, NULL, NULL);
-                    break;
+            instruccion->tipo = iSUB;
+            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->arg2 = (void*) string_a_registro(list_get(lista,2));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->sizeArg3 = 0;
+            break;
         case iJNZ:
-        instruccion = crear_instruccion(tipo_de_instruccion,
-                    tamanioRegistro(string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1))),
-                    string_a_registro(list_get(dividir_cadena_en_tokens(instruccion_char),1)),
-                    sizeof(int), atoi(list_get(dividir_cadena_en_tokens(instruccion_char),2)),
-                    NULL, NULL, NULL, NULL);
-                    break;
+            valor = atoi(list_get(lista,2));
+            if(valor_ptr == NULL){
+                perror("error de memoria");
+                exit(EXIT_FAILURE);
+            }
+            *valor_ptr = valor;
+            instruccion->tipo = iJNZ;
+            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->sizeArg2 = sizeof(int);
+            instruccion->arg2 = valor_ptr;
+            instruccion->sizeArg3 = 0;
+            break;
         case iIO_GEN_SLEEP:
-        instruccion = crear_instruccion(tipo_de_instruccion,
-                    sizeof(int), atoi(list_get(dividir_cadena_en_tokens(instruccion_char),2)),
-                    NULL, NULL, NULL, NULL,
-                    list_get(dividir_cadena_en_tokens(instruccion_char,1)),
-                      NULL);
-                    break;
-        
-    }
-    
-    }
+            valor = atoi(list_get(lista,2));
+            if(valor_ptr == NULL){
+                perror("error de memoria");
+                exit(EXIT_FAILURE);
+            }
+            *valor_ptr = valor;
+            instruccion->tipo = iIO_GEN_SLEEP;
+            instruccion->arg1 = valor_ptr;
+            instruccion->sizeArg1 = sizeof(int);
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+            instruccion->interfaz = list_get(lista,1);
+            break;
+        default :
+        break;
 
-
-t_instruccion* crear_instruccion(t_tipoInstruccion tipo_instruccion, int sizeArg, void* arg1, int sizeArg2, void* arg2, int sizeArg3, void* arg3, char* interfaz, char* archivo){
-    t_instruccion* instruccion = malloc(sizeof(t_instruccion));
-    instruccion->tipo = tipo_instruccion;
-    instruccion->sizeArg1 = sizeArg;
-    instruccion->arg1 = arg1;
-    instruccion->sizeArg2 = sizeArg2;
-    instruccion->arg2 = arg2;
-    instruccion->sizeArg3 = sizeArg3;
-    instruccion-> arg3 = arg3;
-    instruccion->interfaz = interfaz;
-    instruccion->archivo = archivo;
+    }
+         return instruccion;
 }
 
 t_list* dividir_cadena_en_tokens(const char* linea){

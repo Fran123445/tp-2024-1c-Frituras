@@ -25,15 +25,15 @@ proceso_memoria* creacion_proceso(int socket_kernel) {
 
 void abrir_archivo_path(int socket_kernel){
     proceso_memoria* proceso = creacion_proceso(socket_kernel);
-    char* path = stdrup(proceso->path);
-
+    char* path = strdup(proceso->path);
     if (path != NULL){
-        FILE *file = fopen(path,"r");
-        if (file == NULL){
+        exit(1);
+    }
+    FILE *file = fopen(path,"r");
+    if (file == NULL){
             fprintf(stderr, "Archivo vacio");
             free(path);
         }
-
     char* linea = NULL;
     size_t tamanio = 0;
     ssize_t leidos;
@@ -42,7 +42,7 @@ void abrir_archivo_path(int socket_kernel){
     t_proceso* proceso_ins = malloc(sizeof(proceso_ins));
     proceso_ins->pid= proceso->proceso_id;
 
-    while ((leidos = getLine(&linea, &tamanio, file)) != -1){
+    while ((leidos = getline(&linea, &tamanio,file)) != -1){
         if(linea[leidos - 1] == '\n'){
             linea[leidos - 1] = '\0';
         }

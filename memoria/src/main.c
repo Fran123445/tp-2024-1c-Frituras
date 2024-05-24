@@ -38,13 +38,12 @@ void* escuchar_cpu(){
 }
 void* escuchar_kernel(){
     while(1){
-        creacion_proceso_path(socket_kernel);
+        creacion_proceso(socket_kernel);
         abrir_archivo_path(socket_kernel);
     }
 }
-void* escuchar_io(){
-    
-}
+//void* escuchar_io(){}
+
 int main(int argc, char *argv[]){
 
     t_config *config = config_create("memoria.config");
@@ -52,7 +51,7 @@ int main(int argc, char *argv[]){
         exit(1);
     }
     iniciar_servidores(config);
-
+    lista_de_procesos_con_ins = malloc(sizeof(t_list));
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
     pthread_t hilo_cpu;

@@ -8,15 +8,9 @@
 #include <semaphore.h>
 #include "conexiones.h"
 #include "estructuras.h"
-#include "memoriaCPU.h"
-#include "memoriaKernel.h"
 
-t_list* lista_de_procesos_con_ins = malloc(sizeof(t_list));
-
-int socket_kernel;
-int socket_cpu;
-int socket_serv_cpu;
-int socket_serv_kernel;
+extern int socket_kernel;
+extern int socket_cpu;
 
 void* escuchar_kernel();
 void* escuchar_cpu();
