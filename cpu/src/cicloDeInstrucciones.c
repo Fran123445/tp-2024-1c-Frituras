@@ -30,7 +30,7 @@ void enviar_pcb(op_code motivo){
 
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
-    agregar_int_a_paquete(paquete, &pcb->PID);
+    agregar_int_a_paquete(paquete, pcb->PID);
     agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
