@@ -1,66 +1,81 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <commons/log.h>
-#include <commons/config.h>
-#include <utils/server.h>
-#include <utils/client.h>
+#include "main.h"
+
+int socket_memoria;
+
+int socket_kernel_d;
+int socket_kernel_i;
+
+int socket_servidor_d;
+int socket_servidor_i;
+
+t_log* log_ciclo;
+
+volatile int hay_interrupcion = 0;
+PCB* pcb;
+
+
+void iniciar_servidores(t_config* config) {
+    t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", true, LOG_LEVEL_TRACE);
+    t_log* log_serv_interrupt = log_create("servidorInterrupt.log", "CPU", true, LOG_LEVEL_TRACE);
+
+    socket_servidor_d = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH"), log_serv_dispatch);
+    socket_servidor_i = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT"), log_serv_interrupt);
+    
+    socket_kernel_d = esperar_cliente(socket_servidor_d, CPU);
+    socket_kernel_i = esperar_cliente(socket_servidor_i, CPU);
+
+    log_destroy(log_serv_dispatch);
+    log_destroy(log_serv_interrupt);
+}
+
+void* escuchar_dispatch() {
+    while (1) {
+        pcb = recibir_pcb();
+        realizar_ciclo_de_instruccion();
+        free(pcb);
+    }
+    return NULL;
+}
+
+void *escuchar_interrupt() {
+    while (1) {
+        recibir_interrupcion();
+    }
+    return NULL;
+}
+
 
 int main(int argc, char* argv[]) {
-    t_config* nuevo_config = config_create("cpu.config");
-    if (nuevo_config == NULL) {
+    t_config* config = config_create("cpu.config");
+    if (config == NULL) {
         exit(1);
-    }; 
+    }
 
-    t_conexion* memoria = malloc(sizeof(t_conexion));
+    log_ciclo = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
 
-    memoria->config = nuevo_config;
-    memoria->ip = "IP_MEMORIA";
-    memoria->puerto = "PUERTO_MEMORIA";
-    memoria->modulo = CPU;
+    pthread_mutex_init(&mutexInterrupt, NULL);
 
-    t_conexion_escucha* oyente_dispatch = malloc(sizeof(t_conexion_escucha));
+   
 
-    oyente_dispatch->config = nuevo_config;
-    oyente_dispatch->puerto = "PUERTO_ESCUCHA_DISPATCH";
-    oyente_dispatch->log = "servidorDispatch.log";
-    oyente_dispatch->nombre_modulo = "cpuDispatch";
-    oyente_dispatch->modulo = CPU;
+    iniciar_servidores(config);
 
-    t_conexion_escucha* oyente_interrupt = malloc(sizeof(t_conexion_escucha));
+    int a;
+    recv(socket_kernel_d, &a, sizeof(int), MSG_WAITALL);
+    socket_memoria = crear_conexion(config_get_string_value(config, "IP_MEMORIA"), config_get_string_value(config, "PUERTO_MEMORIA"), CPU);
 
-    oyente_interrupt->config = nuevo_config;
-    oyente_interrupt->puerto = "PUERTO_ESCUCHA_INTERRUPT";
-    oyente_interrupt->log = "servidorInterrupt.log";
-    oyente_interrupt->nombre_modulo = "cpuInterrupt";
-    oyente_interrupt->modulo = CPU;
-
-
-    conectarse_a(memoria);
-
-    //Escuchar Conexiones
     pthread_t threadEscuchaDispatch;
-    pthread_create(&threadEscuchaDispatch,
-						NULL,
-						(void*)escucharConexiones,
-						oyente_dispatch);
-    
-    
-    pthread_detach(threadEscuchaDispatch);
+    pthread_create(&threadEscuchaDispatch, NULL, escuchar_dispatch, NULL);
 
     pthread_t threadEscuchaInterrupt;
-    pthread_create(&threadEscuchaInterrupt,
-						NULL,
-						(void*)escucharConexiones,
-						oyente_interrupt);
-                
-    pthread_detach(threadEscuchaInterrupt);
-    
-    while(1);
+    pthread_create(&threadEscuchaInterrupt, NULL, escuchar_interrupt, NULL);
 
-    free(memoria);
-    free(oyente_dispatch);
-    free(oyente_interrupt);
+    pthread_join(threadEscuchaDispatch, NULL);
+    pthread_join(threadEscuchaInterrupt, NULL);
+
+    config_destroy(config);
+    log_destroy(log_ciclo);
+    liberar_conexion(socket_memoria);
+    pthread_mutex_destroy(&mutexInterrupt);
 
     return 0;
 }
