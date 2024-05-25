@@ -110,6 +110,8 @@ void iniciarProceso(char* path) {
     log_info(logger, "Se crea el proceso %d en NEW", siguientePID);
     pthread_mutex_unlock(&mutexLogger);
 
+    recibir_operacion(socketMemoria);
+
     siguientePID += 1;
 
     sem_post(&procesosEnNew);

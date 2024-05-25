@@ -32,6 +32,8 @@ void enviarAExit(PCB* pcb, motivo_exit motivo) {
     cambiarEstado(pcb, ESTADO_EXIT);
     queue_push(colaExit, aExit);
     pthread_mutex_unlock(&mutexExit);
+    
+    sem_post(&procesosEnExit);
 }
 
 void procesosReadyLog(char** lista) {
@@ -97,8 +99,6 @@ void vaciarExit() {
         pthread_mutex_unlock(&mutexLogger);
 
         sem_post(&gradoMultiprogramacion);
-
-        free(motivo);
         free(procesoAFinalizar->pcb);
         free(procesoAFinalizar);
     }
@@ -183,7 +183,11 @@ void recibirDeCPU() {
 }
 
 void planificarRecibido(op_code operacion, t_buffer* buffer) {
-    PCB* proceso = buffer_read_pcb(buffer);
+    PCB* procesoExec = buffer_read_pcb(buffer);
+    PCB* proceso = hallarPCB(procesoExec->PID);
+
+    *proceso = *procesoExec;
+
     switch (operacion) {
         case ENVIAR_IO_GEN_SLEEP:
             t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
@@ -191,12 +195,12 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
             if (comprobarOperacionValida(interfaz, operacion)) {
                 t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
                 solicitud->proceso = proceso;
-                solicitud->unidadesTrabajo = buffer_read_int(buffer);
+                solicitud->unidadesTrabajo = infoInterfaz->unidades_trabajo;
                 pthread_mutex_lock(&interfaz->mutex);
                 queue_push(interfaz->cola, solicitud);
                 cambiarEstado(proceso, ESTADO_BLOCKED);
                 pthread_mutex_unlock(&interfaz->mutex);
-
+                sem_post(&interfaz->semaforo);
             } else {
                 enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
             }
@@ -204,7 +208,7 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
         /*case WAIT:
             // todavia no me fije que hace wait
             break;
-        case SIGNAL:
+        case iSIGNAL:
             // todavia no me fije que hace signal
             break;*/
         case INSTRUCCION_EXIT:
@@ -216,6 +220,7 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
             pthread_mutex_unlock(&mutexLogger);
             break;
     }
+    sem_post(&cpuDisponible);
 }
 
 void planificacionPorFIFO() {

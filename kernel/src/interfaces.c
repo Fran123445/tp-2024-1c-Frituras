@@ -81,6 +81,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
         pthread_mutex_lock(&mutexReady);
         queue_push(colaReady, solicitud->proceso);
         pthread_mutex_unlock(&mutexReady);
+        sem_post(&procesosEnReady);
 
         free(solicitud);
     } 

@@ -92,6 +92,8 @@ int main(int argc, char* argv[]) {
     socketCPUDispatch = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_DISPATCH"), KERNEL);
     socketCPUInterrupt = crear_conexion(ipCPU, config_get_string_value(config, "PUERTO_CPU_INTERRUPT"), KERNEL);
     socketMemoria = crear_conexion(config_get_string_value(config, "IP_MEMORIA"), config_get_string_value(config, "PUERTO_MEMORIA"), KERNEL);
+    int a = 1;
+    send(socketCPUDispatch, &a, sizeof(int), 0);
 
 
     siguientePID = 0;
@@ -103,6 +105,7 @@ int main(int argc, char* argv[]) {
 
     seleccionarAlgoritmoPlanificacion(config);
 
+    //iniciarProceso("instrucciones1.txt");
     solicitarInput();
     
     config_destroy(config);
