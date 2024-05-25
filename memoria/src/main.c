@@ -21,8 +21,8 @@ void iniciar_servidores(t_config* config){
     escucha_io->modulo= MEMORIA;
     escucha_io->socket_servidor= socket_servidor_memoria;
 
-    socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
     socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
 
     pthread_t hilo_io;
     pthread_create(&hilo_io, NULL, (void*) esperar_clientes_IO, escucha_io );
@@ -34,13 +34,11 @@ void* escuchar_cpu(void* argumento){
     //params_cpu usado para pasar los parámetros al hilo sin problema. ignorar warning.
     int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     while(1){
-        recibir_proceso_cpu(socket_cpu);
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
     }
 }
 void* escuchar_kernel(){
     while(1){
-        creacion_proceso(socket_kernel);
         abrir_archivo_path(socket_kernel);
     }
 }
