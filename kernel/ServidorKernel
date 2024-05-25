@@ -76,3 +76,23 @@
 [INFO] 22:39:13:945 Kernel/(42789:42806): Se conecto un cliente!
 [TRACE] 22:40:42:025 Kernel/(43417:43417): Listo para escuchar a mi cliente
 [INFO] 22:41:05:952 Kernel/(43417:43444): Se conecto un cliente!
+[TRACE] 23:42:41:408 Kernel/(13514:13514): Listo para escuchar a mi cliente
+[INFO] 23:43:12:597 Kernel/(13514:13530): Se conecto un cliente!
+[TRACE] 23:43:48:079 Kernel/(14041:14041): Listo para escuchar a mi cliente
+[INFO] 23:43:50:486 Kernel/(14041:14046): Se conecto un cliente!
+[TRACE] 23:46:00:266 Kernel/(14631:14631): Listo para escuchar a mi cliente
+[INFO] 23:46:02:887 Kernel/(14631:14635): Se conecto un cliente!
+[INFO] 23:46:53:711 Kernel/(14631:14635): Ups! Te confundiste
+[INFO] 23:46:53:711 Kernel/(14631:14635): Se conecto un cliente!
+[TRACE] 23:47:24:617 Kernel/(15274:15274): Listo para escuchar a mi cliente
+[TRACE] 23:47:45:154 Kernel/(15523:15523): Listo para escuchar a mi cliente
+[TRACE] 23:48:05:349 Kernel/(15862:15862): Listo para escuchar a mi cliente
+[TRACE] 23:48:29:784 Kernel/(16242:16242): Listo para escuchar a mi cliente
+[TRACE] 23:49:35:684 Kernel/(16664:16664): Listo para escuchar a mi cliente
+[INFO] 23:49:42:937 Kernel/(16664:16668): Se conecto un cliente!
+[TRACE] 23:52:56:203 Kernel/(17290:17290): Listo para escuchar a mi cliente
+[INFO] 23:53:16:012 Kernel/(17290:17325): Se conecto un cliente!
+[TRACE] 00:01:40:368 Kernel/(18568:18568): Listo para escuchar a mi cliente
+[INFO] 00:02:00:958 Kernel/(18568:18586): Se conecto un cliente!
+[TRACE] 00:05:06:816 Kernel/(19596:19596): Listo para escuchar a mi cliente
+[TRACE] 00:07:40:604 Kernel/(20356:20356): Listo para escuchar a mi cliente

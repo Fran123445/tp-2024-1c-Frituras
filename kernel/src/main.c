@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
 
     seleccionarAlgoritmoPlanificacion(config);
 
+    iniciarProceso("instrucciones1.txt");
     solicitarInput();
     
     config_destroy(config);

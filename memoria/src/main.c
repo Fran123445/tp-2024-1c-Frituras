@@ -23,9 +23,9 @@ void iniciar_servidores(t_config* config){
 
     socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
     socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
-    
-    socket_io = (int)(intptr_t)esperar_clientes_IO(escucha_io);
 
+    pthread_t hilo_io;
+    pthread_create(&hilo_io, NULL, (void*) esperar_clientes_IO, escucha_io );
 
 }
 
@@ -59,8 +59,6 @@ int main(int argc, char *argv[]){
     pthread_t hilo_cpu;
     pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
 
-    pthread_t hilo_io;
-    pthread_create(&hilo_io, NULL, (void* (*)(void*)) esperar_clientes_IO, (void*) escucha_io );
     //(void* (*)(void*)) esperar_clientes_IO es casteo ya que pthread_create espera un void* con args void*
     // mientras q esperar cliente es voi* y espera un t_conexion_conexion escucha.
     config_destroy(config);

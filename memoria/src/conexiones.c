@@ -11,7 +11,7 @@
 pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
 t_log* log_memoria_io;
 
-void* esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
+void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
     while (1) {
         int* socket_cliente = malloc(sizeof(int));
         pthread_t hilo;
@@ -44,7 +44,6 @@ void* esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
                         socket_cliente);
         pthread_detach(hilo);
     }
-    return NULL;
        }
        
 void funcion_io(int* socket_cliente){

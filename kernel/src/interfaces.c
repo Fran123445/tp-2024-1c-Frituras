@@ -92,12 +92,12 @@ bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion) {
 
     switch (interfaz->tipo) {
         case INTERFAZ_GENERICA:
-            opValida = inst == iIO_GEN_SLEEP;
+            opValida = operacion == ENVIAR_IO_GEN_SLEEP;
             break;
-        case INTERFAZ_STDIN:
-            opValida = inst == iIO_STDIN_READ;
+        /*case INTERFAZ_STDIN:
+            opValida = operacion == IO_STDIN_READ;
         case INTERFAZ_STDOUT:
-            opValida = inst == iIO_STDOUT_WRITE;
+            opValida = operacion == IO_STDOUT_WRITE;*/
         // Falta todo lo de FS
         default:
             opValida = false;
