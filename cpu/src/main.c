@@ -8,12 +8,15 @@ int socket_kernel_i;
 int socket_servidor_d;
 int socket_servidor_i;
 
+t_log* log_ciclo;
+
 volatile int hay_interrupcion = 0;
 PCB* pcb;
 
+
 void iniciar_servidores(t_config* config) {
-    t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", false, LOG_LEVEL_TRACE);
-    t_log* log_serv_interrupt = log_create("servidorInterrupt.log", "CPU", false, LOG_LEVEL_TRACE);
+    t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", true, LOG_LEVEL_TRACE);
+    t_log* log_serv_interrupt = log_create("servidorInterrupt.log", "CPU", true, LOG_LEVEL_TRACE);
 
     socket_servidor_d = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH"), log_serv_dispatch);
     socket_servidor_i = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT"), log_serv_interrupt);
@@ -48,10 +51,16 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-        pthread_mutex_init(&mutexInterrupt, NULL);
+    log_ciclo = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
+
+    pthread_mutex_init(&mutexInterrupt, NULL);
+
+   
 
     iniciar_servidores(config);
 
+    int a;
+    recv(socket_kernel_d, &a, sizeof(int), MSG_WAITALL);
     socket_memoria = crear_conexion(config_get_string_value(config, "IP_MEMORIA"), config_get_string_value(config, "PUERTO_MEMORIA"), CPU);
 
     pthread_t threadEscuchaDispatch;
@@ -64,6 +73,7 @@ int main(int argc, char* argv[]) {
     pthread_join(threadEscuchaInterrupt, NULL);
 
     config_destroy(config);
+    log_destroy(log_ciclo);
     liberar_conexion(socket_memoria);
     pthread_mutex_destroy(&mutexInterrupt);
 

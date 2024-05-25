@@ -2,8 +2,6 @@
 #include <semaphore.h>
 
 
-t_log* log_ciclo;
-
 t_tipoInstruccion string_a_tipo_instruccion (char* ins_char);
 t_list* dividir_cadena_en_tokens(const char* linea);
 registrosCPU string_a_registro(const char* registro);
@@ -27,7 +25,6 @@ void enviar_pcb(op_code motivo){
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
-
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_int_a_paquete(paquete, pcb->PID);
@@ -37,7 +34,6 @@ void enviar_PC_a_memoria(uint32_t pc){
 }
 
 char* obtener_instruccion_de_memoria(){
-    log_ciclo = log_create("ErrorRecepcionInstruccion.log","Error de recepcion de instruccion",false,LOG_LEVEL_INFO);
     op_code cod_op = recibir_operacion(socket_memoria);
     if (cod_op == ENVIO_DE_INSTRUCCIONES) { 
         t_buffer* buffer = recibir_buffer(socket_memoria);
@@ -47,15 +43,12 @@ char* obtener_instruccion_de_memoria(){
     } else { 
         log_error(log_ciclo, "Error al recibir instrucción de la memoria");
         return NULL;
-    } 
-    log_destroy(log_ciclo);
-        
+    }
 }
 
 //Ciclo de instrucciones
 
 char* fetch(){
-    log_ciclo = log_create("Cpu.log", "Instruccion Buscada", false, LOG_LEVEL_INFO);
     int pid = pcb->PID;
  
     log_info(log_ciclo, "PID: %u - FETCH - Program Counter: %u", pid, pcb->programCounter);
@@ -64,8 +57,6 @@ char* fetch(){
     char* instruccionEncontrada = obtener_instruccion_de_memoria();
 
     pcb->programCounter++;
-
-    log_destroy(log_ciclo);
 
     return instruccionEncontrada;
 }
@@ -86,7 +77,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             }
             *valor_ptr = valor;
             instruccion->tipo = iSET;
-            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            registrosCPU* argumento = malloc(sizeof(registrosCPU));
+            *argumento = string_a_registro(list_get(lista,1));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->sizeArg2 = sizeof(int);
             instruccion->arg2 = valor_ptr;
@@ -94,18 +87,26 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iSUM:
             instruccion->tipo = iSUM;
-            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            registrosCPU* argumento = malloc(sizeof(registrosCPU));
+            *argumento = string_a_registro(list_get(lista,1));
+            registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
+            *argumento2 = string_a_registro(list_get(lista,2));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
-            instruccion->arg2 = (void*) string_a_registro(list_get(lista,2));
+            instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->sizeArg3 = 0;
             break;
         case iSUB:
             instruccion->tipo = iSUB;
-            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            registrosCPU* argumento = malloc(sizeof(registrosCPU));
+            *argumento = string_a_registro(list_get(lista,1));
+            registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
+            *argumento2 = string_a_registro(list_get(lista,2));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->arg2 = (void*) string_a_registro(list_get(lista,2));
-            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->sizeArg2 = argumento2;
             instruccion->sizeArg3 = 0;
             break;
         case iJNZ:
@@ -116,7 +117,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             }
             *valor_ptr = valor;
             instruccion->tipo = iJNZ;
-            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            registrosCPU* argumento = malloc(sizeof(registrosCPU));
+            *argumento = string_a_registro(list_get(lista,1));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->sizeArg2 = sizeof(int);
             instruccion->arg2 = valor_ptr;
@@ -143,7 +146,6 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
 }
 
 void execute(t_instruccion* instruccion){
-    log_ciclo = log_create("Cpu.log", "Instruccion Ejecutada", false, LOG_LEVEL_INFO);
     switch (instruccion->tipo)
     {
     case iSET:
@@ -186,8 +188,8 @@ void execute(t_instruccion* instruccion){
         break;
     */
     case iIO_GEN_SLEEP:
-        IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);
-        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);        
+        IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);   
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);      
         break;
     /*
     case iIO_STDIN_READ:
@@ -222,7 +224,7 @@ void execute(t_instruccion* instruccion){
         log_error(log_ciclo, "La instruccion es inválida");
         break;
     }
-    log_destroy(log_ciclo);
+    //log_destroy(log_ciclo);
 }
 
 int check_interrupt() {
@@ -245,18 +247,16 @@ void realizar_ciclo_de_instruccion(){
         t_instruccion* instruccion_a_ejecutar = decode(instruccion_a_decodificar);
         
         execute(instruccion_a_ejecutar);
-
-
         // Verificar condiciones de salida 
-        if (check_interrupt()) {
-            enviar_pcb(INTERRUPCION);
-            break; // Romper el bucle si hay interrupción
-        }
         if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
             break;
         }
         if (instruccion_a_ejecutar->tipo == iEXIT){
-            break; // Romper el bucle si el proceso ha finalizado
+            break;
+        }
+        if (check_interrupt()) {
+            enviar_pcb(INTERRUPCION);
+            break;
         }
     }
 }
@@ -291,7 +291,7 @@ t_tipoInstruccion string_a_tipo_instruccion (char* ins_char){
     if (strcmp(ins_char, "COPY_STRING") == 0) return iCOPY_STRING;
     if (strcmp(ins_char, "WAIT") == 0) return iWAIT;
     if (strcmp(ins_char, "SIGNAL") == 0) return iSIGNAL;
-    if (strcmp(ins_char, "IO_GEN_SLEEP")) return iIO_GEN_SLEEP;
+    if (strcmp(ins_char, "IO_GEN_SLEEP") == 0) return iIO_GEN_SLEEP;
     if (strcmp(ins_char, "IO_STDIN_READ") == 0) return iIO_STDIN_READ;
     if (strcmp(ins_char, "IO_STDOUT_WRITE") == 0) return iIO_STDOUT_WRITE;
     if (strcmp(ins_char, "IO_FS_CREATE") == 0) return iIO_FS_CREATE;
@@ -314,6 +314,6 @@ t_list* dividir_cadena_en_tokens(const char* linea){
         list_add(lista,token);
         token = strtok(NULL," ");
     }
-    free(cadena);
+    //free(cadena);
     return lista;
 }
