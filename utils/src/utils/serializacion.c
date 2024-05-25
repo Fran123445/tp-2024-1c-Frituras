@@ -177,7 +177,8 @@ void liberar_buffer(t_buffer* buffer) {
 int recibir_operacion(int socket_cliente)
 {
 	int cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
+	ssize_t resultado = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
+	if(resultado > 0)
 		return cod_op;
 	else
 	{

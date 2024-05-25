@@ -26,7 +26,7 @@ proceso_memoria* creacion_proceso(int socket_kernel) {
 void abrir_archivo_path(int socket_kernel){
     proceso_memoria* proceso = creacion_proceso(socket_kernel);
     char* path = strdup(proceso->path);
-    if (path != NULL){
+    if (path == NULL){
         exit(1);
     }
     FILE *file = fopen(path,"r");

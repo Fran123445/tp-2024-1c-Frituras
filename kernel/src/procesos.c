@@ -87,7 +87,7 @@ void iniciarProceso(char* path) {
     nuevoPCB->PID = siguientePID;
     nuevoPCB->estado = ESTADO_NEW;
     nuevoPCB->quantum = quantumInicial;
-    nuevoPCB->programCounter = 0;
+    nuevoPCB->programCounter = 236;
     nuevoPCB->registros = inicializarRegistrosCPU();
 
     pthread_mutex_lock(&mutexListaProcesos);
