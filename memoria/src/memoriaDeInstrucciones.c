@@ -18,6 +18,6 @@ char* obtener_instruccion(int socket_kernel, int pc, int pid){
     t_proceso* proceso = hallar_proceso(pid);
     t_list* lista_instrucciones = proceso->instrucciones;
     char* instruccion_char = list_get(lista_instrucciones, pc);
-    free(lista_instrucciones);
+    //free(lista_instrucciones);
     return instruccion_char;
 }

@@ -25,8 +25,8 @@ proceso_memoria* creacion_proceso(int socket_kernel) {
 
 void abrir_archivo_path(int socket_kernel){
     proceso_memoria* proceso = creacion_proceso(socket_kernel);
-    char* path = strdup(proceso->path);
-    if (path != NULL){
+    char* path = (proceso->path);
+    if (path == NULL){
         exit(1);
     }
     FILE *file = fopen(path,"r");
@@ -39,7 +39,7 @@ void abrir_archivo_path(int socket_kernel){
     ssize_t leidos;
     t_list* instrucciones;
     instrucciones = list_create();
-    t_proceso* proceso_ins = malloc(sizeof(proceso_ins));
+    t_proceso* proceso_ins = malloc(sizeof(t_proceso));
     proceso_ins->pid= proceso->proceso_id;
 
     while ((leidos = getline(&linea, &tamanio,file)) != -1){
@@ -55,6 +55,7 @@ void abrir_archivo_path(int socket_kernel){
             return;
         }
         list_add(instrucciones, linea_copia);
+        free(linea);
     }
     proceso_ins->instrucciones = instrucciones;
     list_add(lista_de_procesos_con_ins,proceso_ins); // guardo en la lista de los procesos el proceso!
@@ -62,8 +63,8 @@ void abrir_archivo_path(int socket_kernel){
     t_paquete* paquete = crear_paquete(PAQUETE);
     enviar_paquete(paquete, socket_kernel);
 
-    free(instrucciones);
     free(linea);
     fclose(file);
 }
+
 

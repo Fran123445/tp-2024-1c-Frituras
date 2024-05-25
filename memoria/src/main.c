@@ -45,13 +45,13 @@ void* escuchar_kernel(){
 //void* escuchar_io(){}
 
 int main(int argc, char *argv[]){
+    lista_de_procesos_con_ins = list_create();
 
     config = config_create("memoria.config");
     if (config == NULL){
         exit(1);
     }
     iniciar_servidores(config);
-    t_list* lista_de_procesos_con_ins = NULL;
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
     pthread_t hilo_cpu;
@@ -59,11 +59,13 @@ int main(int argc, char *argv[]){
 
     //(void* (*)(void*)) esperar_clientes_IO es casteo ya que pthread_create espera un void* con args void*
     // mientras q esperar cliente es voi* y espera un t_conexion_conexion escucha.
-    config_destroy(config);
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
+    config_destroy(config);
     free(escucha_cpu);
     free(escucha_kernel);
     list_destroy(lista_de_procesos_con_ins);
+
+
     return 0;
 }
