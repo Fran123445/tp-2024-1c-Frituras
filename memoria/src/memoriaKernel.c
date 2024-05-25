@@ -25,7 +25,7 @@ proceso_memoria* creacion_proceso(int socket_kernel) {
 
 void abrir_archivo_path(int socket_kernel){
     proceso_memoria* proceso = creacion_proceso(socket_kernel);
-    char* path = strdup(proceso->path);
+    char* path = (proceso->path);
     if (path == NULL){
         exit(1);
     }
@@ -55,6 +55,7 @@ void abrir_archivo_path(int socket_kernel){
             return;
         }
         list_add(instrucciones, linea_copia);
+        free(linea);
     }
     proceso_ins->instrucciones = instrucciones;
     list_add(lista_de_procesos_con_ins,proceso_ins); // guardo en la lista de los procesos el proceso!
