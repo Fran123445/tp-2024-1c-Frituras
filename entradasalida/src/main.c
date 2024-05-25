@@ -2,36 +2,61 @@
 #include <stdio.h>
 #include <utils/client.h>
 #include <utils/server.h>
-
+#include <utils/serializacion.h>
 //Falta agregar hilos para diferentes conexiones 
+typedef struct {
+    char* nombre;
+    int unidades_trabajo;
+} t_interfaz_generica;
+
+
+void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
+
+    t_interfaz_generica interfaz;
+
+    int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+
+    interfaz.nombre = nombre;
+
+    t_paquete* paquete = crear_paquete();
+    agregar_string_a_paquete(paquete, nombre);
+    enviar_paquete(paquete ,socket);
+    eliminar_paquete(paquete);
+
+    while (1) {
+       ssize_t reciv = recibir_operacion(socket);
+
+        if (reciv < 0) {
+            exit(-1);
+        }
+        
+        t_buffer* buffer = recibir_buffer(socket);
+        int unidades_trabajo = buffer_read_int(buffer);
+        sleep(tiempo_pausa * unidades_trabajo);
+
+        t_paquete* paquete = crear_paquete();
+        paquete->codigo_operacion = OPERACION_FINALIZADA;
+        enviar_paquete(paquete ,socket);
+        eliminar_paquete(paquete);
+
+    }
+
+}
 
 int main(int argc, char* argv[]) {
-    t_config* nuevo_config = config_create("entradasalida.config");
+
+    t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
     }; 
 
-    t_conexion* conexion_kernel = malloc(sizeof(t_conexion));
+    int conexion_kernel = crear_conexion(config_get_string_value(nuevo_config,"IP_KERNEL"), config_get_string_value(nuevo_config, "PUERTO_KERNEL"), IO);
 
-    conexion_kernel->config = nuevo_config;
-    conexion_kernel->ip = "IP_KERNEL";
-    conexion_kernel->puerto = "PUERTO_KERNEL";
-    conexion_kernel->modulo = IO;
+    char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
 
-    conectarse_a(conexion_kernel);
-
-    t_conexion* conexion_memoria = malloc(sizeof(t_conexion));
-
-    conexion_memoria->config = nuevo_config;
-    conexion_memoria->ip = "IP_MEMORIA";
-    conexion_memoria->puerto = "PUERTO_MEMORIA";
-    conexion_memoria->modulo = IO;
-
-    conectarse_a(conexion_memoria);
-    
-    free(conexion_kernel);
-    free(conexion_memoria);
-
+    if(!strcmp(tipo,"IO_GEN_SLEEP")){
+        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
+    }
 
     return 0;
 }
