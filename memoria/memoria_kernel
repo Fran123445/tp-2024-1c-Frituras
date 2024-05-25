@@ -381,3 +381,201 @@
 [TRACE] 15:48:50:753 Memoria/(27264:27264): Listo para escuchar a mi cliente
 [INFO] 15:49:05:661 Memoria/(27264:27264): Se conecto un cliente!
 [INFO] 15:49:05:661 Memoria/(27264:27264): Se conecto un cliente!
+[TRACE] 16:22:56:673 Memoria/(28239:28239): Listo para escuchar a mi cliente
+[TRACE] 16:23:01:934 Memoria/(28313:28313): Listo para escuchar a mi cliente
+[INFO] 16:23:11:817 Memoria/(28313:28313): Se conecto un cliente!
+[INFO] 16:23:11:820 Memoria/(28313:28313): Se conecto un cliente!
+[TRACE] 16:26:37:620 Memoria/(2087:2087): Listo para escuchar a mi cliente
+[INFO] 16:26:43:538 Memoria/(2087:2087): Se conecto un cliente!
+[INFO] 16:26:43:543 Memoria/(2087:2087): Se conecto un cliente!
+[TRACE] 16:27:54:783 Memoria/(2354:2354): Listo para escuchar a mi cliente
+[INFO] 16:28:00:206 Memoria/(2354:2354): Se conecto un cliente!
+[INFO] 16:28:00:206 Memoria/(2354:2354): Se conecto un cliente!
+[TRACE] 16:28:12:539 Memoria/(2428:2428): Listo para escuchar a mi cliente
+[INFO] 16:28:19:432 Memoria/(2428:2428): Se conecto un cliente!
+[INFO] 16:28:19:432 Memoria/(2428:2428): Se conecto un cliente!
+[TRACE] 16:28:27:662 Memoria/(2479:2479): Listo para escuchar a mi cliente
+[INFO] 16:28:29:639 Memoria/(2479:2479): Se conecto un cliente!
+[INFO] 16:28:29:641 Memoria/(2479:2479): Se conecto un cliente!
+[TRACE] 16:29:50:251 Memoria/(2609:2609): Listo para escuchar a mi cliente
+[INFO] 16:30:03:981 Memoria/(2609:2609): Se conecto un cliente!
+[INFO] 16:30:03:981 Memoria/(2609:2609): Se conecto un cliente!
+[TRACE] 16:31:20:545 Memoria/(2911:2911): Listo para escuchar a mi cliente
+[INFO] 16:31:35:333 Memoria/(2911:2911): Se conecto un cliente!
+[INFO] 16:31:35:343 Memoria/(2911:2911): Se conecto un cliente!
+[TRACE] 16:33:44:750 Memoria/(3753:3753): Listo para escuchar a mi cliente
+[INFO] 16:34:01:037 Memoria/(3753:3753): Se conecto un cliente!
+[INFO] 16:34:01:037 Memoria/(3753:3753): Se conecto un cliente!
+[TRACE] 16:37:33:284 Memoria/(4458:4458): Listo para escuchar a mi cliente
+[INFO] 16:37:38:839 Memoria/(4458:4458): Se conecto un cliente!
+[INFO] 16:37:38:841 Memoria/(4458:4458): Se conecto un cliente!
+[TRACE] 16:40:05:584 Memoria/(4783:4783): Listo para escuchar a mi cliente
+[INFO] 16:40:27:113 Memoria/(4783:4783): Se conecto un cliente!
+[INFO] 16:40:27:113 Memoria/(4783:4783): Se conecto un cliente!
+[TRACE] 16:43:32:062 Memoria/(5573:5573): Listo para escuchar a mi cliente
+[INFO] 16:43:47:469 Memoria/(5573:5573): Se conecto un cliente!
+[INFO] 16:43:47:470 Memoria/(5573:5573): Se conecto un cliente!
+[TRACE] 16:48:08:939 Memoria/(6455:6455): Listo para escuchar a mi cliente
+[INFO] 16:48:24:789 Memoria/(6455:6455): Se conecto un cliente!
+[INFO] 16:48:24:789 Memoria/(6455:6455): Se conecto un cliente!
+[TRACE] 16:51:43:274 Memoria/(7260:7260): Listo para escuchar a mi cliente
+[INFO] 16:52:01:694 Memoria/(7260:7260): Se conecto un cliente!
+[INFO] 16:52:01:695 Memoria/(7260:7260): Se conecto un cliente!
+[TRACE] 16:53:58:016 Memoria/(8069:8069): Listo para escuchar a mi cliente
+[INFO] 16:54:17:150 Memoria/(8069:8069): Se conecto un cliente!
+[INFO] 16:54:17:150 Memoria/(8069:8069): Se conecto un cliente!
+[TRACE] 16:56:41:487 Memoria/(8865:8865): Listo para escuchar a mi cliente
+[INFO] 16:56:55:777 Memoria/(8865:8865): Se conecto un cliente!
+[INFO] 16:56:55:777 Memoria/(8865:8865): Se conecto un cliente!
+[TRACE] 16:57:38:770 Memoria/(9449:9449): Listo para escuchar a mi cliente
+[INFO] 16:57:50:340 Memoria/(9449:9449): Se conecto un cliente!
+[INFO] 16:57:50:343 Memoria/(9449:9449): Se conecto un cliente!
+[TRACE] 16:59:28:384 Memoria/(10133:10133): Listo para escuchar a mi cliente
+[INFO] 16:59:40:825 Memoria/(10133:10133): Se conecto un cliente!
+[INFO] 16:59:40:826 Memoria/(10133:10133): Se conecto un cliente!
+[TRACE] 17:00:43:434 Memoria/(10726:10726): Listo para escuchar a mi cliente
+[INFO] 17:00:59:575 Memoria/(10726:10726): Se conecto un cliente!
+[INFO] 17:00:59:575 Memoria/(10726:10726): Se conecto un cliente!
+[TRACE] 17:03:33:762 Memoria/(11365:11365): Listo para escuchar a mi cliente
+[INFO] 17:03:46:983 Memoria/(11365:11365): Se conecto un cliente!
+[INFO] 17:03:46:985 Memoria/(11365:11365): Se conecto un cliente!
+[TRACE] 17:05:46:855 Memoria/(12138:12138): Listo para escuchar a mi cliente
+[INFO] 17:06:02:720 Memoria/(12138:12138): Se conecto un cliente!
+[INFO] 17:06:02:723 Memoria/(12138:12138): Se conecto un cliente!
+[TRACE] 17:13:09:281 Memoria/(13136:13136): Listo para escuchar a mi cliente
+[INFO] 17:13:37:916 Memoria/(13136:13136): Se conecto un cliente!
+[INFO] 17:13:41:439 Memoria/(13136:13136): Se conecto un cliente!
+[TRACE] 17:14:53:933 Memoria/(13886:13886): Listo para escuchar a mi cliente
+[INFO] 17:15:24:563 Memoria/(13886:13886): Se conecto un cliente!
+[INFO] 17:15:28:005 Memoria/(13886:13886): Se conecto un cliente!
+[TRACE] 17:17:48:143 Memoria/(14681:14681): Listo para escuchar a mi cliente
+[INFO] 17:18:14:076 Memoria/(14681:14681): Se conecto un cliente!
+[INFO] 17:18:17:868 Memoria/(14681:14681): Se conecto un cliente!
+[TRACE] 17:21:09:877 Memoria/(15525:15525): Listo para escuchar a mi cliente
+[INFO] 17:21:39:789 Memoria/(15525:15525): Se conecto un cliente!
+[INFO] 17:21:43:789 Memoria/(15525:15525): Se conecto un cliente!
+[TRACE] 17:25:27:635 Memoria/(16364:16364): Listo para escuchar a mi cliente
+[INFO] 17:25:51:118 Memoria/(16364:16364): Se conecto un cliente!
+[INFO] 17:25:56:599 Memoria/(16364:16364): Se conecto un cliente!
+[TRACE] 17:26:56:562 Memoria/(17129:17129): Listo para escuchar a mi cliente
+[INFO] 17:27:26:915 Memoria/(17129:17129): Se conecto un cliente!
+[INFO] 17:27:26:932 Memoria/(17129:17129): Se conecto un cliente!
+[TRACE] 17:29:38:742 Memoria/(17908:17908): Listo para escuchar a mi cliente
+[INFO] 17:29:52:313 Memoria/(17908:17908): Se conecto un cliente!
+[INFO] 17:29:52:313 Memoria/(17908:17908): Se conecto un cliente!
+[TRACE] 17:31:06:453 Memoria/(18539:18539): Listo para escuchar a mi cliente
+[INFO] 17:31:18:501 Memoria/(18539:18539): Se conecto un cliente!
+[INFO] 17:31:18:502 Memoria/(18539:18539): Se conecto un cliente!
+[TRACE] 17:31:57:923 Memoria/(19201:19201): Listo para escuchar a mi cliente
+[INFO] 17:32:08:628 Memoria/(19201:19201): Se conecto un cliente!
+[INFO] 17:32:08:629 Memoria/(19201:19201): Se conecto un cliente!
+[TRACE] 17:32:54:218 Memoria/(19877:19877): Listo para escuchar a mi cliente
+[INFO] 17:33:06:782 Memoria/(19877:19877): Se conecto un cliente!
+[INFO] 17:33:06:783 Memoria/(19877:19877): Se conecto un cliente!
+[TRACE] 17:34:21:213 Memoria/(20544:20544): Listo para escuchar a mi cliente
+[TRACE] 17:34:51:512 Memoria/(20744:20744): Listo para escuchar a mi cliente
+[INFO] 17:35:07:515 Memoria/(20744:20744): Se conecto un cliente!
+[INFO] 17:35:07:516 Memoria/(20744:20744): Se conecto un cliente!
+[TRACE] 17:38:12:717 Memoria/(21575:21575): Listo para escuchar a mi cliente
+[INFO] 17:38:25:739 Memoria/(21575:21575): Se conecto un cliente!
+[INFO] 17:38:25:739 Memoria/(21575:21575): Se conecto un cliente!
+[TRACE] 17:40:03:090 Memoria/(22228:22228): Listo para escuchar a mi cliente
+[INFO] 17:40:21:011 Memoria/(22228:22228): Se conecto un cliente!
+[INFO] 17:40:21:011 Memoria/(22228:22228): Se conecto un cliente!
+[TRACE] 17:42:49:335 Memoria/(22913:22913): Listo para escuchar a mi cliente
+[INFO] 17:43:01:333 Memoria/(22913:22913): Se conecto un cliente!
+[INFO] 17:43:01:333 Memoria/(22913:22913): Se conecto un cliente!
+[TRACE] 17:43:28:589 Memoria/(23459:23459): Listo para escuchar a mi cliente
+[INFO] 17:43:40:036 Memoria/(23459:23459): Se conecto un cliente!
+[INFO] 17:43:40:036 Memoria/(23459:23459): Se conecto un cliente!
+[TRACE] 17:45:07:300 Memoria/(23984:23984): Listo para escuchar a mi cliente
+[INFO] 17:45:27:342 Memoria/(23984:23984): Se conecto un cliente!
+[INFO] 17:45:27:343 Memoria/(23984:23984): Se conecto un cliente!
+[TRACE] 17:47:10:203 Memoria/(24742:24742): Listo para escuchar a mi cliente
+[INFO] 17:47:23:308 Memoria/(24742:24742): Se conecto un cliente!
+[INFO] 17:47:23:308 Memoria/(24742:24742): Se conecto un cliente!
+[TRACE] 17:47:51:965 Memoria/(25266:25266): Listo para escuchar a mi cliente
+[INFO] 17:48:05:839 Memoria/(25266:25266): Se conecto un cliente!
+[INFO] 17:48:05:840 Memoria/(25266:25266): Se conecto un cliente!
+[TRACE] 17:50:06:608 Memoria/(25996:25996): Listo para escuchar a mi cliente
+[INFO] 17:50:21:965 Memoria/(25996:25996): Se conecto un cliente!
+[INFO] 17:50:21:965 Memoria/(25996:25996): Se conecto un cliente!
+[TRACE] 17:52:41:452 Memoria/(26688:26688): Listo para escuchar a mi cliente
+[INFO] 17:52:59:550 Memoria/(26688:26688): Se conecto un cliente!
+[INFO] 17:52:59:551 Memoria/(26688:26688): Se conecto un cliente!
+[TRACE] 17:53:35:150 Memoria/(27343:27343): Listo para escuchar a mi cliente
+[INFO] 17:53:46:590 Memoria/(27343:27343): Se conecto un cliente!
+[INFO] 17:53:46:591 Memoria/(27343:27343): Se conecto un cliente!
+[TRACE] 17:54:29:165 Memoria/(27961:27961): Listo para escuchar a mi cliente
+[INFO] 17:54:47:466 Memoria/(27961:27961): Se conecto un cliente!
+[INFO] 17:54:47:466 Memoria/(27961:27961): Se conecto un cliente!
+[TRACE] 17:56:02:017 Memoria/(28641:28641): Listo para escuchar a mi cliente
+[INFO] 17:56:15:125 Memoria/(28641:28641): Se conecto un cliente!
+[INFO] 17:56:15:126 Memoria/(28641:28641): Se conecto un cliente!
+[TRACE] 17:56:40:103 Memoria/(29147:29147): Listo para escuchar a mi cliente
+[INFO] 17:57:03:713 Memoria/(29147:29147): Se conecto un cliente!
+[INFO] 17:57:03:713 Memoria/(29147:29147): Se conecto un cliente!
+[TRACE] 17:59:36:360 Memoria/(29784:29784): Listo para escuchar a mi cliente
+[INFO] 17:59:47:440 Memoria/(29784:29784): Se conecto un cliente!
+[INFO] 17:59:47:440 Memoria/(29784:29784): Se conecto un cliente!
+[TRACE] 18:03:38:536 Memoria/(30272:30272): Listo para escuchar a mi cliente
+[INFO] 18:03:52:182 Memoria/(30272:30272): Se conecto un cliente!
+[INFO] 18:03:52:184 Memoria/(30272:30272): Se conecto un cliente!
+[TRACE] 18:06:20:765 Memoria/(30479:30479): Listo para escuchar a mi cliente
+[INFO] 18:06:27:543 Memoria/(30479:30479): Se conecto un cliente!
+[INFO] 18:06:27:544 Memoria/(30479:30479): Se conecto un cliente!
+[TRACE] 18:08:04:616 Memoria/(30743:30743): Listo para escuchar a mi cliente
+[INFO] 18:08:17:657 Memoria/(30743:30743): Se conecto un cliente!
+[INFO] 18:08:17:658 Memoria/(30743:30743): Se conecto un cliente!
+[TRACE] 18:10:21:789 Memoria/(31275:31275): Listo para escuchar a mi cliente
+[INFO] 18:10:27:921 Memoria/(31275:31275): Se conecto un cliente!
+[INFO] 18:10:27:922 Memoria/(31275:31275): Se conecto un cliente!
+[TRACE] 18:11:41:098 Memoria/(31668:31668): Listo para escuchar a mi cliente
+[INFO] 18:11:47:162 Memoria/(31668:31668): Se conecto un cliente!
+[INFO] 18:11:47:162 Memoria/(31668:31668): Se conecto un cliente!
+[TRACE] 18:16:08:039 Memoria/(32135:32135): Listo para escuchar a mi cliente
+[TRACE] 18:16:39:731 Memoria/(32396:32396): Listo para escuchar a mi cliente
+[INFO] 18:16:55:576 Memoria/(32396:32396): Se conecto un cliente!
+[INFO] 18:16:55:577 Memoria/(32396:32396): Se conecto un cliente!
+[TRACE] 18:20:05:154 Memoria/(33049:33049): Listo para escuchar a mi cliente
+[INFO] 18:20:22:943 Memoria/(33049:33049): Se conecto un cliente!
+[INFO] 18:20:22:944 Memoria/(33049:33049): Se conecto un cliente!
+[TRACE] 18:21:25:810 Memoria/(33452:33452): Listo para escuchar a mi cliente
+[INFO] 18:21:40:146 Memoria/(33452:33452): Se conecto un cliente!
+[INFO] 18:21:40:147 Memoria/(33452:33452): Se conecto un cliente!
+[TRACE] 18:23:17:550 Memoria/(34056:34056): Listo para escuchar a mi cliente
+[INFO] 18:23:29:174 Memoria/(34056:34056): Se conecto un cliente!
+[INFO] 18:23:29:174 Memoria/(34056:34056): Se conecto un cliente!
+[TRACE] 18:25:49:236 Memoria/(34632:34632): Listo para escuchar a mi cliente
+[INFO] 18:25:59:495 Memoria/(34632:34632): Se conecto un cliente!
+[INFO] 18:25:59:497 Memoria/(34632:34632): Se conecto un cliente!
+[TRACE] 18:27:47:612 Memoria/(35206:35206): Listo para escuchar a mi cliente
+[INFO] 18:27:58:930 Memoria/(35206:35206): Se conecto un cliente!
+[INFO] 18:27:58:931 Memoria/(35206:35206): Se conecto un cliente!
+[TRACE] 18:28:44:662 Memoria/(35730:35730): Listo para escuchar a mi cliente
+[INFO] 18:29:13:093 Memoria/(35730:35730): Se conecto un cliente!
+[INFO] 18:29:13:094 Memoria/(35730:35730): Se conecto un cliente!
+[TRACE] 18:31:30:940 Memoria/(36610:36610): Listo para escuchar a mi cliente
+[INFO] 18:31:48:210 Memoria/(36610:36610): Se conecto un cliente!
+[INFO] 18:31:48:217 Memoria/(36610:36610): Se conecto un cliente!
+[TRACE] 18:34:33:376 Memoria/(37401:37401): Listo para escuchar a mi cliente
+[INFO] 18:34:52:750 Memoria/(37401:37401): Se conecto un cliente!
+[INFO] 18:34:52:751 Memoria/(37401:37401): Se conecto un cliente!
+[TRACE] 18:35:29:233 Memoria/(37907:37907): Listo para escuchar a mi cliente
+[INFO] 18:35:46:071 Memoria/(37907:37907): Se conecto un cliente!
+[INFO] 18:35:46:072 Memoria/(37907:37907): Se conecto un cliente!
+[TRACE] 18:37:33:473 Memoria/(38462:38462): Listo para escuchar a mi cliente
+[INFO] 18:37:55:243 Memoria/(38462:38462): Se conecto un cliente!
+[INFO] 18:37:55:244 Memoria/(38462:38462): Se conecto un cliente!
+[TRACE] 18:40:34:076 Memoria/(39061:39061): Listo para escuchar a mi cliente
+[TRACE] 18:41:12:219 Memoria/(39293:39293): Listo para escuchar a mi cliente
+[INFO] 18:41:26:435 Memoria/(39293:39293): Se conecto un cliente!
+[INFO] 18:41:26:438 Memoria/(39293:39293): Se conecto un cliente!
+[TRACE] 18:45:05:197 Memoria/(39936:39936): Listo para escuchar a mi cliente
+[INFO] 18:45:26:307 Memoria/(39936:39936): Se conecto un cliente!
+[TRACE] 18:45:42:373 Memoria/(40231:40231): Listo para escuchar a mi cliente
+[INFO] 18:46:31:930 Memoria/(40231:40231): Se conecto un cliente!
+[INFO] 18:46:33:865 Memoria/(40231:40231): Se conecto un cliente!
+[TRACE] 18:48:30:458 Memoria/(41028:41028): Listo para escuchar a mi cliente
+[INFO] 18:48:51:742 Memoria/(41028:41028): Se conecto un cliente!
+[INFO] 18:48:53:255 Memoria/(41028:41028): Se conecto un cliente!

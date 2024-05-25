@@ -39,7 +39,7 @@ void abrir_archivo_path(int socket_kernel){
     ssize_t leidos;
     t_list* instrucciones;
     instrucciones = list_create();
-    t_proceso* proceso_ins = malloc(sizeof(proceso_ins));
+    t_proceso* proceso_ins = malloc(sizeof(t_proceso));
     proceso_ins->pid= proceso->proceso_id;
 
     while ((leidos = getline(&linea, &tamanio,file)) != -1){
@@ -62,7 +62,6 @@ void abrir_archivo_path(int socket_kernel){
     t_paquete* paquete = crear_paquete(PAQUETE);
     enviar_paquete(paquete, socket_kernel);
 
-    free(instrucciones);
     free(linea);
     fclose(file);
 }

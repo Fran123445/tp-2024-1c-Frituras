@@ -30,13 +30,13 @@ void enviar_pcb(op_code motivo){
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_int_a_paquete(paquete, pcb->PID);
-    agregar_a_paquete(paquete, pc, sizeof(uint32_t));
+    agregar_a_paquete(paquete, &pc, sizeof(uint32_t));
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
 
 char* obtener_instruccion_de_memoria(){
-    log_ciclo = log_create("ErrorRecepcionInstruccion.log","Error de recepcion de instruccion",false,LOG_LEVEL_INFO);
+    //log_ciclo = log_create("ErrorRecepcionInstruccion.log","Error de recepcion de instruccion",false,LOG_LEVEL_INFO);
     op_code cod_op = recibir_operacion(socket_memoria);
     if (cod_op == ENVIO_DE_INSTRUCCIONES) { 
         t_buffer* buffer = recibir_buffer(socket_memoria);
@@ -85,7 +85,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             }
             *valor_ptr = valor;
             instruccion->tipo = iSET;
-            instruccion->arg1 = (void*) string_a_registro(list_get(lista,1));
+            registrosCPU* argumento = malloc(sizeof(registrosCPU));
+            *argumento = string_a_registro(list_get(lista,1));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->sizeArg2 = sizeof(int);
             instruccion->arg2 = valor_ptr;
@@ -142,7 +144,6 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
 }
 
 void execute(t_instruccion* instruccion){
-    log_ciclo = log_create("Cpu.log", "Instruccion Ejecutada", false, LOG_LEVEL_INFO);
     switch (instruccion->tipo)
     {
     case iSET:
@@ -186,7 +187,8 @@ void execute(t_instruccion* instruccion){
     */
     case iIO_GEN_SLEEP:
         IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);
-        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);        
+        log_info(log_ciclo, "PID: %d", pcb->PID);    
+        //log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);      
         break;
     /*
     case iIO_STDIN_READ:
@@ -221,7 +223,7 @@ void execute(t_instruccion* instruccion){
         log_error(log_ciclo, "La instruccion es inválida");
         break;
     }
-    log_destroy(log_ciclo);
+    //log_destroy(log_ciclo);
 }
 
 int check_interrupt() {
@@ -288,7 +290,7 @@ t_tipoInstruccion string_a_tipo_instruccion (char* ins_char){
     if (strcmp(ins_char, "COPY_STRING") == 0) return iCOPY_STRING;
     if (strcmp(ins_char, "WAIT") == 0) return iWAIT;
     if (strcmp(ins_char, "SIGNAL") == 0) return iSIGNAL;
-    if (strcmp(ins_char, "IO_GEN_SLEEP")) return iIO_GEN_SLEEP;
+    if (strcmp(ins_char, "IO_GEN_SLEEP") == 0) return iIO_GEN_SLEEP;
     if (strcmp(ins_char, "IO_STDIN_READ") == 0) return iIO_STDIN_READ;
     if (strcmp(ins_char, "IO_STDOUT_WRITE") == 0) return iIO_STDOUT_WRITE;
     if (strcmp(ins_char, "IO_FS_CREATE") == 0) return iIO_FS_CREATE;
@@ -311,6 +313,6 @@ t_list* dividir_cadena_en_tokens(const char* linea){
         list_add(lista,token);
         token = strtok(NULL," ");
     }
-    free(cadena);
+    //free(cadena);
     return lista;
 }

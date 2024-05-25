@@ -12,8 +12,8 @@ proceso_cpu* recibir_proceso_cpu(int socket_cpu){
     proceso_cpu* proceso_de_cpu = malloc(sizeof(proceso_cpu));
     if (cod_op == ENVIO_PC){
         t_buffer* buffer = recibir_buffer(socket_cpu);
-        uint32_t pc = buffer_read_uint32(buffer);
         int pid = buffer_read_int(buffer);
+        uint32_t pc = buffer_read_uint32(buffer);
         liberar_buffer(buffer);
         proceso_de_cpu->pid = pid;
         proceso_de_cpu->pc= pc;

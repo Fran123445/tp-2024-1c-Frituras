@@ -61,6 +61,8 @@ int main(int argc, char* argv[]) {
 
     iniciar_servidores(config);
 
+    int a;
+    recv(socket_kernel_d, &a, sizeof(int), MSG_WAITALL);
     socket_memoria = crear_conexion(config_get_string_value(config, "IP_MEMORIA"), config_get_string_value(config, "PUERTO_MEMORIA"), CPU);
 
     pthread_t threadEscuchaDispatch;

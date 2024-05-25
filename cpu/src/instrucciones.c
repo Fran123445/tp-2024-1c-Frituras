@@ -135,7 +135,7 @@ void RESIZE(int tamaño){
 void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     t_paquete* paquete = crear_paquete(ENVIAR_IO_GEN_SLEEP);
 
-    t_interfaz_generica* interfaz_a_enviar;
+    t_interfaz_generica* interfaz_a_enviar = malloc(sizeof(t_interfaz_generica));
     interfaz_a_enviar->nombre = interfaz;
     interfaz_a_enviar->unidades_trabajo = unidades_de_trabajo;
     

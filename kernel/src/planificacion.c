@@ -191,12 +191,12 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
             if (comprobarOperacionValida(interfaz, operacion)) {
                 t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
                 solicitud->proceso = proceso;
-                solicitud->unidadesTrabajo = buffer_read_int(buffer);
+                solicitud->unidadesTrabajo = infoInterfaz->unidades_trabajo;
                 pthread_mutex_lock(&interfaz->mutex);
                 queue_push(interfaz->cola, solicitud);
                 cambiarEstado(proceso, ESTADO_BLOCKED);
                 pthread_mutex_unlock(&interfaz->mutex);
-
+                sem_post(&interfaz->semaforo);
             } else {
                 enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
             }
