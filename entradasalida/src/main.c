@@ -34,7 +34,7 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create("entradasalida.config");
+    t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
     }; 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
 
     if(!strcmp(tipo,"GENERICA")){
-        iniciarInterfazGenerica(conexion_kernel, nuevo_config, "Interfaz1");
+        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
     }
 
     return 0;
