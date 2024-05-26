@@ -13,7 +13,7 @@ t_config* config;
 t_parametros_cpu* params_cpu;
 
 void iniciar_servidores(t_config* config){
-    t_log* log_memoria = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
+    t_log* log_memoria = log_create("memoria_kernel.log", "Memoria",true, LOG_LEVEL_TRACE);
 
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria);
 
@@ -42,7 +42,6 @@ void* escuchar_kernel(){
         abrir_archivo_path(socket_kernel);
     }
 }
-//void* escuchar_io(){}
 
 int main(int argc, char *argv[]){
     lista_de_procesos_con_ins = list_create();
@@ -57,8 +56,6 @@ int main(int argc, char *argv[]){
     pthread_t hilo_cpu;
     pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
 
-    //(void* (*)(void*)) esperar_clientes_IO es casteo ya que pthread_create espera un void* con args void*
-    // mientras q esperar cliente es voi* y espera un t_conexion_conexion escucha.
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
     config_destroy(config);
