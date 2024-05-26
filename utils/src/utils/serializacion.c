@@ -153,14 +153,6 @@ t_instruccion* buffer_read_instruccion(t_buffer* buffer) {
 	return inst;
 }
 
-t_dispatch* buffer_read_dispatch(t_buffer* buffer) {
-	t_dispatch* dispatch = malloc(sizeof(t_dispatch));
-	dispatch->proceso = buffer_read_pcb(buffer);
-	dispatch->instruccion = buffer_read_instruccion(buffer);
-
-	return dispatch;
-}
-
 t_interfaz_generica* buffer_read_interfaz_generica(t_buffer* buffer) {
     t_interfaz_generica* interfaz = malloc(sizeof(t_interfaz_generica));
 

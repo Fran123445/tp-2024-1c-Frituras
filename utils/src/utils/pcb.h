@@ -85,12 +85,5 @@ typedef struct {
     char* archivo;       
 }t_instruccion;
 
-typedef struct {
-    PCB* proceso;
-    t_instruccion* instruccion;
-}t_dispatch;
-
-
-
 size_t tamanioRegistro(registrosCPU registro);
 #endif /* PCB_H */

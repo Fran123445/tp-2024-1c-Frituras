@@ -22,12 +22,19 @@ int iniciar_servidor(char *puerto, t_log *log)
 							 servinfo->ai_socktype,
 							 servinfo->ai_protocol);
 
+	setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+	
 	// Asociamos el socket a un puerto
-	bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
+	if (bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
+		log_error(loggerServ, "Error bind");
+	}
+
 
 	// Escuchamos las conexiones entrantes
-	listen(socket_servidor, MAXCONN);
-
+	if (listen(socket_servidor, MAXCONN) < 0) {
+		log_error(loggerServ, "Error listen");
+	}
+	
 	freeaddrinfo(servinfo);
 	log_trace(loggerServ, "Listo para escuchar a mi cliente");
 	return socket_servidor;
