@@ -66,6 +66,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
     t_list* lista = dividir_cadena_en_tokens(instruccion_sin_decodificar);
     t_tipoInstruccion tipo_de_instruccion = string_a_tipo_instruccion(list_get(lista,0));
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
+    registrosCPU* argumento = malloc(sizeof(registrosCPU));
+    registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
+    registrosCPU* argumento3 = malloc(sizeof(registrosCPU));
     int valor;
     int*valor_ptr = malloc(sizeof(int));
     switch(tipo_de_instruccion){
@@ -77,7 +80,6 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             }
             *valor_ptr = valor;
             instruccion->tipo = iSET;
-            registrosCPU* argumento = malloc(sizeof(registrosCPU));
             *argumento = string_a_registro(list_get(lista,1));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
@@ -87,9 +89,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iSUM:
             instruccion->tipo = iSUM;
-            registrosCPU* argumento = malloc(sizeof(registrosCPU));
             *argumento = string_a_registro(list_get(lista,1));
-            registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
             *argumento2 = string_a_registro(list_get(lista,2));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
@@ -99,14 +99,12 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iSUB:
             instruccion->tipo = iSUB;
-            registrosCPU* argumento = malloc(sizeof(registrosCPU));
             *argumento = string_a_registro(list_get(lista,1));
-            registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
             *argumento2 = string_a_registro(list_get(lista,2));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
-            instruccion->arg2 = (void*) string_a_registro(list_get(lista,2));
-            instruccion->sizeArg2 = argumento2;
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
             break;
         case iJNZ:
@@ -117,7 +115,6 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             }
             *valor_ptr = valor;
             instruccion->tipo = iJNZ;
-            registrosCPU* argumento = malloc(sizeof(registrosCPU));
             *argumento = string_a_registro(list_get(lista,1));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
@@ -139,8 +136,11 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg3 = 0;
             instruccion->interfaz = list_get(lista,1);
             break;
-        default :
-        break;
+        case iEXIT:
+            instruccion->tipo = iEXIT;
+            break;
+        default:
+            break;
     }
     return instruccion;
 }
