@@ -3,22 +3,12 @@
 #include <utils/client.h>
 #include <utils/server.h>
 #include <utils/serializacion.h>
-//Falta agregar hilos para diferentes conexiones 
-typedef struct {
-    char* nombre;
-    int unidades_trabajo;
-} t_interfaz_generica;
-
 
 void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
-    t_interfaz_generica interfaz;
-
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
 
-    interfaz.nombre = nombre;
-
-    t_paquete* paquete = crear_paquete();
+    t_paquete* paquete = crear_paquete(CONEXION_IOGENERICA);
     agregar_string_a_paquete(paquete, nombre);
     enviar_paquete(paquete ,socket);
     eliminar_paquete(paquete);
@@ -34,8 +24,7 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
         int unidades_trabajo = buffer_read_int(buffer);
         sleep(tiempo_pausa * unidades_trabajo);
 
-        t_paquete* paquete = crear_paquete();
-        paquete->codigo_operacion = OPERACION_FINALIZADA;
+        t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,socket);
         eliminar_paquete(paquete);
 
@@ -45,7 +34,7 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create(argv[2]);
+    t_config* nuevo_config = config_create("entradasalida.config");
     if (nuevo_config == NULL) {
         exit(1);
     }; 
@@ -54,8 +43,8 @@ int main(int argc, char* argv[]) {
 
     char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
 
-    if(!strcmp(tipo,"IO_GEN_SLEEP")){
-        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
+    if(!strcmp(tipo,"GENERICA")){
+        iniciarInterfazGenerica(conexion_kernel, nuevo_config, "Interfaz1");
     }
 
     return 0;
