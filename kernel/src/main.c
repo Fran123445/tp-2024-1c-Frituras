@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }; 
 
-    t_log* logServidor = log_create("ServidorKernel", "Kernel", false, LOG_LEVEL_TRACE);
+    t_log* logServidor = log_create("ServidorKernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     pthread_t esperarClientes;
 
