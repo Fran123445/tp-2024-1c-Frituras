@@ -55,7 +55,6 @@ void abrir_archivo_path(int socket_kernel){
             return;
         }
         list_add(instrucciones, linea_copia);
-        free(linea);
     }
     proceso_ins->instrucciones = instrucciones;
     list_add(lista_de_procesos_con_ins,proceso_ins); // guardo en la lista de los procesos el proceso!
