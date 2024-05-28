@@ -9,6 +9,7 @@
 #include "planificacion.h"
 #include "interfaces.h"
 #include "roundRobin.h"
+#include "recursos.h"
 
 int socketCPUDispatch;
 int socketCPUInterrupt;
@@ -104,6 +105,8 @@ int main(int argc, char* argv[]) {
     inicializarSemaforosYMutex(config_get_int_value(config, "GRADO_MULTIPROGRAMACION"));
 
     seleccionarAlgoritmoPlanificacion(config);
+
+    leerRecursosDeConfig(config);
 
     //iniciarProceso("instrucciones1.txt");
     solicitarInput();
