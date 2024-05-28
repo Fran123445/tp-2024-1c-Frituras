@@ -17,5 +17,6 @@ typedef struct {
 extern t_list* listaRecursos;
 
 void leerRecursosDeConfig(t_config* config);
+t_recurso* hallarRecurso(char* nombre);
 
 #endif /* RECS_H */

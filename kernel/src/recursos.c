@@ -23,3 +23,15 @@ void leerRecursosDeConfig(t_config* config) {
     string_array_destroy(instancias); // como hice atoi, no pasa nada liberando la memoria de los strings de las instancias
     free(recursos); // hago free en vez de array_destroy para destruir el array y no sus contenidos
 }
+
+t_recurso* hallarRecurso(char* nombre) {
+    bool _mismoNombre(t_recurso* recurso) {
+        return !strcmp(nombre, recurso->nombre);
+    };
+
+    // CREO que nunca van a haber varios hilos accediendo a la lista,
+    // asi que no seria necesario un mutex
+    t_recurso* recursoHallado = list_find(listaRecursos, _mismoNombre);
+
+    return recursoHallado;
+}
