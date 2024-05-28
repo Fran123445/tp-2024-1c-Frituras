@@ -19,4 +19,7 @@ void leerRecursosDeConfig(t_config* config) {
 
         list_add(listaRecursos, recurso);
     }
+
+    string_array_destroy(instancias); // como hice atoi, no pasa nada liberando la memoria de los strings de las instancias
+    free(recursos); // hago free en vez de array_destroy para destruir el array y no sus contenidos
 }
