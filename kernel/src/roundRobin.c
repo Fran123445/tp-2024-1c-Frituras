@@ -10,13 +10,13 @@ void enviarInterrupcion(int PID) {
 }
 
 void esperarQuantumCompleto(PCB* proceso) {
-    sleep(proceso->quantum);
+    usleep(proceso->quantum*1000);
     enviarInterrupcion(proceso->PID);
 
     procesoInterrumpido = 1;
 }
 
-void esperarFinQuantum(PCB* proceso) {
+void esperarVuelta(PCB* proceso) {
     pthread_t esperaQuantum;
     pthread_create(&esperaQuantum,
 						NULL,
@@ -28,6 +28,7 @@ void esperarFinQuantum(PCB* proceso) {
     // esto es por si el proceso termina o no de ejecutarse antes que se cumpla el quantum
     if (procesoInterrumpido) {
         pthread_join(esperaQuantum, NULL);
+        procesoInterrumpido = 0;
         return;
     }
 
@@ -40,7 +41,7 @@ void enviarProcesoACPU_RR(PCB* proceso) {
     pthread_t quantum;
     pthread_create(&quantum,
 						NULL,
-						(void*) esperarFinQuantum,
+						(void*) esperarVuelta,
 						proceso);
     pthread_detach(quantum);
 }

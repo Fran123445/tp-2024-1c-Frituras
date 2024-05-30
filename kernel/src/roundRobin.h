@@ -11,7 +11,7 @@ void enviarInterrupcion(int PID);
 void esperarQuantumCompleto(PCB* proceso);
 
 // Espera a que el proceso vuelva por fin de quantum o porque termino de ejecutarse
-void esperarFinQuantum(PCB* proceso);
+void esperarVuelta(PCB* proceso);
 
 // Envia el proceso a CPU e inicia el conteo del quantum
 void enviarProcesoACPU_RR(PCB*);
