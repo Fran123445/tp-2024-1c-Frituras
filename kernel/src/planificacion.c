@@ -182,12 +182,23 @@ void recibirDeCPU() {
     }
 }
 
+void actualizarProcesoRecibido(PCB* pcbRecibido, PCB* pcbEnKernel) {
+    // esto es porque si no al hacer el reemplazo queda el string_array original
+    // leakeando memoria
+    string_array_destroy(pcbEnKernel->recursosAsignados);
+
+    *pcbEnKernel = *pcbRecibido;
+    
+    free(pcbRecibido);
+}
+
 void planificarRecibido(op_code operacion, t_buffer* buffer) {
     PCB* procesoExec = buffer_read_pcb(buffer);
     PCB* proceso = hallarPCB(procesoExec->PID);
-
-    *proceso = *procesoExec;
-
+    actualizarProcesoRecibido(procesoExec, proceso); 
+    
+    // Seguramente este switch gigante pase a ser varias funciones individuales
+    // por un tema obviamente de legibilidad, pero por ahora se queda asi
     switch (operacion) {
         case ENVIAR_IO_GEN_SLEEP:
             t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
@@ -205,12 +216,25 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
                 enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
             }
             break;
-        /*case WAIT:
-            // todavia no me fije que hace wait
+        case INSTRUCCION_WAIT:
+            char* nombreRecurso = buffer_read_string(buffer);
+            t_recurso* recurso = hallarRecurso(nombreRecurso);
+            if (!recurso) {
+                enviarAExit(proceso, INVALID_RESOURCE);
+                break;
+            }
+
+            int recursoTomado = waitRecurso(recurso, proceso);
+
+            free(nombreRecurso);
+
+            if (recursoTomado) { 
+                enviarProcesoACPU(proceso);
+                return;
+            }
+
+        case INSTRUCCION_SIGNAL:
             break;
-        case iSIGNAL:
-            // todavia no me fije que hace signal
-            break;*/
         case INSTRUCCION_EXIT:
             enviarAExit(proceso, SUCCESS);
             break;
@@ -220,6 +244,7 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
             pthread_mutex_unlock(&mutexLogger);
             break;
     }
+
     sem_post(&cpuDisponible);
 }
 

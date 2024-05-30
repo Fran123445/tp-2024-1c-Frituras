@@ -11,6 +11,7 @@
 #include <procesos.h>
 #include <interfaces.h>
 #include <utils/serializacion.h>
+#include <recursos.h>
 
 extern pthread_t pth_colaExit;
 extern pthread_t pth_colaNew;
