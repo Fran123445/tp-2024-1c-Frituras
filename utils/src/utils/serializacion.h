@@ -21,6 +21,8 @@ typedef enum {
     INTERRUPCION,
     // CPU - KERNEL
     INSTRUCCION_EXIT,
+    INSTRUCCION_WAIT,
+    INSTRUCCION_SIGNAL,
     ENVIAR_IO_GEN_SLEEP,
     // CPU - Memoria
     ENVIO_PC,
