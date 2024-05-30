@@ -6,6 +6,7 @@
 #include <string.h>
 #include<netdb.h>
 #include <unistd.h>
+#include <commons/string.h>
 
 typedef enum {
     PAQUETE,

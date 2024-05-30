@@ -7,3 +7,8 @@ size_t tamanioRegistro(registrosCPU registro) {
         return sizeof(uint32_t);
     }
 }
+
+void liberar_pcb(PCB* pcb) {
+    string_array_destroy(pcb->recursosAsignados);
+    free(pcb);
+}
