@@ -35,3 +35,21 @@ t_recurso* hallarRecurso(char* nombre) {
 
     return recursoHallado;
 }
+
+int waitRecurso(t_recurso* recurso, PCB* proceso) {
+    // Me genera confusion que el enunciado diga estrictamente menor a 0
+    // en vez de menor o igual a 0, ya que entonces un proceso podria tomar un
+    // recurso que tiene 0 instancias ¿?
+    int recursoTomado;
+    if (recurso->instancias < 0) {
+        queue_push(recurso->procesosBloqueados, proceso);
+        recursoTomado = 0;
+    } else {
+        string_array_push(&proceso->recursosAsignados, strdup(recurso->nombre));
+        recursoTomado = 1;
+    }
+    
+    recurso->instancias -= 1;
+
+    return recursoTomado;
+}
