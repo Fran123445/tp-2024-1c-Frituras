@@ -6,7 +6,7 @@
 #include <commons/string.h>
 #include <readline/readline.h>
 #include <planificacion.h>
-#include <procesos.h>
+#include <planificadorLP.h>
 
 // Solicita input por consola al usuario
 void solicitarInput(void);

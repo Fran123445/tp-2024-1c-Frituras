@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <string.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
-#include <string.h>
-#include <procesos.h>
-#include <interfaces.h>
 #include <utils/serializacion.h>
+#include <planificadorLP.h>
+#include <interfaces.h>
 #include <recursos.h>
 
 extern pthread_t pth_colaExit;

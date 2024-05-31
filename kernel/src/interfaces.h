@@ -3,13 +3,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <threads.h>
 #include <semaphore.h>
+#include <pthread.h>
 #include <commons/collections/queue.h>
 #include <commons/log.h>
 #include <utils/server.h>
 #include <utils/serializacion.h>
-#include <procesos.h>
+#include <planificadorLP.h>
 #include <planificacion.h>
 
 extern t_log* logger;

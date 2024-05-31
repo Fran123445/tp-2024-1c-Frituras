@@ -1,4 +1,4 @@
-#include <procesos.h>
+#include <planificadorLP.h>
 
 
 char* enumEstadoAString(estado_proceso estado) {

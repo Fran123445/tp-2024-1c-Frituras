@@ -1,5 +1,5 @@
-#ifndef PROC_H
-#define PROC_H
+#ifndef PLANLP_H
+#define PLANLP_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -67,4 +67,4 @@ t_queue* enumEstadoACola(int);
 // Saca el PCB enviado por parametro de la cola enviada por parametro.
 void sacarProceso(t_queue*, PCB*);
 
-#endif /* PROC_H */
+#endif /* PLANLP_H */
