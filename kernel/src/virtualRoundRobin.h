@@ -9,7 +9,11 @@
 #include <utils/pcb.h>
 #include <roundRobin.h>
 
-extern t_queue* colaPrioritaria;
-extern pthread_mutex_t mutexColaPrioritaria;
+extern sem_t cpuDisponible;
+
+typedef enum {
+    COLA_READY,
+    COLA_PRIORITARIA
+} colaProveniente;
 
 #endif /* VRR_H */
