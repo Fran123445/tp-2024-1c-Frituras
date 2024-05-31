@@ -1,6 +1,11 @@
-#include <planificacion.h>
+#ifndef RR_H
+#define RR_H
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <planificacion.h>
 
 extern sem_t cpuDisponible;
 
@@ -22,3 +27,5 @@ void enviarInterrupcion();
 void ejecutarSiguienteRR();
 
 void planificacionPorRR();
+
+#endif /* RR_H */
