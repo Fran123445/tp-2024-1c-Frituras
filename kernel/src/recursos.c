@@ -53,3 +53,11 @@ int waitRecurso(t_recurso* recurso, PCB* proceso) {
 
     return recursoTomado;
 }
+
+void signalRecurso(t_recurso* recurso) {
+    recurso->instancias += 1;
+
+    if(!queue_is_empty(recurso->procesosBloqueados)) {
+        enviarAReady(queue_pop(recurso->procesosBloqueados));
+    }
+}

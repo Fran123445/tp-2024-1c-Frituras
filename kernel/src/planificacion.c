@@ -36,6 +36,13 @@ void enviarAExit(PCB* pcb, motivo_exit motivo) {
     sem_post(&procesosEnExit);
 }
 
+void enviarAReady(PCB* pcb) {
+    pthread_mutex_lock(&mutexReady);
+    cambiarEstado(pcb, ESTADO_READY);
+    queue_push(colaReady, pcb);
+    pthread_mutex_unlock(&mutexReady);
+}
+
 void procesosReadyLog(char** lista) {
     void _agregarPIDALista(PCB* proceso) {
         if(proceso->estado == ESTADO_READY) {
@@ -219,6 +226,8 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
         case INSTRUCCION_WAIT:
             char* nombreRecurso = buffer_read_string(buffer);
             t_recurso* recurso = hallarRecurso(nombreRecurso);
+            free(nombreRecurso);
+
             if (!recurso) {
                 enviarAExit(proceso, INVALID_RESOURCE);
                 break;
@@ -226,15 +235,26 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
 
             int recursoTomado = waitRecurso(recurso, proceso);
 
-            free(nombreRecurso);
-
             if (recursoTomado) { 
                 enviarProcesoACPU(proceso);
                 return;
             }
 
         case INSTRUCCION_SIGNAL:
-            break;
+            char* nombreRecurso = buffer_read_string(buffer);
+            t_recurso* recurso = hallarRecurso(nombreRecurso);
+            free(nombreRecurso);
+
+            if (!recurso) {
+                enviarAExit(proceso, INVALID_RESOURCE);
+                break;
+            }
+
+            signalRecurso(recurso);
+
+            enviarProcesoACPU(proceso);
+            return;
+
         case INSTRUCCION_EXIT:
             enviarAExit(proceso, SUCCESS);
             break;
