@@ -10,7 +10,6 @@
 #include <utils/server.h>
 #include <utils/serializacion.h>
 #include <planificadorLP.h>
-#include <planificacion.h>
 
 extern t_log* logger;
 

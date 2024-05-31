@@ -15,34 +15,6 @@ pthread_mutex_t mutexLogger;
 
 int finalizar = 0;
 
-void cambiarEstado(PCB* proceso, estado_proceso estado) {
-    estado_proceso estadoAnterior = proceso->estado;
-    proceso->estado = estado;
-    pthread_mutex_lock(&mutexLogger);
-    log_info(logger, "PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
-    pthread_mutex_unlock(&mutexLogger);
-}
-
-void enviarAExit(PCB* pcb, motivo_exit motivo) {
-    procesoEnExit* aExit = malloc(sizeof(procesoEnExit));
-    aExit->pcb = pcb;
-    aExit->motivo = motivo;
-
-    pthread_mutex_lock(&mutexExit);
-    cambiarEstado(pcb, ESTADO_EXIT);
-    queue_push(colaExit, aExit);
-    pthread_mutex_unlock(&mutexExit);
-    
-    sem_post(&procesosEnExit);
-}
-
-void enviarAReady(PCB* pcb) {
-    pthread_mutex_lock(&mutexReady);
-    cambiarEstado(pcb, ESTADO_READY);
-    queue_push(colaReady, pcb);
-    pthread_mutex_unlock(&mutexReady);
-}
-
 void procesosReadyLog(char** lista) {
     void _agregarPIDALista(PCB* proceso) {
         if(proceso->estado == ESTADO_READY) {

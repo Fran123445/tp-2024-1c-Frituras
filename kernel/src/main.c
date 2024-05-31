@@ -5,7 +5,7 @@
 #include <utils/server.h>
 #include <utils/client.h>
 #include "consola.h"
-#include "procesos.h"
+#include "planificadorLP.h"
 #include "planificacion.h"
 #include "interfaces.h"
 #include "roundRobin.h"

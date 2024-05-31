@@ -9,6 +9,7 @@
 #include <commons/collections/queue.h>
 #include <commons/collections/list.h>
 #include <utils/pcb.h>
+#include <planificadorLP.h>
 
 typedef struct {
     char* nombre;

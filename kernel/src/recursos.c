@@ -31,7 +31,7 @@ t_recurso* hallarRecurso(char* nombre) {
 
     // CREO que nunca van a haber varios hilos accediendo a la lista,
     // asi que no seria necesario un mutex
-    t_recurso* recursoHallado = list_find(listaRecursos, _mismoNombre);
+    t_recurso* recursoHallado = list_find(listaRecursos, (void *) _mismoNombre);
 
     return recursoHallado;
 }

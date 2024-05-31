@@ -49,6 +49,15 @@ extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
+// Envia un proceso a la cola Exit con su respectivo motivo
+void enviarAExit(PCB* pcb, motivo_exit motivo);
+
+// Cambia el estado de un proceso y loggea el estado anterior y el nuevo
+void cambiarEstado(PCB* proceso, estado_proceso estado);
+
+// Envia un proceso a la cola Ready
+void enviarAReady(PCB* pcb);
+
 // Devuelve un string con el nombre del dato enumerado 
 char* enumEstadoAString(estado_proceso);
 
