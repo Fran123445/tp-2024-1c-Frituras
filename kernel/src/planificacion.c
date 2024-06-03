@@ -148,19 +148,6 @@ void ejecutarSiguiente() {
     }
 }
 
-void leerBufferYPlanificar(op_code operacion) {
-    t_buffer* buffer = recibir_buffer(socketCPUDispatch);
-    planificarRecibido(operacion, buffer);
-    liberar_buffer(buffer);
-}
-
-void recibirDeCPU() {
-    while(1) {
-        op_code operacion = recibir_operacion(socketCPUDispatch);
-        leerBufferYPlanificar(operacion);
-    }
-}
-
 void actualizarProcesoRecibido(PCB* pcbRecibido, PCB* pcbEnKernel) {
     // esto es porque si no al hacer el reemplazo queda el string_array original
     // leakeando memoria
@@ -171,11 +158,25 @@ void actualizarProcesoRecibido(PCB* pcbRecibido, PCB* pcbEnKernel) {
     free(pcbRecibido);
 }
 
-void planificarRecibido(op_code operacion, t_buffer* buffer) {
+void leerBufferYPlanificar(op_code operacion) {
+    t_buffer* buffer = recibir_buffer(socketCPUDispatch);
+
     PCB* procesoExec = buffer_read_pcb(buffer);
     PCB* proceso = hallarPCB(procesoExec->PID);
     actualizarProcesoRecibido(procesoExec, proceso); 
     
+    planificarRecibido(operacion, proceso, buffer);
+    liberar_buffer(buffer);
+}
+
+void recibirDeCPU() {
+    while(1) {
+        op_code operacion = recibir_operacion(socketCPUDispatch);
+        leerBufferYPlanificar(operacion);
+    }
+}
+
+void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer) {    
     // Seguramente este switch gigante pase a ser varias funciones individuales
     // por un tema obviamente de legibilidad, pero por ahora se queda asi
     switch (operacion) {
@@ -196,6 +197,7 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
             }
             break;
         case INSTRUCCION_WAIT:
+        /*
             char* nombreRecurso = buffer_read_string(buffer);
             t_recurso* recurso = hallarRecurso(nombreRecurso);
             free(nombreRecurso);
@@ -211,6 +213,7 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
                 enviarProcesoACPU(proceso);
                 return;
             }
+        */
 
         case INSTRUCCION_SIGNAL:
             char* nombreRecurso = buffer_read_string(buffer);

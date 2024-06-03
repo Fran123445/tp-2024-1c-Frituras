@@ -42,7 +42,7 @@ void enviarProcesoACPU(PCB*);
 void ejecutarSiguiente();
 
 // Recibe un t_dispatch y planifica en funcion de lo que solicita
-void planificarRecibido(op_code operacion, t_buffer* buffer);
+void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer);
 
 // Lee el t_dispatch del buffer y llama a planificarRecibido
 void leerBufferYPlanificar(op_code operacion);
