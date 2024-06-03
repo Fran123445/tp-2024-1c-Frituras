@@ -50,8 +50,6 @@ void vaciarExit() {
     while(1) {
         sem_wait(&procesosEnExit);
 
-        if (finalizar) break;
-
         char* motivo;
 
         pthread_mutex_lock(&mutexExit);

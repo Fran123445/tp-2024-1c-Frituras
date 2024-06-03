@@ -13,8 +13,6 @@ pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
 pthread_mutex_t mutexLogger;
 
-int finalizar = 0;
-
 void procesosReadyLog(char** lista) {
     void _agregarPIDALista(PCB* proceso) {
         if(proceso->estado == ESTADO_READY) {
@@ -48,8 +46,6 @@ void procesoNewAReady() {
     while(1) {
         sem_wait(&gradoMultiprogramacion);
         sem_wait(&procesosEnNew);
-
-        if (finalizar) break;
 
         PCB* proceso;
         char* listaReady = string_new();
@@ -90,7 +86,6 @@ void enviarProcesoACPU(PCB* proceso) {
 
 PCB* sacarSiguienteDeReady() {
     sem_wait(&procesosEnReady);
-    if (finalizar) return NULL;
     pthread_mutex_lock(&mutexReady);
     PCB* proceso = queue_pop(colaReady);
     cambiarEstado(proceso, ESTADO_EXEC);
@@ -103,7 +98,6 @@ void ejecutarSiguiente() {
     while(1) {
         sem_wait(&cpuDisponible);
         PCB* proceso = sacarSiguienteDeReady();
-        if (finalizar) break;
         enviarProcesoACPU(proceso);
     }
 }
@@ -233,13 +227,4 @@ void planificacionPorFIFO() {
 						NULL,
 						(void*) recibirDeCPU,
 						NULL);
-}
-
-void finalizarHilos() {
-    finalizar = 1;
-    sem_post(&cpuDisponible);
-    sem_post(&gradoMultiprogramacion);
-    sem_post(&procesosEnNew);
-    sem_post(&procesosEnReady);
-    sem_post(&procesosEnExit);
 }
