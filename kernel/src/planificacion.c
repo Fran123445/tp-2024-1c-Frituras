@@ -43,46 +43,6 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     pthread_mutex_init(&mutexLogger, NULL); // no se si dejarlo aca
 }
 
-void vaciarExit() {
-    while(1) {
-        sem_wait(&procesosEnExit);
-
-        if (finalizar) break;
-
-        char* motivo;
-
-        pthread_mutex_lock(&mutexExit);
-        procesoEnExit* procesoAFinalizar = queue_pop(colaExit);
-        pthread_mutex_unlock(&mutexExit);
-
-        pthread_mutex_lock(&mutexListaProcesos);
-        list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
-        pthread_mutex_unlock(&mutexListaProcesos);
-
-        t_paquete* paquete = crear_paquete(FIN_PROCESO);
-        agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
-        enviar_paquete(paquete, socketMemoria);
-        eliminar_paquete(paquete);
-
-        switch(procesoAFinalizar->motivo) {
-            case SUCCESS:
-                motivo = "SUCCESS"; break;
-            case INVALID_RESOURCE:
-                motivo = "INVALID RESOURCE"; break;
-            case INVALID_WRITE:
-                motivo = "INVALID WRITE"; break;
-        }
-
-        pthread_mutex_lock(&mutexLogger);
-        log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
-        pthread_mutex_unlock(&mutexLogger);
-
-        sem_post(&gradoMultiprogramacion);
-        free(procesoAFinalizar->pcb);
-        free(procesoAFinalizar);
-    }
-}
-
 void procesoNewAReady() {
 
     while(1) {

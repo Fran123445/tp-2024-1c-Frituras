@@ -49,6 +49,9 @@ extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
+// Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria
+void vaciarExit();
+
 // Envia un proceso a la cola Exit con su respectivo motivo
 void enviarAExit(PCB* pcb, motivo_exit motivo);
 

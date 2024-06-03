@@ -46,6 +46,46 @@ void enviarAReady(PCB* pcb) {
     pthread_mutex_unlock(&mutexReady);
 }
 
+void vaciarExit() {
+    while(1) {
+        sem_wait(&procesosEnExit);
+
+        if (finalizar) break;
+
+        char* motivo;
+
+        pthread_mutex_lock(&mutexExit);
+        procesoEnExit* procesoAFinalizar = queue_pop(colaExit);
+        pthread_mutex_unlock(&mutexExit);
+
+        pthread_mutex_lock(&mutexListaProcesos);
+        list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
+        pthread_mutex_unlock(&mutexListaProcesos);
+
+        t_paquete* paquete = crear_paquete(FIN_PROCESO);
+        agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
+        enviar_paquete(paquete, socketMemoria);
+        eliminar_paquete(paquete);
+
+        switch(procesoAFinalizar->motivo) {
+            case SUCCESS:
+                motivo = "SUCCESS"; break;
+            case INVALID_RESOURCE:
+                motivo = "INVALID RESOURCE"; break;
+            case INVALID_WRITE:
+                motivo = "INVALID WRITE"; break;
+        }
+
+        pthread_mutex_lock(&mutexLogger);
+        log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
+        pthread_mutex_unlock(&mutexLogger);
+
+        sem_post(&gradoMultiprogramacion);
+        free(procesoAFinalizar->pcb);
+        free(procesoAFinalizar);
+    }
+}
+
 t_queue* enumEstadoACola(int estado) {
     switch (estado)
     {
@@ -89,24 +129,6 @@ registros_cpu inicializarRegistrosCPU() {
     reg.PC = 0;
 
     return reg;
-}
-
-void sacarProceso(t_queue* cola, PCB* proceso) {
-    int i;
-    t_queue* colaTemporal = queue_create();
-    PCB* aux;
-    int cantidadElementos = queue_size(cola);
-
-    for(i = 0; i < cantidadElementos; i++) {
-        aux = queue_pop(cola);
-        if (aux->PID != proceso->PID) {
-            queue_push(colaTemporal, aux);
-        }
-    }
-
-    free(cola->elements); // esto esta porque habia un leak, no se si es la mejor solucion
-    *cola = *colaTemporal;
-    free(colaTemporal);
 }
 
 void iniciarProceso(char* path) {
