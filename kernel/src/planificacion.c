@@ -176,60 +176,71 @@ void recibirDeCPU() {
     }
 }
 
-void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer) {    
-    // Seguramente este switch gigante pase a ser varias funciones individuales
-    // por un tema obviamente de legibilidad, pero por ahora se queda asi
+void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
+    t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
+    t_IOConectado* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
+    if (comprobarOperacionValida(interfaz, operacion)) {
+        t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
+        solicitud->proceso = proceso;
+        solicitud->unidadesTrabajo = infoInterfaz->unidades_trabajo;
+        pthread_mutex_lock(&interfaz->mutex);
+        queue_push(interfaz->cola, solicitud);
+        cambiarEstado(proceso, ESTADO_BLOCKED);
+        pthread_mutex_unlock(&interfaz->mutex);
+        sem_post(&interfaz->semaforo);
+    } else {
+        enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
+    }
+}
+
+int instruccionWait(PCB* proceso, t_buffer* buffer) {
+    char* nombreRecurso = buffer_read_string(buffer);
+    t_recurso* recurso = hallarRecurso(nombreRecurso);
+    free(nombreRecurso);
+
+    if (!recurso) {
+        enviarAExit(proceso, INVALID_RESOURCE);
+        return 1;
+    }
+
+    int recursoTomado = waitRecurso(recurso, proceso);
+
+    if (recursoTomado) { 
+        enviarProcesoACPU(proceso);
+        return 0;
+    }
+
+    return 1;
+}
+
+int instruccionSignal(PCB* proceso, t_buffer* buffer) {
+    char* nombreRecurso = buffer_read_string(buffer);
+    t_recurso* recurso = hallarRecurso(nombreRecurso);
+    free(nombreRecurso);
+
+    if (!recurso) {
+        enviarAExit(proceso, INVALID_RESOURCE);
+        return 1;
+    }
+
+    signalRecurso(recurso);
+
+    enviarProcesoACPU(proceso);
+    return 0;
+}
+
+void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer) {
+    int cpuLibre;
     switch (operacion) {
         case ENVIAR_IO_GEN_SLEEP:
-            t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
-            t_IOConectado* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
-            if (comprobarOperacionValida(interfaz, operacion)) {
-                t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
-                solicitud->proceso = proceso;
-                solicitud->unidadesTrabajo = infoInterfaz->unidades_trabajo;
-                pthread_mutex_lock(&interfaz->mutex);
-                queue_push(interfaz->cola, solicitud);
-                cambiarEstado(proceso, ESTADO_BLOCKED);
-                pthread_mutex_unlock(&interfaz->mutex);
-                sem_post(&interfaz->semaforo);
-            } else {
-                enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
-            }
+            enviarAIOGenerica(proceso, operacion, buffer);
             break;
         case INSTRUCCION_WAIT:
-        /*
-            char* nombreRecurso = buffer_read_string(buffer);
-            t_recurso* recurso = hallarRecurso(nombreRecurso);
-            free(nombreRecurso);
-
-            if (!recurso) {
-                enviarAExit(proceso, INVALID_RESOURCE);
-                break;
-            }
-
-            int recursoTomado = waitRecurso(recurso, proceso);
-
-            if (recursoTomado) { 
-                enviarProcesoACPU(proceso);
-                return;
-            }
-        */
-
+            cpuLibre = instruccionWait(proceso, buffer);
+            if (cpuLibre) break; else return;
         case INSTRUCCION_SIGNAL:
-            char* nombreRecurso = buffer_read_string(buffer);
-            t_recurso* recurso = hallarRecurso(nombreRecurso);
-            free(nombreRecurso);
-
-            if (!recurso) {
-                enviarAExit(proceso, INVALID_RESOURCE);
-                break;
-            }
-
-            signalRecurso(recurso);
-
-            enviarProcesoACPU(proceso);
-            return;
-
+            cpuLibre = instruccionSignal(proceso, buffer);
+            if (cpuLibre) break; else return;
         case INSTRUCCION_EXIT:
             enviarAExit(proceso, SUCCESS);
             break;

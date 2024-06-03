@@ -47,6 +47,17 @@ void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer);
 // Lee el t_dispatch del buffer y llama a planificarRecibido
 void leerBufferYPlanificar(op_code operacion);
 
+// Envia el proceso pasado por parametro a la IO generica en el buffer
+void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer);
+
+// Realiza WAIT sobre un recurso y se lo asigna al proceso pasado por parametro
+// Devuelve 0 si el proceso fue devuelto a la CPU y 1 si el proceso fue bloqueado o enviado a exit
+int instruccionWait(PCB* proceso, t_buffer* buffer);
+
+// Realiza SIGNAL sobre un recurso y se lo asigna al proceso pasado por parametro
+// Devuelve 0 si el proceso fue devuelto a la CPU y 1 si el proceso fue enviado a exit
+int instruccionSignal(PCB* proceso, t_buffer* buffer);
+
 // Inicia los hilos para la planificacion por FIFO
 void planificacionPorFIFO();
 
