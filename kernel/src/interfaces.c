@@ -1,5 +1,7 @@
 #include "interfaces.h"
 
+void (*planificar)(op_code, PCB*, t_buffer*);
+
 void esperarClientesIO(t_conexion_escucha* params) {
     while(1) {
         int* socket_cliente = malloc(sizeof(int));
@@ -77,11 +79,10 @@ void administrarInterfazGenerica(int* socket_cliente) {
             break;
         }
 
-        // Temporal, casi seguro que lo cambio cuando haga VRR
-        pthread_mutex_lock(&mutexReady);
-        queue_push(colaReady, solicitud->proceso);
-        pthread_mutex_unlock(&mutexReady);
-        sem_post(&procesosEnReady);
+        op_code op = recibir_operacion(*socket_cliente);
+        pthread_mutex_lock(&mutexPlanificador);
+        planificar(op, solicitud->proceso, NULL);
+        pthread_mutex_unlock(&mutexPlanificador);
 
         free(solicitud);
     } 

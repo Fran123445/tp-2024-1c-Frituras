@@ -33,6 +33,7 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&cpuDisponible, 0, 1); // lo inicializo en 1 porque (entiendo) al arrancar el kernel la cpu no va a estar ocupada con nada
     sem_init(&gradoMultiprogramacion, 0, multiprogramacion);
     sem_init(&llegadaProceso, 0, 0);
+    pthread_mutex_init(&mutexPlanificador, NULL);
     pthread_mutex_init(&mutexExit, NULL);
     pthread_mutex_init(&mutexNew, NULL);
     pthread_mutex_init(&mutexReady, NULL);
@@ -126,7 +127,9 @@ void leerBufferYPlanificar(op_code operacion) {
 void recibirDeCPU() {
     while(1) {
         op_code operacion = recibir_operacion(socketCPUDispatch);
+        pthread_mutex_lock(&mutexPlanificador); // No se si seria el lugar correcto para poner esto, pensando de cara a detener la planificacion
         leerBufferYPlanificar(operacion);
+        pthread_mutex_unlock(&mutexPlanificador);
     }
 }
 
@@ -189,6 +192,9 @@ void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer) {
         case ENVIAR_IO_GEN_SLEEP:
             enviarAIOGenerica(proceso, operacion, buffer);
             break;
+        case OPERACION_FINALIZADA:
+            enviarAReady(proceso);
+            return;
         case INSTRUCCION_WAIT:
             cpuLibre = instruccionWait(proceso, buffer);
             if (cpuLibre) break; else return;

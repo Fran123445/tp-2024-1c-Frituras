@@ -17,6 +17,9 @@ int socketMemoria;
 
 int siguientePID;
 int quantumInicial;
+
+pthread_mutex_t mutexPlanificador;
+
 t_queue* colaNew;
 t_queue* colaReady;
 t_queue* colaExit;
@@ -40,7 +43,6 @@ void inicializarColas() {
 }
 
 void liberarVariablesGlobales() {    
-    finalizarHilos();
     pthread_join(pth_colaExit, NULL);
     pthread_join(pth_colaNew, NULL);
     pthread_join(pth_colaReady, NULL);
@@ -60,6 +62,7 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
     char* algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 
     if(!strcmp(algoritmo, "FIFO")) {
+        planificar = planificarRecibido;
         planificacionPorFIFO();
     } else if (!strcmp(algoritmo, "RR")) {
         planificacionPorRR();
