@@ -1,5 +1,22 @@
 #include <planificadorLP.h>
 
+void logProcesosEnCola(char* nombreCola, t_queue* cola) {
+    // rompe la abstraccion pero bue, a esta altura es lo que hay
+
+    char* string = string_new();
+
+    void _agregarPIDALista(PCB* proceso) {
+        string_append_with_format(&string, "%d, ", proceso->PID);
+    };
+
+
+    list_iterate(cola->elements, (void *) _agregarPIDALista);
+    string[strlen(string)-2] = '\0';
+
+    log_info(logger, "[%s]", string);
+
+    free(string);
+}
 
 char* enumEstadoAString(estado_proceso estado) {
     char* string;
@@ -41,8 +58,15 @@ void enviarAExit(PCB* pcb, motivo_exit motivo) {
 
 void enviarAReady(PCB* pcb) {
     pthread_mutex_lock(&mutexReady);
+
     cambiarEstado(pcb, ESTADO_READY);
     queue_push(colaReady, pcb);
+
+    // No se si dejar esto adentro del mutex de ready
+    pthread_mutex_lock(&mutexLogger);
+    logProcesosEnCola("READY", colaReady);
+    pthread_mutex_unlock(&mutexLogger);
+
     pthread_mutex_unlock(&mutexReady);
 
     sem_post(&procesosEnReady);

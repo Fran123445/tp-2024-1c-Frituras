@@ -13,20 +13,6 @@ pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
 pthread_mutex_t mutexLogger;
 
-void procesosReadyLog(char** lista) {
-    void _agregarPIDALista(PCB* proceso) {
-        if(proceso->estado == ESTADO_READY) {
-            string_append_with_format(lista, "%d, ", proceso->PID);
-        }
-    };
-    
-    pthread_mutex_lock(&mutexListaProcesos);
-
-    list_iterate(listadoProcesos, (void *) _agregarPIDALista);
-
-    pthread_mutex_unlock(&mutexListaProcesos);
-}
-
 void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnNew, 0, 0);
     sem_init(&procesosEnExit, 0, 0);
@@ -48,33 +34,12 @@ void procesoNewAReady() {
         sem_wait(&gradoMultiprogramacion);
         sem_wait(&procesosEnNew);
 
-        PCB* proceso;
-        char* listaReady = string_new();
-
-        listaReady[0] = '\0';
-
         pthread_mutex_lock(&mutexNew);
-        pthread_mutex_lock(&mutexReady);
 
-        proceso = queue_pop(colaNew);
-        queue_push(colaReady, proceso);
-        cambiarEstado(proceso, ESTADO_READY);
+        PCB* proceso = queue_pop(colaNew);
+        enviarAReady(proceso);
 
-        pthread_mutex_unlock(&mutexReady);
         pthread_mutex_unlock(&mutexNew);
-
-        /* no debe ser ni la forma mas eficiente ni la mas elegante
-        para hacer este log, pero funciona */
-        procesosReadyLog(&listaReady);
-        listaReady[strlen(listaReady)-2] = '\0';
-
-        pthread_mutex_lock(&mutexLogger);
-        log_info(logger, "Cola READY: [%s]", listaReady);
-        pthread_mutex_unlock(&mutexLogger);
-        
-        free(listaReady);
-
-        sem_post(&procesosEnReady);    
     }
 }
 
@@ -224,7 +189,6 @@ void iniciarFIFO() {
 						NULL,
 						(void*) procesoNewAReady,
 						NULL);
-
     pthread_create(&pth_colaReady,
 						NULL,
 						(void*) ejecutarSiguiente,
