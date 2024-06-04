@@ -23,7 +23,7 @@ void esperarVuelta(PCB* proceso) {
 						(void*) esperarQuantumCompleto,
 						proceso);
 
-    sem_wait(&llegadaProceso);
+    sem_wait(&finalizarQuantum);
 
     // esto es por si el proceso termina o no de ejecutarse antes que se cumpla el quantum
     if (procesoInterrumpido) {
@@ -57,12 +57,47 @@ void ejecutarSiguienteRR() {
 void recibirDeCPURR() {
     while(1) {
         op_code operacion = recibir_operacion(socketCPUDispatch);
-        sem_post(&llegadaProceso);
         leerBufferYPlanificar(operacion);
     }
 }
 
-void planificacionPorRR() {
+void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
+    int cpuLibre;
+    switch (operacion) {
+        case ENVIAR_IO_GEN_SLEEP:
+            sem_post(&finalizarQuantum);
+            enviarAIOGenerica(proceso, operacion, buffer);
+            break;
+        case OPERACION_FINALIZADA:
+            enviarAReady(proceso);
+            return;
+        case INSTRUCCION_WAIT:
+            cpuLibre = instruccionWait(proceso, buffer);
+            if (cpuLibre) { 
+                sem_post(&finalizarQuantum);
+                break; 
+            } else return;
+        case INSTRUCCION_SIGNAL:
+            cpuLibre = instruccionSignal(proceso, buffer);
+            if (cpuLibre) { 
+                sem_post(&finalizarQuantum);
+                break; 
+            } else return;
+        case INSTRUCCION_EXIT:
+            sem_post(&finalizarQuantum);
+            enviarAExit(proceso, SUCCESS);
+            break;
+        default:
+            pthread_mutex_lock(&mutexLogger);
+            log_error(logger, "Instruccion no válida");
+            pthread_mutex_unlock(&mutexLogger);
+            break;
+    }
+
+    sem_post(&cpuDisponible);
+}
+
+void iniciarRR() {
     pthread_create(&pth_colaExit,
 						NULL,
 						(void*) vaciarExit,

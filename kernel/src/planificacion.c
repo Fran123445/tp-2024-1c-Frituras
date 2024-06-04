@@ -5,7 +5,7 @@ sem_t procesosEnReady;
 sem_t procesosEnExit;
 sem_t gradoMultiprogramacion;
 sem_t cpuDisponible;
-sem_t llegadaProceso;
+sem_t finalizarQuantum;
 pthread_mutex_t mutexExit;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
@@ -32,7 +32,7 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnExit, 0, 0);
     sem_init(&cpuDisponible, 0, 1); // lo inicializo en 1 porque (entiendo) al arrancar el kernel la cpu no va a estar ocupada con nada
     sem_init(&gradoMultiprogramacion, 0, multiprogramacion);
-    sem_init(&llegadaProceso, 0, 0);
+    sem_init(&finalizarQuantum, 0, 0);
     pthread_mutex_init(&mutexPlanificador, NULL);
     pthread_mutex_init(&mutexExit, NULL);
     pthread_mutex_init(&mutexNew, NULL);
@@ -120,7 +120,7 @@ void leerBufferYPlanificar(op_code operacion) {
     PCB* proceso = hallarPCB(procesoExec->PID);
     actualizarProcesoRecibido(procesoExec, proceso); 
     
-    planificarRecibido(operacion, proceso, buffer);
+    planificarPorFIFO(operacion, proceso, buffer);
     liberar_buffer(buffer);
 }
 
@@ -186,7 +186,7 @@ int instruccionSignal(PCB* proceso, t_buffer* buffer) {
     return 0;
 }
 
-void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer) {
+void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
     int cpuLibre;
     switch (operacion) {
         case ENVIAR_IO_GEN_SLEEP:
@@ -214,7 +214,7 @@ void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer) {
     sem_post(&cpuDisponible);
 }
 
-void planificacionPorFIFO() {
+void iniciarFIFO() {
     pthread_create(&pth_colaExit,
 						NULL,
 						(void*) vaciarExit,

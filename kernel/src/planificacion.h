@@ -21,7 +21,7 @@ extern pthread_t pth_recibirProc;
 extern int socketCPUDispatch;
 extern int socketCPUInterrupt;
 
-extern sem_t llegadaProceso;
+extern sem_t finalizarQuantum;
 
 extern pthread_mutex_t mutexLogger;
 
@@ -38,9 +38,6 @@ void enviarProcesoACPU(PCB*);
 // Espera a que la CPU se encuentre disponible y le envia el siguiente proceso en READY para que lo ejecute
 void ejecutarSiguiente();
 
-// Recibe un t_dispatch y planifica en funcion de lo que solicita
-void planificarRecibido(op_code operacion, PCB* proceso, t_buffer* buffer);
-
 // Lee el t_dispatch del buffer y llama a planificarRecibido
 void leerBufferYPlanificar(op_code operacion);
 
@@ -55,7 +52,10 @@ int instruccionWait(PCB* proceso, t_buffer* buffer);
 // Devuelve 0 si el proceso fue devuelto a la CPU y 1 si el proceso fue enviado a exit
 int instruccionSignal(PCB* proceso, t_buffer* buffer);
 
+// Recibe un t_dispatch y planifica en funcion de lo que solicita
+void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer);
+
 // Inicia los hilos para la planificacion por FIFO
-void planificacionPorFIFO();
+void iniciarFIFO();
 
 #endif /* PLAN_H */

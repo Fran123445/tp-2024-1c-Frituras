@@ -26,6 +26,6 @@ void enviarInterrupcion();
 
 void ejecutarSiguienteRR();
 
-void planificacionPorRR();
+void iniciarRR();
 
 #endif /* RR_H */

@@ -62,10 +62,10 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
     char* algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 
     if(!strcmp(algoritmo, "FIFO")) {
-        planificar = planificarRecibido;
-        planificacionPorFIFO();
+        planificar = planificarPorFIFO;
+        iniciarFIFO();
     } else if (!strcmp(algoritmo, "RR")) {
-        planificacionPorRR();
+        iniciarRR();
     } else {
         //VRR
     }
