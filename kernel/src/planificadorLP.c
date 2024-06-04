@@ -44,6 +44,8 @@ void enviarAReady(PCB* pcb) {
     cambiarEstado(pcb, ESTADO_READY);
     queue_push(colaReady, pcb);
     pthread_mutex_unlock(&mutexReady);
+
+    sem_post(&procesosEnReady);
 }
 
 void vaciarExit() {
