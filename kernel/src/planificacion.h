@@ -38,8 +38,11 @@ void enviarProcesoACPU(PCB*);
 // Espera a que la CPU se encuentre disponible y le envia el siguiente proceso en READY para que lo ejecute
 void ejecutarSiguiente();
 
-// Lee el t_dispatch del buffer y llama a planificarRecibido
+// Lee el buffer y llama al algoritmo de planificacion
 void leerBufferYPlanificar(op_code operacion);
+
+// Recibe una operacion de CPU y solicita que se planifique
+void recibirDeCPU();
 
 // Envia el proceso pasado por parametro a la IO generica en el buffer
 void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer);
