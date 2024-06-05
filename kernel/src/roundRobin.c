@@ -54,13 +54,6 @@ void ejecutarSiguienteRR() {
     }
 }
 
-void recibirDeCPURR() {
-    while(1) {
-        op_code operacion = recibir_operacion(socketCPUDispatch);
-        leerBufferYPlanificar(operacion);
-    }
-}
-
 void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
     int cpuLibre;
     switch (operacion) {
@@ -112,6 +105,6 @@ void iniciarRR() {
 						NULL);
     pthread_create(&pth_recibirProc,
 						NULL,
-						(void*) recibirDeCPURR,
+						(void*) recibirDeCPU,
 						NULL);
 }

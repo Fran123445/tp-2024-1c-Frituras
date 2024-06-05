@@ -85,7 +85,7 @@ void leerBufferYPlanificar(op_code operacion) {
     PCB* proceso = hallarPCB(procesoExec->PID);
     actualizarProcesoRecibido(procesoExec, proceso); 
     
-    planificarPorFIFO(operacion, proceso, buffer);
+    planificar(operacion, proceso, buffer);
     liberar_buffer(buffer);
 }
 
