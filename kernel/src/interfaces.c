@@ -70,7 +70,8 @@ void administrarInterfazGenerica(int* socket_cliente) {
         enviar_paquete(paquete, *socket_cliente);
         eliminar_paquete(paquete);
 
-        if (recibir_operacion(*socket_cliente) < 0) {
+        op_code op = recibir_operacion(*socket_cliente);
+        if (op < 0) {
             pthread_mutex_lock(&mutexLogger);
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
             pthread_mutex_unlock(&mutexLogger);
@@ -79,7 +80,6 @@ void administrarInterfazGenerica(int* socket_cliente) {
             break;
         }
 
-        op_code op = recibir_operacion(*socket_cliente);
         pthread_mutex_lock(&mutexPlanificador);
         planificar(op, solicitud->proceso, NULL);
         pthread_mutex_unlock(&mutexPlanificador);
