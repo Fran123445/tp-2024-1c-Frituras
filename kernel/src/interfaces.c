@@ -56,14 +56,12 @@ void administrarInterfazGenerica(int* socket_cliente) {
     list_add(interfacesConectadas, interfaz);
     pthread_mutex_unlock(&mutexListaInterfaces);
 
-    t_solicitudIOGenerica* solicitud;
-
     while (1) {
         t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
         sem_wait(&interfaz->semaforo);
 
         pthread_mutex_lock(&interfaz->mutex);
-        solicitud = queue_pop(interfaz->cola);
+        t_solicitudIOGenerica* solicitud = queue_pop(interfaz->cola);
         pthread_mutex_unlock(&interfaz->mutex);
 
         agregar_int_a_paquete(paquete, solicitud->unidadesTrabajo);
@@ -79,7 +77,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
             free(solicitud);
             break;
         }
-
+        
         pthread_mutex_lock(&mutexPlanificador);
         planificar(op, solicitud->proceso, NULL);
         pthread_mutex_unlock(&mutexPlanificador);
