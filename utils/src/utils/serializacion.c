@@ -210,9 +210,18 @@ void liberar_buffer(t_buffer* buffer) {
 
 int recibir_operacion(int socket_cliente)
 {
-	int cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
+	op_code cod_op;
+	int tamanioBuffer;
+
+	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0) {
+		// revisa si el tamaño del buffer es 0, de ser asi lo saca del buffer del socket
+		recv(socket_cliente, &tamanioBuffer, sizeof(int), MSG_PEEK);
+		if(tamanioBuffer == 0) {
+			recv(socket_cliente, &tamanioBuffer, sizeof(int), MSG_WAITALL);
+		}
+
 		return cod_op;
+	}
 	else
 	{
 		close(socket_cliente);
