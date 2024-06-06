@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h> // Incluye esta línea si utilizas tipos de datos como uint8_t o uint32_t
 #include <stdio.h>
+#include <commons/string.h>
 
 // Declaraciones de tipos de datos
 typedef enum {
@@ -41,6 +42,7 @@ typedef struct {
     int quantum;
     estado_proceso estado;
     registros_cpu registros;
+    char** recursosAsignados;
 }PCB;
 
 //Tipos de instrucciones
@@ -66,6 +68,11 @@ typedef enum{
     iEXIT
 }t_tipoInstruccion;
 
+typedef struct {
+    char* nombre;
+    int unidades_trabajo;
+}t_interfaz_generica;
+
 //Estructura de una instruccion: tiene el tipo, 3 argumentos void porque pueden ser numeros y/o registros(ejemplo set ax 10 -- sub ax cx -- resize 128 -- io_gen_sleep int3 4)
 //interfaz es un char* para poder pasarle que interfaz es, y archivo va a pasar un nombre del archivo.
 typedef struct {
@@ -80,15 +87,6 @@ typedef struct {
     char* archivo;       
 }t_instruccion;
 
-typedef struct {
-    PCB* proceso;
-    t_instruccion* instruccion;
-}t_dispatch;
-
-typedef struct {
-    char* nombre;
-    int unidades_trabajo;
-}t_interfaz_generica;
-
 size_t tamanioRegistro(registrosCPU registro);
+void liberar_pcb(PCB* pcb);
 #endif /* PCB_H */

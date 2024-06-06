@@ -1,10 +1,11 @@
 #include "server.h"
 #include "estructurasConexion.h"
 
-t_log* loggerServ;
+t_log *loggerServ;
 
-int iniciar_servidor(char* puerto, t_log* log){
-    loggerServ = log;
+int iniciar_servidor(char *puerto, t_log *log)
+{
+	loggerServ = log;
 
 	int socket_servidor;
 
@@ -18,21 +19,29 @@ int iniciar_servidor(char* puerto, t_log* log){
 	getaddrinfo(NULL, puerto, &hints, &servinfo);
 
 	socket_servidor = socket(servinfo->ai_family,
-                         servinfo->ai_socktype,
-                         servinfo->ai_protocol);
-						 
-	// Asociamos el socket a un puerto
-	bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
-	
-	// Escuchamos las conexiones entrantes
-	listen(socket_servidor, MAXCONN);
+							 servinfo->ai_socktype,
+							 servinfo->ai_protocol);
 
+	setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+	
+	// Asociamos el socket a un puerto
+	if (bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
+		log_error(loggerServ, "Error bind");
+	}
+
+
+	// Escuchamos las conexiones entrantes
+	if (listen(socket_servidor, MAXCONN) < 0) {
+		log_error(loggerServ, "Error listen");
+	}
+	
 	freeaddrinfo(servinfo);
 	log_trace(loggerServ, "Listo para escuchar a mi cliente");
 	return socket_servidor;
 }
 
-int esperar_cliente(int socket_servidor, modulo_code modulo){
+int esperar_cliente(int socket_servidor, modulo_code modulo)
+{
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 	size_t bytes;
 
@@ -45,12 +54,13 @@ int esperar_cliente(int socket_servidor, modulo_code modulo){
 	if (compararHandshake(modulo, handshake_recibido))
 	{
 		bytes = send(socket_cliente, &resultOk, sizeof(int), 0);
-	} else 
+	}
+	else
 	{
 		bytes = send(socket_cliente, &resultError, sizeof(int), 0);
 		log_info(loggerServ, "Ups! Te confundiste");
 	}
-	
+
 	log_info(loggerServ, "Se conecto un cliente!");
 
 	return socket_cliente;
