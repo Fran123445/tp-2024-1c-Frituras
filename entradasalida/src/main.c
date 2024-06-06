@@ -79,7 +79,6 @@ void iniciarInterfazSTDIN(int socket, t_config* config, char* nombre) {
 
 void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
 
-    int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
     char* ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     char* puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     int conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, IO);
