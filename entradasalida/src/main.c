@@ -8,12 +8,7 @@ typedef struct {
     char* nombre;
     int unidades_trabajo;
 } t_interfaz_generica;
-typedef struct {
-    char* nombre;
-} t_interfaz_stdin;
-typedef struct {
-    char* nombre;
-} t_interfaz_stdout;
+
 
 void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
@@ -49,9 +44,6 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 }
 
 void iniciarInterfazSTDIN(int socket, t_config* config, char* nombre) {
-    t_interfaz_stdin interfaz;
-
-    interfaz.nombre = nombre;
 
     char* ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     char* puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
@@ -86,10 +78,6 @@ void iniciarInterfazSTDIN(int socket, t_config* config, char* nombre) {
 
 
 void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
-
-    t_interfaz_stdout interfaz;
-
-    interfaz.nombre = nombre;
 
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
     char* ip_memoria = config_get_string_value(config, "IP_MEMORIA");
