@@ -37,6 +37,17 @@ typedef enum {
 }estado_proceso;
 
 typedef struct {
+    uint32_t marco_pagina;
+    int bit_validez;  // 0 si no es válido, 1 si es válido
+} tabla_pagina;
+
+typedef struct {
+    int id_proceso;
+    uint32_t pagina;
+    uint32_t marco;
+} TLB;
+
+typedef struct {
     int PID;
     uint32_t programCounter;
     int quantum;
