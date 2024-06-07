@@ -2,6 +2,7 @@
 #include "main.h"
 #include "memoriaCPU.h"
 #include "conexiones.h"
+#include "memoriaContigua.h"
 int socket_kernel= 0;
 int socket_cpu = 0;
 int socket_io = 0;
@@ -13,7 +14,7 @@ t_config* config;
 t_parametros_cpu* params_cpu;
 
 void iniciar_servidores(t_config* config){
-    t_log* log_memoria = log_create("memoria_kernel.log", "Memoria",true, LOG_LEVEL_TRACE);
+    t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
 
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria);
 
@@ -51,11 +52,13 @@ int main(int argc, char *argv[]){
         exit(1);
     }
     iniciar_servidores(config);
+
+    iniciar_memoria((config_get_int_value(config, "TAM_MEMORIA")/ (config_get_int_value(config, "TAM_PAGINA"));
+
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
     pthread_t hilo_cpu;
     pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
-
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
     config_destroy(config);

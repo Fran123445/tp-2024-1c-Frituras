@@ -27,4 +27,17 @@ typedef struct{
     int pid;
     uint32_t pc;
 }proceso_cpu;
+
+typedef struct{
+    int marco;
+    bool validez;
+}informacion_de_tabla;
+
+typedef struct{
+    int pid;
+    t_list* tabla_de_paginas; // dentro de él va a estar la estructura informacion_de_tabla
+}t_tabla_paginas;
+// o sea va a ser una estructura que relacione el PID con la tabla de página y ahí sé que proceso tiene
+//qué marcos y qué paginas.
+
 #endif /* ESTRUCTURAS_CON_MEM */
