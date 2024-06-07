@@ -7,6 +7,8 @@
 #include "main.h"
 
 t_list* lista_de_procesos_con_ins = NULL;
+t_list* tablas_de_paginas = NULL;
+pthread_mutex_t mutex_tablas_paginas = PTHREAD_MUTEX_INITIALIZER;
 
 proceso_memoria* creacion_proceso(int socket_kernel) {
     op_code cod_op = recibir_operacion(socket_kernel);
@@ -17,6 +19,7 @@ proceso_memoria* creacion_proceso(int socket_kernel) {
         proceso->proceso_id=pid_proceso;
         char* path_proceso = buffer_read_string(buffer);
         proceso->path= path_proceso;
+        proceso->info_de_tabla = NULL; // info arranca como lista vacía ya q arranca todo vacío
         liberar_buffer(buffer);
         return proceso;
     }
@@ -66,4 +69,43 @@ void abrir_archivo_path(int socket_kernel){
     fclose(file);
 }
 
+proceso_memoria* hallar_proceso_tabla_pags(int PID){
+    bool _mismoPID(proceso_memoria* proceso){
+        return (proceso->pid == PID);
+    };
 
+    pthread_mutex_lock(&mutex_tablas_paginas);
+    t_proceso* encontrado = list_find(tablas_de_paginas, (void *)_mismoPID);
+    pthread_mutex_unlock(&mutex_tablas_paginas);
+
+    return encontrado;
+}
+
+void destruir_proceso(proceso_memoria* proceso){
+    if(proceso!=NULL){
+        list_destroy_and_destroy_elements(proceso->instrucciones,free); // libera memoria asignada a cada instruccion del proceso y la lista proceso->instrucciones
+        free(proceso); //libera la memoria asignada al propio proceso
+    }
+}
+
+void eliminar_proceso_tabla_pags(int PID){
+    bool _mismoPID(proceso_memoria* proceso){
+        return (proceso->pid == PID);
+    };
+    pthread_mutex_lock(&mutex_tablas_paginas);
+    list_remove_and_destroy_by_condition(tablas_de_paginas, (void*)_mismoPID, (void*) destruir_proceso);
+    pthread_mutex_unlock(&mutex_tablas_paginas);
+    
+}
+
+void finalizar_proceso(int socket_kernel){
+    op_code cod_op = recibir_operacion(socket_kernel);
+    if(cod_op == FIN_PROCESO){
+        t_buffer* buffer = recibir_buffer(socket_kernel);
+        int pid_proceso= buffer_read_int(buffer);
+        eliminar_proceso_de_lista_ins(pid_proceso);
+        eliminar_proceso_tabla_pags(pid_proceso);
+        liberar_buffer(buffer);
+    }
+
+}

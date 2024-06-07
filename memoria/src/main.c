@@ -46,6 +46,7 @@ void* escuchar_kernel(){
 
 int main(int argc, char *argv[]){
     lista_de_procesos_con_ins = list_create();
+    tablas_de_paginas = list_create();
 
     config = config_create("memoria.config");
     if (config == NULL){

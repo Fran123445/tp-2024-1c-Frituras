@@ -13,11 +13,19 @@
 #include <utils/serializacion.h>
 
 typedef struct{
+    int marco;
+    bool validez;
+}informacion_de_tabla;
+typedef struct{
     int proceso_id;
     char* path;
+    t_list* tabla_del_proceso; //contiene la estructura informacion_de_tabla
 }proceso_memoria;
+// o sea va a ser una estructura que relacione PID con tabla de página y path. Ahí sé que páginas y marcos tiene ese proceso
 
 extern t_list* lista_de_procesos_con_ins; //adentro tiene t_procesos.
+extern t_list* tablas_de_paginas; //lista de proceso_memoria
+
 typedef struct{
     int pid;
     t_list* instrucciones;
@@ -28,16 +36,6 @@ typedef struct{
     uint32_t pc;
 }proceso_cpu;
 
-typedef struct{
-    int marco;
-    bool validez;
-}informacion_de_tabla;
 
-typedef struct{
-    int pid;
-    t_list* tabla_de_paginas; // dentro de él va a estar la estructura informacion_de_tabla
-}t_tabla_paginas;
-// o sea va a ser una estructura que relacione el PID con la tabla de página y ahí sé que proceso tiene
-//qué marcos y qué paginas.
 
 #endif /* ESTRUCTURAS_CON_MEM */
