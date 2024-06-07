@@ -28,14 +28,10 @@ extern t_list* tablas_de_paginas; //lista de proceso_memoria
 
 typedef struct{
     int pid;
+    uint32_t pc;
+    int tamanio_proceso;
     t_list* instrucciones;
 }t_proceso;
-
-typedef struct{
-    int pid;
-    uint32_t pc;
-}proceso_cpu;
-
 
 
 #endif /* ESTRUCTURAS_CON_MEM */

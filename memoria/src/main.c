@@ -53,8 +53,10 @@ int main(int argc, char *argv[]){
         exit(1);
     }
     iniciar_servidores(config);
-
-    iniciar_memoria((config_get_int_value(config, "TAM_MEMORIA")/ (config_get_int_value(config, "TAM_PAGINA"));
+    int tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
+    int tam_pag = config_get_int_value(config, "TAM_PAGINA");
+    int tamanio = tam_memoria/tam_pag;
+    iniciar_memoria(tamanio);
 
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
