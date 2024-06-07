@@ -1,7 +1,5 @@
 #include "mmu.h"
 
-int tamanio_pagina = 32; // Esto en realidad lo recibiriamos del handshake con memoria (o dsp), hay que hacerlo.
-
 t_list* TLB;
 
 uint32_t numPagAux; // No soy muy fan de esto, pero no sé cómo hacer para implementar esta_en_la_TLB sino.
@@ -33,6 +31,7 @@ void pedir_marco(){
     eliminar_paquete(paquete);
 }
 
+
 bool esta_en_la_TLB(void* data) {
     entrada_TLB* entrada = (entrada_TLB*) data;
     return (entrada->id_proceso == pcb->PID) && (entrada->pagina == numPagAux);
@@ -53,33 +52,50 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
         log_info(log_TLB, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", pcb->PID, numero_pagina, entradaExistenteEnTLB->marco);
         log_destroy(log_TLB);
 
+        if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
+           mover_al_frente_de_la_estructura_LRU(entradaExistenteEnTLB);
+        }
+
         return entradaExistenteEnTLB->marco;
     }
         else{
             free(entradaExistenteEnTLB);
+        
             log_info(log_TLB, "PID: %u - TLB MISS - Pagina: %u", pcb->PID, numero_pagina);
    
-            entrada_TLB entradaTLB;
-
             uint32_t desplazamiento = obtener_desplazamineto_pagina(direccion_logica);
     
             pedir_marco();
             uint32_t marco = recibir_marco();
 
+            entrada_TLB* entradaTLB;
             entradaTLB->id_proceso = pcb->PID;
             entradaTLB->pagina = numero_pagina;
             entradaTLB->marco = marco;    
 
-            if(list_size(TLB) < 32){
+            if(list_size(TLB) < cant_entradas_TLB){
                 list_add(TLB,entradaTLB);
+
+                if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
+                    queue_push(cola_FIFO, entradaTLB);
+                }
+                else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
+                    list_add(estructura_LRU,entradaTLB);
+                }
             }
-                else{
-                    //Algoritmo de reemplazo para reemplazar en la TLB
-                }           
+            else{
+                if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
+                    FIFO(entradaTLB);
+                }
+                else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
+                    LRU(entradaTLB);
+                }
+            }           
 
             log_info(log_TLB, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", pcb->PID, numero_pagina, marco);
             log_destroy(log_TLB);
 
-            return marco * tamanio_pagina + desplazamiento;
+        return marco * tamanio_pagina + desplazamiento;
     }
 }
+

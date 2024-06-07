@@ -11,8 +11,11 @@ int socket_servidor_i;
 t_log* log_ciclo;
 
 volatile int hay_interrupcion = 0;
+
 PCB* pcb;
 
+int cant_entradas_TLB;
+int tamanio_pagina; // hay que recibirlo del handshake
 
 void iniciar_servidores(t_config* config) {
     t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", true, LOG_LEVEL_TRACE);
@@ -52,12 +55,24 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    TLB = list_create();
-
     log_ciclo = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
 
-    pthread_mutex_init(&mutexInterrupt, NULL);
+    TLB = list_create();
+    cant_entradas_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
 
+    char* algoritmoSustitucionTLB = config_get_string_value(config, "ALGORITMO_TLB");
+
+    if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
+        cola_FIFO = queue_create();
+        free(estructura_LRU);
+    }
+    else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
+        estructura_LRU = list_create();
+        free(cola_FIFO);
+    }
+
+
+    pthread_mutex_init(&mutexInterrupt, NULL);
    
 
     iniciar_servidores(config);
