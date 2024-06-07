@@ -15,7 +15,7 @@
 #include "instrucciones.h"
 #include "interrupciones.h"
 #include "cicloDeInstrucciones.h"
-
+#include "mmu.h"
 
 extern t_log* log_ciclo;
 extern PCB* pcb;

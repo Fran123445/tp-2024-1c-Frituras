@@ -46,10 +46,13 @@ void *escuchar_interrupt() {
 
 
 int main(int argc, char* argv[]) {
+    
     t_config* config = config_create("cpu.config");
     if (config == NULL) {
         exit(1);
     }
+
+    TLB = list_create();
 
     log_ciclo = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
 
