@@ -7,9 +7,9 @@
 #include "main.h"
 #include "memoriaDeInstrucciones.h"
 
-t_proceso* recibir_proceso_cpu(int socket_cpu){
+t_proceso_memoria* recibir_proceso_cpu(int socket_cpu){
     op_code cod_op = recibir_operacion(socket_cpu);
-    t_proceso* proceso_cpu = malloc(sizeof(proceso_cpu));
+    t_proceso_memoria* proceso_cpu = malloc(sizeof(proceso_cpu));
     if (cod_op == ENVIO_PC){
         t_buffer* buffer = recibir_buffer(socket_cpu);
         int pid = buffer_read_int(buffer);
@@ -22,7 +22,7 @@ t_proceso* recibir_proceso_cpu(int socket_cpu){
 }
 
 void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retardo){
-    t_proceso* proceso = recibir_proceso_cpu(socket_cpu);
+    t_proceso_memoria* proceso = recibir_proceso_cpu(socket_cpu);
     char* instruccion = obtener_instruccion(socket_kernel,(proceso->pc), (proceso->pid));
     t_paquete* paquete = crear_paquete(ENVIO_DE_INSTRUCCIONES);
     agregar_string_a_paquete(paquete,instruccion);
@@ -32,7 +32,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
 
 void resize_proceso(int socket_cpu){
     op_code cod_op = recibir_operacion(socket_cpu);
-    t_proceso* proceso = malloc(sizeof(proceso));
+    t_proceso_memoria* proceso = malloc(sizeof(proceso));
     if (cod_op == ENVIO_RESIZE){
         t_buffer* buffer = recibir_buffer(socket_cpu);
         int pid = buffer_read_int(buffer);

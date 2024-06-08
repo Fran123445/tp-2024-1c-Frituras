@@ -17,21 +17,17 @@ typedef struct{
     bool validez;
 }informacion_de_tabla;
 typedef struct{
-    int proceso_id;
+    int pid;
     char* path;
     t_list* tabla_del_proceso; //contiene la estructura informacion_de_tabla
-}proceso_memoria;
+    int tamanio_proceso;
+    t_list* instrucciones;
+    uint32_t pc;
+}t_proceso_memoria;
 // o sea va a ser una estructura que relacione PID con tabla de página y path. Ahí sé que páginas y marcos tiene ese proceso
 
 extern t_list* lista_de_procesos_con_ins; //adentro tiene t_procesos.
 extern t_list* tablas_de_paginas; //lista de proceso_memoria
-
-typedef struct{
-    int pid;
-    uint32_t pc;
-    int tamanio_proceso;
-    t_list* instrucciones;
-}t_proceso;
 
 
 #endif /* ESTRUCTURAS_CON_MEM */

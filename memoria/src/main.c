@@ -7,11 +7,15 @@ int socket_kernel= 0;
 int socket_cpu = 0;
 int socket_io = 0;
 int socket_servidor_memoria;
+void* memoria_contigua = 0;
+int cant_marcos = 0;
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
 t_parametros_cpu* params_cpu;
+
+
 
 void iniciar_servidores(t_config* config){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
@@ -45,18 +49,15 @@ void* escuchar_kernel(){
 }
 
 int main(int argc, char *argv[]){
-    lista_de_procesos_con_ins = list_create();
-    tablas_de_paginas = list_create();
+    lista_de_procesos = list_create();
 
     config = config_create("memoria.config");
     if (config == NULL){
         exit(1);
     }
     iniciar_servidores(config);
-    int tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
-    int tam_pag = config_get_int_value(config, "TAM_PAGINA");
-    int tamanio = tam_memoria/tam_pag;
-    iniciar_memoria(tamanio);
+    memoria_contigua = iniciar_memoria(config);
+    cant_marcos = calcular_marcos(config);
 
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);

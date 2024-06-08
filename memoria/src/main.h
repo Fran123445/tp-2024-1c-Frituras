@@ -15,6 +15,8 @@
 extern int socket_kernel;
 extern int socket_cpu;
 extern int socket_io;
+extern void* memoria_contigua;
+extern int cant_marcos;
 void* escuchar_kernel();
 void* escuchar_cpu();
 
