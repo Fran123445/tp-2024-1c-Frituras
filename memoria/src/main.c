@@ -7,8 +7,7 @@ int socket_kernel= 0;
 int socket_cpu = 0;
 int socket_io = 0;
 int socket_servidor_memoria;
-void* memoria_contigua = 0;
-int cant_marcos = 0;
+t_bitarray* mapa_de_marcos;
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
@@ -47,6 +46,15 @@ void* escuchar_kernel(){
         abrir_archivo_path(socket_kernel);
     }
 }
+t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
+    void* bitmap_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
+    if (!bitmap_memoria_usuario){
+        fprintf(stderr, "Error al crear bitmap");
+        return NULL;
+    }
+    t_bitarray* mapa_de_marcos = bitarray_create_with_mode(bitmap_memoria_usuario, cant_marcos, LSB_FIRST);
+    return mapa_de_marcos;
+}
 
 int main(int argc, char *argv[]){
     lista_de_procesos = list_create();
@@ -57,7 +65,8 @@ int main(int argc, char *argv[]){
     }
     iniciar_servidores(config);
     memoria_contigua = iniciar_memoria(config);
-    cant_marcos = calcular_marcos(config);
+    int cant_marcos = calcular_marcos(config);
+    mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
 
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
@@ -68,8 +77,8 @@ int main(int argc, char *argv[]){
     config_destroy(config);
     free(escucha_cpu);
     free(escucha_kernel);
-    list_destroy(lista_de_procesos_con_ins);
-
+    list_destroy(lista_de_procesos);
+    bitarray_destroy(mapa_de_marcos);
 
     return 0;
 }

@@ -9,5 +9,8 @@
 #include <semaphore.h>
 #include "estructuras.h"
 
-extern pthread_mutex_t mutex_lista_de_procesos_con_ins;
+extern pthread_mutex_t mutex_lista_procesos;
 char* obtener_instruccion(int socket_kernel, int pc, int pid);
+void eliminar_proceso_de_lista_de_procesos(int PID);
+void destruir_proceso(t_proceso_memoria* proceso);
+t_proceso_memoria* hallar_proceso(int PID);

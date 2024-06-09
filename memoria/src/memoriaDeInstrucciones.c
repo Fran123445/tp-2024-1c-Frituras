@@ -19,7 +19,7 @@ void destruir_proceso(t_proceso_memoria* proceso){
         list_destroy_and_destroy_elements(proceso->instrucciones,free); // libera memoria asignada a cada instruccion del proceso y la lista proceso->instrucciones
         }
         if (proceso->tabla_del_proceso != NULL){
-            (proceso->tabla_del_proceso, free);
+           list_destroy_and_destroy_elements(proceso->tabla_del_proceso, free);
         }
         free(proceso->path);
         free(proceso); //libera la memoria asignada al propio proceso
@@ -39,6 +39,5 @@ char* obtener_instruccion(int socket_kernel, int pc, int pid){
     t_proceso_memoria* proceso = hallar_proceso(pid);
     t_list* lista_instrucciones = proceso->instrucciones;
     char* instruccion_char = list_get(lista_instrucciones, pc);
-    //free(lista_instrucciones);
     return instruccion_char;
 }

@@ -26,8 +26,6 @@ typedef struct{
 }t_proceso_memoria;
 // o sea va a ser una estructura que relacione PID con tabla de página y path. Ahí sé que páginas y marcos tiene ese proceso
 
-extern t_list* lista_de_procesos_con_ins; //adentro tiene t_procesos.
-extern t_list* tablas_de_paginas; //lista de proceso_memoria
-
+extern t_list* lista_de_procesos;
 
 #endif /* ESTRUCTURAS_CON_MEM */

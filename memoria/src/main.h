@@ -11,12 +11,12 @@
 #include "memoriaCPU.h"
 #include "memoriaKernel.h"
 #include "memoriaDeInstrucciones.h"
+#include "memoriaContigua.h"
 
 extern int socket_kernel;
 extern int socket_cpu;
 extern int socket_io;
-extern void* memoria_contigua;
-extern int cant_marcos;
+extern t_bitarray* mapa_de_marcos;
 void* escuchar_kernel();
 void* escuchar_cpu();
 

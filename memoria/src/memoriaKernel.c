@@ -13,15 +13,19 @@ pthread_mutex_t mutex_tablas_paginas = PTHREAD_MUTEX_INITIALIZER;
 t_proceso_memoria* creacion_proceso(int socket_kernel) {
     op_code cod_op = recibir_operacion(socket_kernel);
     if(cod_op == CREACION_PROCESO){
-        t_proceso_memoria* proceso = malloc(sizeof(proceso_memoria));
+        t_proceso_memoria* proceso = malloc(sizeof(proceso));
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
         proceso->pid=pid_proceso;
         char* path_proceso = buffer_read_string(buffer);
         proceso->path= path_proceso;
-        proceso->tabla_del_proceso = NULL; // info arranca como lista vacía ya q arranca todo vacío
+        proceso->tabla_del_proceso = list_create(); // info arranca como lista vacía ya q arranca todo vacío
         proceso->tamanio_proceso = 0;
+        proceso->instrucciones = list_create();
+        proceso->pc = 0;
         liberar_buffer(buffer);
+        list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!
+
         return proceso;
     }
     return NULL;
@@ -41,11 +45,7 @@ void abrir_archivo_path(int socket_kernel){
     char* linea = NULL;
     size_t tamanio = 0;
     ssize_t leidos;
-    t_list* instrucciones;
-    instrucciones = list_create();
-    t_proceso_memoria* proceso_ins = malloc(sizeof(t_proceso_memoria));
-    proceso_ins->pid= proceso->proceso_id;
-
+   
     while ((leidos = getline(&linea, &tamanio,file)) != -1){
         if(linea[leidos - 1] == '\n'){
             linea[leidos - 1] = '\0';
@@ -58,12 +58,9 @@ void abrir_archivo_path(int socket_kernel){
             fclose(file);
             return;
         }
-        list_add(instrucciones, linea_copia);
+        list_add(proceso->instrucciones, linea_copia);
     }
-    proceso_ins->instrucciones = instrucciones;
-    list_add(lista_de_procesos,proceso_ins); // guardo en la lista de los procesos el proceso!
-
-    t_paquete* paquete = crear_paquete(PAQUETE);
+    t_paquete* paquete = crear_paquete(PAQUETE); // NO BORRAR! esto es para que conecten bien los módulos 
     enviar_paquete(paquete, socket_kernel);
 
     free(linea);

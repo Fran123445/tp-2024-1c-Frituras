@@ -8,7 +8,10 @@
 #include<string.h>
 #include<pthread.h>
 #include <utils/serializacion.h>
+#include <commons/bitarray.h>
 #include "memoriaDeInstrucciones.h"
+
+
 
 extern void* memoria_contigua;
 void* iniciar_memoria(t_config* config);
