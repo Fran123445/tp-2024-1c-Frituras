@@ -73,7 +73,7 @@ void asignarQuantum(PCB* proceso) {
     }
 }
 
-void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
+void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
     int cpuLibre;
     switch (operacion) {
         case ENVIAR_IO_GEN_SLEEP:
