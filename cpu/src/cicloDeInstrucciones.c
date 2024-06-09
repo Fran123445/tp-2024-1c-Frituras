@@ -25,6 +25,7 @@ void enviar_pcb(op_code motivo){
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
+
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_PC);
     agregar_int_a_paquete(paquete, pcb->PID);

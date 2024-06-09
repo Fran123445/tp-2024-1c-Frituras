@@ -13,7 +13,15 @@ void* obtenerRegistro(registrosCPU registro) {
     else{
         return NULL;
     }
-    }
+}
+
+enviar_tamanio_a_memoria(int tamanio_en_bytes){
+    t_paquete* paquete = crear_paquete(ENVIO_RESIZE);
+    agregar_int_a_paquete(paquete, pcb->PID);
+    agregar_uint32_a_paquete(paquete, tamanio_en_bytes);
+    enviar_paquete(paquete, socket_memoria);
+    eliminar_paquete(paquete);
+}
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
@@ -126,12 +134,6 @@ void JNZ(registrosCPU registro, int instruccion){
     }
 }
 
-/*
-void RESIZE(int tamaño){
-    
-}
-*/
-
 void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     t_paquete* paquete = crear_paquete(ENVIAR_IO_GEN_SLEEP);
 
@@ -149,6 +151,24 @@ void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     pthread_mutex_unlock(&mutexInterrupt);
 }
 
+void RESIZE(int tamanio_en_bytes){
+    enviar_tamanio_a_memoria(tamanio_en_bytes);
+    op_code cod_op = recibir_operacion(socket_memoria);
+    if(cod_op == OUT_OF_MEMORY){
+        enviar_pcb(cod_op);
+    }
+}
+
+void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
+    void *reg_datos = obtenerRegistro(registroDatos);
+    uint32_t* reg_direccion = (uint32_t*) obtenerRegistro(registroDireccion);
+
+    uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(*reg_direccion);
+
+    //enviar_dir_fisica_a_memoria(direccion_fisica);
+
+    //reg_datos = recibir_contenido_leido_memoria();
+}
 
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);

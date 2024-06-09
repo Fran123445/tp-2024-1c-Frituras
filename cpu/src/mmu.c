@@ -15,7 +15,7 @@ uint32_t obtener_desplazamineto_pagina(uint32_t direccion_logica){
 
 int* recibir_marco(){
     op_code cod_op = recibir_operacion(socket_memoria);
-    if(cod_op == ENVIO_MARCO){
+    if(cod_op == ACCESO_TABLAS_PAGINAS){
         t_buffer* buffer = recibir_buffer(socket_memoria);
         int marco = buffer_read_int(buffer);
         liberar_buffer(buffer);
@@ -24,9 +24,10 @@ int* recibir_marco(){
     return NULL;
 }
 
-void pedir_marco(){
-    t_paquete* paquete = crear_paquete(ENVIO_MARCO);
+void pedir_marco(uint32_t numero_pagina){
+    t_paquete* paquete = crear_paquete(ACCESO_TABLAS_PAGINAS);
     agregar_int_a_paquete(paquete, pcb->PID);
+    agregar_uint32_a_paquete(paquete, numero_pagina);
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
@@ -65,7 +66,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
    
             uint32_t desplazamiento = obtener_desplazamineto_pagina(direccion_logica);
     
-            pedir_marco();
+            pedir_marco(numero_pagina);
             uint32_t marco = recibir_marco();
 
             entrada_TLB* entradaTLB;

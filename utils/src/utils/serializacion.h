@@ -27,7 +27,8 @@ typedef enum {
     // CPU - Memoria
     ENVIO_PC,
     ENVIO_RESIZE,
-    ENVIO_MARCO,
+    OUT_OF_MEMORY,
+    RESIZE_ACEPTADO,
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
