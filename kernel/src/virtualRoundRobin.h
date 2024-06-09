@@ -10,6 +10,7 @@
 #include <roundRobin.h>
 
 extern sem_t cpuDisponible;
+extern bool procesoInterrumpido;
 
 typedef enum {
     COLA_READY,
