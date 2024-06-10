@@ -43,10 +43,6 @@ void inicializarColas() {
 }
 
 void liberarVariablesGlobales() {    
-    pthread_join(pth_colaExit, NULL);
-    pthread_join(pth_colaNew, NULL);
-    pthread_join(pth_colaReady, NULL);
-    pthread_join(pth_recibirProc, NULL);
     log_destroy(logger);
     queue_destroy_and_destroy_elements(colaNew, free);
     queue_destroy_and_destroy_elements(colaExit, free);
