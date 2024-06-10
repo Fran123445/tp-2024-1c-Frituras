@@ -8,7 +8,7 @@
 
 t_list* lista_de_procesos = NULL;
 
-pthread_mutex_t mutex_tablas_paginas = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_lista_procesos = PTHREAD_MUTEX_INITIALIZER;
 
 t_proceso_memoria* creacion_proceso(int socket_kernel) {
     op_code cod_op = recibir_operacion(socket_kernel);
@@ -24,8 +24,9 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
         proceso->instrucciones = list_create();
         proceso->pc = 0;
         liberar_buffer(buffer);
+        pthread_mutex_lock (&lista_de_procesos);
         list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!
-
+        pthread_mutex_unlock(&lista_de_procesos)
         return proceso;
     }
     return NULL;
@@ -72,8 +73,9 @@ void finalizar_proceso(int socket_kernel){
     if(cod_op == FIN_PROCESO){
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
-        eliminar_proceso_de_lista_ins(pid_proceso);
-        eliminar_proceso_tabla_pags(pid_proceso);
+        eliminar_proceso(pid_proceso);
+        frames_libres_por_fin_proceso(pid_proceso);
+        
         liberar_buffer(buffer);
     }
 
