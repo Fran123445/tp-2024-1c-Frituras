@@ -30,11 +30,6 @@ void procesoNewAReady() {
         sem_wait(&gradoMultiprogramacion);
         sem_wait(&procesosEnNew);
 
-        pthread_mutex_lock(&mutexNew);
-        PCB* proceso = queue_pop(colaNew);
-        enviarAReady(proceso);
-        pthread_mutex_unlock(&mutexNew);
-
         pthread_mutex_lock(&mutexPlanificador);
         planificar(CREACION_PROCESO, NULL, NULL);
         pthread_mutex_unlock(&mutexPlanificador);
@@ -154,6 +149,10 @@ int cpuLibre = 1;
 void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
     switch (operacion) {
         case CREACION_PROCESO: // esta operacion viene desde el mismo kernel cuando se hace le paso de NEW a READY
+            pthread_mutex_lock(&mutexNew);
+            PCB* nuevoProceso = queue_pop(colaNew);
+            enviarAReady(nuevoProceso);
+            pthread_mutex_unlock(&mutexNew);
             break;
         case ENVIAR_IO_GEN_SLEEP:
             enviarAIOGenerica(proceso, operacion, buffer);

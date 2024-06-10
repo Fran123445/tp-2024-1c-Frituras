@@ -49,10 +49,15 @@ void enviarProcesoACPU_RR(PCB* proceso) {
 void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
     switch (operacion) {
         case CREACION_PROCESO:
+            pthread_mutex_lock(&mutexNew);
+            PCB* nuevoProceso = queue_pop(colaNew);
+            enviarAReady(nuevoProceso);
+            pthread_mutex_unlock(&mutexNew);
             break;
         case ENVIAR_IO_GEN_SLEEP:
             sem_post(&finalizarQuantum);
             enviarAIOGenerica(proceso, operacion, buffer);
+            cpuLibre = 1;
             break;
         case OPERACION_FINALIZADA:
             enviarAReady(proceso);
@@ -72,6 +77,11 @@ void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
         case INSTRUCCION_EXIT:
             sem_post(&finalizarQuantum);
             enviarAExit(proceso, SUCCESS);
+            cpuLibre = 1;
+            break;
+        case INTERRUPCION:
+            enviarAReady(proceso);
+            cpuLibre = 1;
             break;
         default:
             pthread_mutex_lock(&mutexLogger);
@@ -83,6 +93,7 @@ void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
 
     if (cpuLibre && !queue_is_empty(colaReady)) {
         enviarProcesoACPU_RR(sacarSiguienteDeReady());
+        cpuLibre = 0;
     }
 }
 

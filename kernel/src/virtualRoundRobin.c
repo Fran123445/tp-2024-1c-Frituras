@@ -57,11 +57,16 @@ void asignarQuantum(PCB* proceso) {
 void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
     switch (operacion) {
         case CREACION_PROCESO:
+            pthread_mutex_lock(&mutexNew);
+            PCB* proceso = queue_pop(colaNew);
+            enviarAReady(proceso);
+            pthread_mutex_unlock(&mutexNew);
             break;
         case ENVIAR_IO_GEN_SLEEP:
             temporal_destroy(tiempoTranscurrido);
             asignarQuantum(proceso);
             enviarAIOGenerica(proceso, operacion, buffer);
+            cpuLibre = 0;
             break;
         case OPERACION_FINALIZADA:
             if (proceso->quantum == quantumInicial) {
@@ -89,6 +94,7 @@ void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
         case INSTRUCCION_EXIT:
             sem_post(&finalizarQuantum);
             enviarAExit(proceso, SUCCESS);
+            cpuLibre = 0;
             break;
         default:
             pthread_mutex_lock(&mutexLogger);
@@ -103,6 +109,7 @@ void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
         enviarProcesoACPU_RR(procesoAEnviar);
         pidProcesoEnEjecucion = proceso->PID;
         ultimoPrioritario = (cola == COLA_PRIORITARIA) ? 1 : 0;
+        cpuLibre = 0;
         tiempoTranscurrido = temporal_create();
     }
 }
