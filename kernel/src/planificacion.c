@@ -90,14 +90,24 @@ void recibirDeCPU() {
 void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
     t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
     t_IOConectado* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
+
     if (comprobarOperacionValida(interfaz, operacion)) {
         t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
         solicitud->proceso = proceso;
         solicitud->unidadesTrabajo = infoInterfaz->unidades_trabajo;
+
         pthread_mutex_lock(&interfaz->mutex);
+
         queue_push(interfaz->cola, solicitud);
         cambiarEstado(proceso, ESTADO_BLOCKED);
+
+        char* str = string_new();
+        string_append_with_format(&str, "BLOCKED %s", interfaz->nombreInterfaz);
+        logProcesosEnCola(str, interfaz->cola);
+        free(str);
+
         pthread_mutex_unlock(&interfaz->mutex);
+
         sem_post(&interfaz->semaforo);
     } else {
         enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado

@@ -48,6 +48,8 @@ extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
+void logProcesosEnCola(char* nombreCola, t_queue* cola);
+
 // Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria
 void vaciarExit();
 

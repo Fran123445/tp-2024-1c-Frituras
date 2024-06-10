@@ -13,7 +13,7 @@ void logProcesosEnCola(char* nombreCola, t_queue* cola) {
     list_iterate(cola->elements, (void *) _agregarPIDALista);
     string[strlen(string)-2] = '\0';
 
-    log_info(logger, "[%s]", string);
+    log_info(logger, "Cola %s: [%s]", nombreCola, string);
 
     free(string);
 }
@@ -186,6 +186,8 @@ void iniciarProceso(char* path) {
     recibir_operacion(socketMemoria);
 
     siguientePID += 1;
+
+    logProcesosEnCola("NEW", colaNew);
 
     sem_post(&procesosEnNew);
 }
