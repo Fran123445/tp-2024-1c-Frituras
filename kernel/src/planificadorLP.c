@@ -111,7 +111,7 @@ void vaciarExit() {
         pthread_mutex_unlock(&mutexLogger);
 
         sem_post(&gradoMultiprogramacion);
-        free(procesoAFinalizar->pcb);
+        liberar_pcb(procesoAFinalizar->pcb);
         free(procesoAFinalizar);
     }
 }
