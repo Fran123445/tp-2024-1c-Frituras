@@ -3,18 +3,17 @@
 #include "memoriaCPU.h"
 #include "conexiones.h"
 #include "memoriaContigua.h"
-int socket_kernel= 0;
+
+int socket_kernel = 0;
 int socket_cpu = 0;
 int socket_io = 0;
 int socket_servidor_memoria;
-t_bitarray* mapa_de_marcos;
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
 t_parametros_cpu* params_cpu;
-
-
+t_bitarray* mapa_de_marcos;
 
 void iniciar_servidores(t_config* config){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);

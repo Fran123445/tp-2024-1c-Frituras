@@ -1,7 +1,5 @@
 #include "memoriaDeInstrucciones.h"
 
-pthread_mutex_t mutex_lista_procesos = PTHREAD_MUTEX_INITIALIZER;
-
 t_proceso_memoria* hallar_proceso(int PID){
     bool _mismoPID(t_proceso_memoria* proceso){
         return (proceso->pid == PID);
@@ -41,3 +39,4 @@ char* obtener_instruccion(int socket_kernel, int pc, int pid){
     char* instruccion_char = list_get(lista_instrucciones, pc);
     return instruccion_char;
 }
+ 

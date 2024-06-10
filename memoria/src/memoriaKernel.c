@@ -21,12 +21,12 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
         proceso->path= path_proceso;
         proceso->tabla_del_proceso = list_create(); // info arranca como lista vacía ya q arranca todo vacío
         proceso->tamanio_proceso = 0;
-        proceso->instrucciones = list_create();
-        proceso->pc = 0;
+        proceso->instrucciones = list_create(); // arranca vacía pq todavia no le llegan las instrucciones
+        proceso->pc = 0; // esto es para ya tenerlo seteado, pero luego se va a cambiar
         liberar_buffer(buffer);
-        pthread_mutex_lock (&lista_de_procesos);
+        pthread_mutex_lock (&mutex_lista_procesos);
         list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!
-        pthread_mutex_unlock(&lista_de_procesos)
+        pthread_mutex_unlock(&mutex_lista_procesos);
         return proceso;
     }
     return NULL;
@@ -68,14 +68,24 @@ void abrir_archivo_path(int socket_kernel){
     fclose(file);
 }
 
+void eliminar_proceso(int pid_proceso){
+    t_proceso_memoria* proceso = hallar_proceso(pid_proceso);
+    list_remove(lista_de_procesos, (proceso->pid));
+    free(proceso);
+}
+void frames_libres_por_fin_proceso(pid_proceso){
+    t_proceso_memoria* proceso_a_eliminar = hallar_proceso(pid_proceso);
+
+}
 void finalizar_proceso(int socket_kernel){
     op_code cod_op = recibir_operacion(socket_kernel);
     if(cod_op == FIN_PROCESO){
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
-        eliminar_proceso(pid_proceso);
         frames_libres_por_fin_proceso(pid_proceso);
+        eliminar_proceso(pid_proceso);
         
+
         liberar_buffer(buffer);
     }
 

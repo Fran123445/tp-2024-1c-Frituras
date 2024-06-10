@@ -10,6 +10,7 @@
 #include "memoriaContigua.h"
 
 pthread_mutex_t mutex_bitarray_marcos_libres = PTHREAD_MUTEX_INITIALIZER;
+
 t_list* agregar_n_entradas_vacias(int cant_pags_a_agregar, t_list* tabla_del_proceso) {
     for (int i = 0; i < cant_pags_a_agregar; i++) {
         list_add(tabla_del_proceso, NULL);
@@ -40,13 +41,13 @@ void marcar_frames_como_libres(int cant_pags_a_sacar, t_list* tabla_del_proceso)
 void chequear_espacio_memoria (int cant_pags, int socket_cpu){
 
     if(!memoria_contigua){
-        fprintf(stderr, "No se creó memoria contigua aún")
+        fprintf(stderr, "No se creó memoria contigua aún");
         exit(EXIT_FAILURE);
     }
 
     int contador_marcos_libres = 0;
     pthread_mutex_lock(&mutex_bitarray_marcos_libres);
-    for (size_t i = 0; i < mapa_de_marcos->size; i++) {
+    for (size_t i = 0; i < (mapa_de_marcos->size); i++) {
     if (!bitarray_test_bit(mapa_de_marcos, i)) {
         contador_marcos_libres++;
     }
@@ -152,4 +153,6 @@ void resize_proceso(int socket_cpu,t_config* config){
             return;
         }
         liberar_buffer(buffer);
+
+}
 }

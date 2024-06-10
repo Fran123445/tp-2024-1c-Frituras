@@ -15,4 +15,4 @@
 
 extern void* memoria_contigua;
 void* iniciar_memoria(t_config* config);
-int calcular_marcos (t_config* config)
+int calcular_marcos (t_config* config);
