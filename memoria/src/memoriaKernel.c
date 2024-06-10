@@ -4,6 +4,7 @@
 #include <commons/collections/list.h>
 #include "estructuras.h"
 #include "memoriaDeInstrucciones.h"
+#include "memoriaCPU.h"
 #include "main.h"
 
 t_list* lista_de_procesos = NULL;
@@ -73,20 +74,28 @@ void eliminar_proceso(int pid_proceso){
     list_remove(lista_de_procesos, (proceso->pid));
     free(proceso);
 }
-void frames_libres_por_fin_proceso(pid_proceso){
+void frames_libres_por_fin_proceso(int pid_proceso){
     t_proceso_memoria* proceso_a_eliminar = hallar_proceso(pid_proceso);
+    int tamanio_tabla = list_size(proceso_a_eliminar->tabla_del_proceso);
 
-}
+    for(int i = 0; i < tamanio_tabla; i++){
+        informacion_de_tabla* entrada = list_get(proceso_a_eliminar->tabla_del_proceso, i);
+        pthread_mutex_lock(&mutex_bitarray_marcos_libres);
+
+        if(entrada->validez){
+            bitarray_clean_bit(mapa_de_marcos,entrada->marco);
+        }
+        pthread_mutex_unlock(&mutex_bitarray_marcos_libres);
+    }
+    }
+
 void finalizar_proceso(int socket_kernel){
     op_code cod_op = recibir_operacion(socket_kernel);
     if(cod_op == FIN_PROCESO){
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
         frames_libres_por_fin_proceso(pid_proceso);
-        eliminar_proceso(pid_proceso);
-        
-
+        eliminar_proceso_de_lista_de_procesos(pid_proceso);
         liberar_buffer(buffer);
     }
-
 }
