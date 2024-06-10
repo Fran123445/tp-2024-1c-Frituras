@@ -38,6 +38,8 @@ typedef enum {
     // Cualquier módulo a Memoria
     AJUSTAR_SIZE_PROCESO,
     ACCESO_TABLAS_PAGINAS,
+    OUT_OF_MEMORY,
+    RESIZE_ACEPTADO,
 
 }op_code;
 
