@@ -57,9 +57,9 @@ void interpretarInput(char* input) {
     } else if (!strcmp(*comando, "MULTIPROGRAMACION")) {
         //gradoMultiprogramacion =  atoi(*(comando+1)); <- esto hay que cambiarlo
     } else if (!strcmp(*comando, "DETENER_PLANIFICACION")) {
-        //detenerPlanificacion()
+        pthread_mutex_lock(&mutexPlanificador);
     } else if (!strcmp(*comando, "INICIAR_PLANIFICACION")) {
-        //iniciarPlanificacion
+        pthread_mutex_unlock(&mutexPlanificador);
     } else if (!strcmp(*comando, "PROCESO_ESTADO")) {
         listarProcesos();
     }
