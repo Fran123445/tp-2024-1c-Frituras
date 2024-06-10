@@ -33,7 +33,9 @@ void ejecutarScript(char* path) {
     char* instruccion = malloc(sizeof(char)*64);
 
     while(fgets(instruccion, 63, archivoScript)) {
-        instruccion[strlen(instruccion)-1] = '\0'; //fgets lee hasta, incluido, el \n
+        if (instruccion[strlen(instruccion)-1] == '\n') { //fgets lee hasta, incluido, el \n
+            instruccion[strlen(instruccion)-1] = '\0';
+        }
         interpretarInput(instruccion);
     }
 
