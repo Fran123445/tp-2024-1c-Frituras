@@ -117,6 +117,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
         free (proceso);
         return;
     }
+    sleep(tiempo_retardo/1000);
     t_paquete* paquete = crear_paquete(ENVIO_DE_INSTRUCCIONES);
     agregar_string_a_paquete(paquete,instruccion);
     enviar_paquete(paquete, socket_cpu);
@@ -125,7 +126,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
     free (proceso);
 }
 
-void resize_proceso(int socket_cpu,t_config* config){
+void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
     op_code cod_op = recibir_operacion(socket_cpu);
     if (cod_op == ENVIO_RESIZE){
         t_buffer* buffer = recibir_buffer(socket_cpu);
@@ -134,17 +135,20 @@ void resize_proceso(int socket_cpu,t_config* config){
         t_proceso_memoria* proceso = hallar_proceso(pid);
         t_log* log_resize = log_create("Resize_Proceso_Memoria", "Memoria", false, LOG_LEVEL_INFO);
         if(proceso->tamanio_proceso < tamanio_nuevo){
-                log_info(log_resize, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
                 int paginas_nuevas = ceil(tamanio_nuevo/config_get_int_value(config, "TAM_PAGINA"));
                 chequear_espacio_memoria(paginas_nuevas, socket_cpu);
+                
+                log_info(log_resize, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
                 proceso->tamanio_proceso = tamanio_nuevo;
                 proceso->tabla_del_proceso = agregar_n_entradas_vacias(paginas_nuevas, proceso->tabla_del_proceso);
                 asignar_frames_a_paginas(paginas_nuevas,proceso);
                 t_paquete* paquete = crear_paquete(RESIZE_ACEPTADO);
                 enviar_paquete(paquete, socket_cpu);
                 eliminar_paquete(paquete);
+                log_destroy(log_resize);
             }else if (proceso->tamanio_proceso > tamanio_nuevo){
                 log_info(log_resize, "Reduccion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
+                sleep(tiempo_retardo/1000);
                 proceso->tamanio_proceso = tamanio_nuevo;
                 int paginas_a_sacar = ceil (tamanio_nuevo/config_get_int_value(config,"TAM_PAGINA"));
                 marcar_frames_como_libres(paginas_a_sacar,proceso->tabla_del_proceso);
@@ -152,14 +156,16 @@ void resize_proceso(int socket_cpu,t_config* config){
                 t_paquete* paquete = crear_paquete(RESIZE_ACEPTADO);
                 enviar_paquete(paquete,socket_cpu);
                 eliminar_paquete(paquete);
+                log_destroy(log_resize);
         }else{
             return;
         }
         liberar_buffer(buffer);
+        
 
 }
 }
-void acceso_tabla_paginas(int socket_cpu){
+void acceso_tabla_paginas(int socket_cpu, int tiempo_retardo){
     op_code cod_op = recibir_operacion(socket_cpu);
         if(cod_op == ACCESO_TABLAS_PAGINAS){
             t_buffer* buffer = recibir_buffer(socket_cpu);
@@ -174,6 +180,7 @@ void acceso_tabla_paginas(int socket_cpu){
                 fprintf(stderr, "Error: Nro de página no válido");
                 return;
             }
+            sleep(tiempo_retardo/1000);
             informacion_de_tabla* entrada = list_get(proceso->tabla_del_proceso, pagina_a_buscar);
             int marco = entrada->marco;
             t_paquete* paquete = crear_paquete(ACCESO_TABLAS_PAGINAS);

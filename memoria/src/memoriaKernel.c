@@ -11,8 +11,9 @@ t_list* lista_de_procesos = NULL;
 t_log* log_tabla_pags; 
 pthread_mutex_t mutex_lista_procesos = PTHREAD_MUTEX_INITIALIZER;
 
-t_proceso_memoria* creacion_proceso(int socket_kernel) {
+t_proceso_memoria* creacion_proceso(int socket_kernel, int tiempo_retardo) {
     op_code cod_op = recibir_operacion(socket_kernel);
+    sleep(tiempo_retardo/1000);
     log_tabla_pags = log_create("Tabla_de_Pags_Memoria", "Memoria", false, LOG_LEVEL_INFO);
     if(cod_op == CREACION_PROCESO){
         t_proceso_memoria* proceso = malloc(sizeof(proceso));
@@ -35,8 +36,8 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
     return NULL;
 }
 
-void abrir_archivo_path(int socket_kernel){
-    t_proceso_memoria* proceso = creacion_proceso(socket_kernel);
+void abrir_archivo_path(int socket_kernel, int tiempo_retardo){
+    t_proceso_memoria* proceso = creacion_proceso(socket_kernel, tiempo_retardo);
     char* path = (proceso->path);
     if (path == NULL){
         exit(1);
@@ -90,8 +91,9 @@ void frames_libres_por_fin_proceso(t_proceso_memoria* proceso_a_eliminar){
     }
     }
 
-void finalizar_proceso(int socket_kernel){
+void finalizar_proceso(int socket_kernel, int tiempo_retardo){
     op_code cod_op = recibir_operacion(socket_kernel);
+    sleep(tiempo_retardo/1000);
     log_tabla_pags = log_create("Tabla_de_Pags_Memoria", "Memoria", false, LOG_LEVEL_INFO);
     if(cod_op == FIN_PROCESO){
         t_buffer* buffer = recibir_buffer(socket_kernel);

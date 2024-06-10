@@ -13,6 +13,7 @@ t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
 t_parametros_cpu* params_cpu;
+t_parametros_kernel* params_kernel;
 t_bitarray* mapa_de_marcos;
 
 void iniciar_servidores(t_config* config){
@@ -32,17 +33,25 @@ void iniciar_servidores(t_config* config){
 
 }
 
-void* escuchar_cpu(void* argumento){
-    t_parametros_cpu* params_cpu = (t_parametros_cpu*)argumento;
+void* escuchar_cpu(void* argumento_cpu){
+    t_parametros_cpu* params_cpu = (t_parametros_cpu*)argumento_cpu;
     //params_cpu usado para pasar los parámetros al hilo sin problema. ignorar warning.
     int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     while(1){
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
+        resize_proceso(socket_cpu, config,tiempo_retardo);
+        acceso_tabla_paginas(socket_cpu,tiempo_retardo);
+
     }
 }
-void* escuchar_kernel(){
+void* escuchar_kernel(void* argumento_kernel){
+    t_parametros_kernel* params_kernel = (t_parametros_kernel*)argumento_kernel;
+    //params_kernel usado para pasar los parámetros al hilo sin problema. ignorar warning.
+    int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     while(1){
-        abrir_archivo_path(socket_kernel);
+        abrir_archivo_path(socket_kernel, tiempo_retardo);
+        finalizar_proceso(socket_kernel, tiempo_retardo);
+
     }
 }
 t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
@@ -68,7 +77,7 @@ int main(int argc, char *argv[]){
     mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
 
     pthread_t hilo_kernel;
-    pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
+    pthread_create(&hilo_kernel,NULL, escuchar_kernel, (void*)params_kernel);
     pthread_t hilo_cpu;
     pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
     pthread_join(hilo_cpu, NULL);

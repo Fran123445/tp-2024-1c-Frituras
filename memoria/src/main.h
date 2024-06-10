@@ -25,3 +25,8 @@ typedef struct{
     int socket_cpu;
     int tiempo_retardo;
 }t_parametros_cpu;
+
+typedef struct{
+    int socket_kernel;
+    int tiempo_retardo;
+}t_parametros_kernel;
