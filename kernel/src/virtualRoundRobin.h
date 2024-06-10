@@ -9,7 +9,7 @@
 #include <utils/pcb.h>
 #include <roundRobin.h>
 
-extern sem_t cpuDisponible;
+extern int cpuLibre;
 extern bool procesoInterrumpido;
 
 typedef enum {

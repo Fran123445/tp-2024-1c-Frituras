@@ -45,36 +45,30 @@ void enviarProcesoACPU_RR(PCB* proceso) {
     pthread_detach(quantum);
 }
 
-void ejecutarSiguienteRR() {
-    while(1) {
-        sem_wait(&cpuDisponible);
-        PCB* proceso = sacarSiguienteDeReady();    
-        enviarProcesoACPU_RR(proceso);
-    }
-}
-
+// Seguramente refactorice esto para tener un solo switch en vez de uno en cada uno
 void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
-    int cpuLibre;
     switch (operacion) {
+        case CREACION_PROCESO:
+            break;
         case ENVIAR_IO_GEN_SLEEP:
             sem_post(&finalizarQuantum);
             enviarAIOGenerica(proceso, operacion, buffer);
             break;
         case OPERACION_FINALIZADA:
             enviarAReady(proceso);
-            return;
+            break;
         case INSTRUCCION_WAIT:
             cpuLibre = instruccionWait(proceso, buffer);
             if (cpuLibre) { 
                 sem_post(&finalizarQuantum);
-                break; 
-            } else return;
+            }
+            break;
         case INSTRUCCION_SIGNAL:
             cpuLibre = instruccionSignal(proceso, buffer);
             if (cpuLibre) { 
                 sem_post(&finalizarQuantum);
-                break; 
-            } else return;
+            }
+            break;
         case INSTRUCCION_EXIT:
             sem_post(&finalizarQuantum);
             enviarAExit(proceso, SUCCESS);
@@ -86,7 +80,10 @@ void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
             break;
     }
 
-    sem_post(&cpuDisponible);
+
+    if (cpuLibre && !queue_is_empty(colaReady)) {
+        enviarProcesoACPU_RR(sacarSiguienteDeReady());
+    }
 }
 
 void iniciarRR() {
@@ -97,10 +94,6 @@ void iniciarRR() {
     pthread_create(&pth_colaNew,
 						NULL,
 						(void*) procesoNewAReady,
-						NULL);
-    pthread_create(&pth_colaReady,
-						NULL,
-						(void*) ejecutarSiguienteRR,
 						NULL);
     pthread_create(&pth_recibirProc,
 						NULL,

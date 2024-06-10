@@ -7,7 +7,6 @@ int pidProcesoEnEjecucion;
 
 pthread_mutex_t mutexColaPrioritaria;
 t_queue* colaPrioritaria;
-sem_t procesosEnColaPrioritaria;
 t_temporal* tiempoTranscurrido;
 
 void enviarAColaPrioritaria(PCB* proceso) {
@@ -20,13 +19,9 @@ void enviarAColaPrioritaria(PCB* proceso) {
         enviarInterrupcion(pidProcesoEnEjecucion);
         ultimoPrioritario = 1;
     }
-
-    sem_post(&procesosEnColaPrioritaria);
 }
 
 PCB* sacarSiguienteDeColaPrioritaria() {
-    sem_wait(&procesosEnColaPrioritaria);
-
     pthread_mutex_lock(&mutexColaPrioritaria);
     PCB* proceso = queue_pop(colaPrioritaria);
     cambiarEstado(proceso, ESTADO_EXEC);
@@ -48,20 +43,6 @@ colaProveniente seleccionarSiguiente(PCB* proceso) {
     return cola;
 }
 
-void ejecutarSiguienteVRR() {
-    // siento que me quedaron medio engorrosas esta funcion y la de seleccionar siguiente,
-    // pero en este momento no se me ocurre una mejor manera de plantearlas
-    PCB* proceso;
-    while(1) {
-        sem_wait(&cpuDisponible);
-        colaProveniente cola = seleccionarSiguiente(proceso);
-        enviarProcesoACPU_RR(proceso);
-        pidProcesoEnEjecucion = proceso->PID;
-        ultimoPrioritario = (cola == COLA_PRIORITARIA) ? 1 : 0;
-        tiempoTranscurrido = temporal_create();
-    }
-}
-
 void asignarQuantum(PCB* proceso) {
     sem_post(&finalizarQuantum);
     temporal_stop(tiempoTranscurrido);
@@ -74,9 +55,11 @@ void asignarQuantum(PCB* proceso) {
 }
 
 void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
-    int cpuLibre;
     switch (operacion) {
+        case CREACION_PROCESO:
+            break;
         case ENVIAR_IO_GEN_SLEEP:
+            temporal_destroy(tiempoTranscurrido);
             asignarQuantum(proceso);
             enviarAIOGenerica(proceso, operacion, buffer);
             break;
@@ -86,19 +69,23 @@ void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
             } else {
                 enviarAColaPrioritaria(proceso);
             }
-            return;
+            break;
         case INSTRUCCION_WAIT:
             cpuLibre = instruccionWait(proceso, buffer);
             if (cpuLibre) { 
                 sem_post(&finalizarQuantum);
+            }
+            break;
                 break; 
-            } else return;
+            break;
         case INSTRUCCION_SIGNAL:
             cpuLibre = instruccionSignal(proceso, buffer);
             if (cpuLibre) { 
                 sem_post(&finalizarQuantum);
+            } 
+            break;
                 break; 
-            } else return;
+            break;
         case INSTRUCCION_EXIT:
             sem_post(&finalizarQuantum);
             enviarAExit(proceso, SUCCESS);
@@ -110,6 +97,12 @@ void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
             break;
     }
 
-    temporal_destroy(tiempoTranscurrido);
-    sem_post(&cpuDisponible);
+    if (cpuLibre && (!queue_is_empty(colaReady) || !queue_is_empty(colaPrioritaria))) {
+        PCB* procesoAEnviar;
+        colaProveniente cola = seleccionarSiguiente(procesoAEnviar);
+        enviarProcesoACPU_RR(procesoAEnviar);
+        pidProcesoEnEjecucion = proceso->PID;
+        ultimoPrioritario = (cola == COLA_PRIORITARIA) ? 1 : 0;
+        tiempoTranscurrido = temporal_create();
+    }
 }

@@ -68,8 +68,6 @@ void enviarAReady(PCB* pcb) {
     pthread_mutex_unlock(&mutexLogger);
 
     pthread_mutex_unlock(&mutexReady);
-
-    sem_post(&procesosEnReady);
 }
 
 void vaciarExit() {

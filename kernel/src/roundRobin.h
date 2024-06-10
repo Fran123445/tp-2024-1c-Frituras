@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <planificacion.h>
 
-extern sem_t cpuDisponible;
+extern int cpuLibre;
 
 // Envia una interrupcion por fin de quantum
 void enviarInterrupcion(int PID);
@@ -25,6 +25,8 @@ void enviarProcesoACPU_RR(PCB*);
 void enviarInterrupcion();
 
 void ejecutarSiguienteRR();
+
+void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer);
 
 void iniciarRR();
 

@@ -65,6 +65,7 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
         planificar = planificarPorFIFO;
         iniciarFIFO();
     } else if (!strcmp(algoritmo, "RR")) {
+        planificar = planificarPorRR;
         iniciarRR();
     } else {
         //VRR
@@ -111,7 +112,6 @@ int main(int argc, char* argv[]) {
 
     leerRecursosDeConfig(config);
 
-    //iniciarProceso("instrucciones1.txt");
     solicitarInput();
     
     config_destroy(config);

@@ -1,10 +1,8 @@
 #include <planificacion.h>
 
 sem_t procesosEnNew;
-sem_t procesosEnReady;
 sem_t procesosEnExit;
 sem_t gradoMultiprogramacion;
-sem_t cpuDisponible;
 sem_t finalizarQuantum;
 pthread_mutex_t mutexExit;
 pthread_mutex_t mutexNew;
@@ -16,7 +14,6 @@ pthread_mutex_t mutexLogger;
 void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnNew, 0, 0);
     sem_init(&procesosEnExit, 0, 0);
-    sem_init(&cpuDisponible, 0, 1); // lo inicializo en 1 porque (entiendo) al arrancar el kernel la cpu no va a estar ocupada con nada
     sem_init(&gradoMultiprogramacion, 0, multiprogramacion);
     sem_init(&finalizarQuantum, 0, 0);
     pthread_mutex_init(&mutexPlanificador, NULL);
@@ -29,17 +26,18 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
 }
 
 void procesoNewAReady() {
-
     while(1) {
         sem_wait(&gradoMultiprogramacion);
         sem_wait(&procesosEnNew);
 
         pthread_mutex_lock(&mutexNew);
-
         PCB* proceso = queue_pop(colaNew);
         enviarAReady(proceso);
-
         pthread_mutex_unlock(&mutexNew);
+
+        pthread_mutex_lock(&mutexPlanificador);
+        planificar(CREACION_PROCESO, NULL, NULL);
+        pthread_mutex_unlock(&mutexPlanificador);
     }
 }
 
@@ -51,21 +49,12 @@ void enviarProcesoACPU(PCB* proceso) {
 }
 
 PCB* sacarSiguienteDeReady() {
-    sem_wait(&procesosEnReady);
     pthread_mutex_lock(&mutexReady);
     PCB* proceso = queue_pop(colaReady);
     cambiarEstado(proceso, ESTADO_EXEC);
     pthread_mutex_unlock(&mutexReady);
 
     return proceso;
-}
-
-void ejecutarSiguiente() {
-    while(1) {
-        sem_wait(&cpuDisponible);
-        PCB* proceso = sacarSiguienteDeReady();
-        enviarProcesoACPU(proceso);
-    }
 }
 
 void actualizarProcesoRecibido(PCB* pcbRecibido, PCB* pcbEnKernel) {
@@ -151,23 +140,27 @@ int instruccionSignal(PCB* proceso, t_buffer* buffer) {
     return 0;
 }
 
+int cpuLibre = 1;
 void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
-    int cpuLibre;
     switch (operacion) {
+        case CREACION_PROCESO: // esta operacion viene desde el mismo kernel cuando se hace le paso de NEW a READY
+            break;
         case ENVIAR_IO_GEN_SLEEP:
             enviarAIOGenerica(proceso, operacion, buffer);
+            cpuLibre = 1;
             break;
         case OPERACION_FINALIZADA:
             enviarAReady(proceso);
-            return;
+            break;
         case INSTRUCCION_WAIT:
             cpuLibre = instruccionWait(proceso, buffer);
-            if (cpuLibre) break; else return;
+            break;
         case INSTRUCCION_SIGNAL:
             cpuLibre = instruccionSignal(proceso, buffer);
-            if (cpuLibre) break; else return;
+            break;
         case INSTRUCCION_EXIT:
             enviarAExit(proceso, SUCCESS);
+            cpuLibre = 1;
             break;
         default:
             pthread_mutex_lock(&mutexLogger);
@@ -176,7 +169,10 @@ void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
             break;
     }
 
-    sem_post(&cpuDisponible);
+    if (cpuLibre && !queue_is_empty(colaReady)) {
+        enviarProcesoACPU(sacarSiguienteDeReady());
+        cpuLibre = 0;
+    }
 }
 
 void iniciarFIFO() {
@@ -184,15 +180,10 @@ void iniciarFIFO() {
 						NULL,
 						(void*) vaciarExit,
 						NULL);
-
     pthread_create(&pth_colaNew,
 						NULL,
 						(void*) procesoNewAReady,
-						NULL);
-    pthread_create(&pth_colaReady,
-						NULL,
-						(void*) ejecutarSiguiente,
-						NULL);              
+						NULL);        
     pthread_create(&pth_recibirProc,
 						NULL,
 						(void*) recibirDeCPU,
