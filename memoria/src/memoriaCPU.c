@@ -156,3 +156,27 @@ void resize_proceso(int socket_cpu,t_config* config){
 
 }
 }
+void acceso_tabla_paginas(int socket_cpu){
+    op_code cod_op = recibir_operacion(socket_cpu);
+        if(cod_op == ACCESO_TABLAS_PAGINAS){
+            t_buffer* buffer = recibir_buffer(socket_cpu);
+            int pid = buffer_read_int(buffer);
+            int pagina_a_buscar = buffer_read_int(buffer);
+            t_proceso_memoria* proceso = hallar_proceso(pid);
+            if(proceso == NULL){
+                fprintf(stderr, "No se encuentra el PID en la lista de procesos");
+                return;
+            }
+            if(pagina_a_buscar < 0 || pagina_a_buscar >= list_size(proceso->tabla_del_proceso)){
+                fprintf(stderr, "Error: Nro de página no válido");
+                return;
+            }
+            informacion_de_tabla* entrada = list_get(proceso->tabla_del_proceso, pagina_a_buscar);
+            int marco = entrada->marco;
+            t_paquete* paquete = crear_paquete(ACCESO_TABLAS_PAGINAS);
+            agregar_int_a_paquete(paquete, marco);
+            enviar_paquete(paquete, socket_cpu);
+            liberar_buffer(buffer);
+            eliminar_paquete(paquete);
+        }
+}
