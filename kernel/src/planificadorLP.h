@@ -12,6 +12,7 @@
 #include <commons/string.h>
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
+#include <interfaces.h>
 
 extern pthread_mutex_t mutexLogger;
 typedef enum {
@@ -48,7 +49,7 @@ extern t_list* listadoProcesos;
 
 extern int siguientePID;
 
-void logProcesosEnCola(char* nombreCola, t_queue* cola);
+void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola);
 
 // Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria
 void vaciarExit();

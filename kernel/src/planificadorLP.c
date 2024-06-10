@@ -1,16 +1,24 @@
 #include <planificadorLP.h>
 
-void logProcesosEnCola(char* nombreCola, t_queue* cola) {
+void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola) {
     // rompe la abstraccion pero bue, a esta altura es lo que hay
 
     char* string = string_new();
+
+    void (*func)(void*);
 
     void _agregarPIDALista(PCB* proceso) {
         string_append_with_format(&string, "%d, ", proceso->PID);
     };
 
+    void _agregarPIDBloqueadoALista(t_solicitudIOGenerica* solicitud) {
+        string_append_with_format(&string, "%d, ", solicitud->proceso->PID);
+    };
 
-    list_iterate(cola->elements, (void *) _agregarPIDALista);
+    if (estado == ESTADO_BLOCKED) func = _agregarPIDBloqueadoALista;
+    else func = _agregarPIDALista;
+
+    list_iterate(cola->elements, (void *) func);
     string[strlen(string)-2] = '\0';
 
     log_info(logger, "Cola %s: [%s]", nombreCola, string);
@@ -64,7 +72,7 @@ void enviarAReady(PCB* pcb) {
 
     // No se si dejar esto adentro del mutex de ready
     pthread_mutex_lock(&mutexLogger);
-    logProcesosEnCola("READY", colaReady);
+    logProcesosEnCola(ESTADO_READY, "READY", colaReady);
     pthread_mutex_unlock(&mutexLogger);
 
     pthread_mutex_unlock(&mutexReady);
@@ -187,7 +195,7 @@ void iniciarProceso(char* path) {
 
     siguientePID += 1;
 
-    logProcesosEnCola("NEW", colaNew);
+    logProcesosEnCola(ESTADO_NEW, "NEW", colaNew);
 
     sem_post(&procesosEnNew);
 }

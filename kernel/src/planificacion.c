@@ -103,7 +103,7 @@ void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
 
         char* str = string_new();
         string_append_with_format(&str, "BLOCKED %s", interfaz->nombreInterfaz);
-        logProcesosEnCola(str, interfaz->cola);
+        logProcesosEnCola(ESTADO_BLOCKED, str, interfaz->cola);
         free(str);
 
         pthread_mutex_unlock(&interfaz->mutex);
