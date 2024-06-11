@@ -7,7 +7,7 @@
 #include <commons/temporal.h>
 #include <commons/collections/queue.h>
 #include <utils/pcb.h>
-#include <roundRobin.h>
+#include <planificacion/roundRobin.h>
 
 extern int cpuLibre;
 extern bool procesoInterrumpido;

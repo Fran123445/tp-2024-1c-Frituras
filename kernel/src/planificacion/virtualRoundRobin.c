@@ -1,4 +1,4 @@
-#include <virtualRoundRobin.h>
+#include <planificacion/virtualRoundRobin.h>
 
 // indica que si el ultimo proceso enviado salio o no de la cola prioritaria
 int ultimoPrioritario = 0;

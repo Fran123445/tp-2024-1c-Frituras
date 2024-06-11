@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <semaphore.h>
 #include <unistd.h>
-#include <planificacion.h>
+#include <planificacion/planificacion.h>
 
 extern int cpuLibre;
 

@@ -4,11 +4,12 @@
 #include <commons/config.h>
 #include <utils/server.h>
 #include <utils/client.h>
+#include <planificacion/planificacion.h>
+#include <planificacion/roundRobin.h>
+#include <planificacion/virtualRoundRobin.h>
 #include "consola.h"
 #include "planificadorLP.h"
-#include "planificacion.h"
 #include "interfaces.h"
-#include "roundRobin.h"
 #include "recursos.h"
 
 int socketCPUDispatch;

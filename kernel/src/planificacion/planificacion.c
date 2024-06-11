@@ -1,4 +1,4 @@
-#include <planificacion.h>
+#include <planificacion/planificacion.h>
 
 sem_t procesosEnNew;
 sem_t procesosEnExit;
