@@ -11,5 +11,8 @@ typedef struct {
 
 extern t_list* TLB;
 
+uint32_t obtener_desplazamineto_pagina(uint32_t direccion_logica);
+uint32_t obtener_numero_pagina(uint32_t direccion_logica);
+uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica);
 
 #endif /* MMU_H_ */

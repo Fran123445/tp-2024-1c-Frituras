@@ -33,7 +33,8 @@ typedef enum {
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
     //CPU o IO - Memoria
-    ACCESO_ESPACIO_USUARIO,
+    ACCESO_ESPACIO_USUARIO_LECTURA,
+    ACCESO_ESPACIO_USUARIO_ESCRITURA,
     CONEXION_DIAL_FS,
     //Memoria de Instrucciones - CPU
     ENVIO_DE_INSTRUCCIONES,

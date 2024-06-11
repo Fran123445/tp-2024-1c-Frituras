@@ -19,7 +19,7 @@ int* recibir_marco(){
         t_buffer* buffer = recibir_buffer(socket_memoria);
         int marco = buffer_read_int(buffer);
         liberar_buffer(buffer);
-        return int;
+        return marco;
     }
     return NULL;
 }
