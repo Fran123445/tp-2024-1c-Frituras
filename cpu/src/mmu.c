@@ -13,11 +13,11 @@ uint32_t obtener_desplazamineto_pagina(uint32_t direccion_logica){
 	return direccion_logica - obtener_numero_pagina(direccion_logica) * tamanio_pagina;
 }
 
-int* recibir_marco(){
+uint32_t recibir_marco(){
     op_code cod_op = recibir_operacion(socket_memoria);
     if(cod_op == ACCESO_TABLAS_PAGINAS){
         t_buffer* buffer = recibir_buffer(socket_memoria);
-        int marco = buffer_read_int(buffer);
+        uint32_t marco = buffer_read_int(buffer);
         liberar_buffer(buffer);
         return marco;
     }
@@ -44,6 +44,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
     t_log* log_TLB = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
 
     uint32_t numero_pagina = obtener_numero_pagina(direccion_logica);
+    uint32_t desplazamiento = obtener_desplazamineto_pagina(direccion_logica);
 
     numPagAux = numero_pagina; //Acá hay que checkear lo que puse arriba.
     entrada_TLB* entradaExistenteEnTLB = (entrada_TLB*) list_find(TLB, esta_en_la_TLB);
@@ -57,19 +58,17 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
            mover_al_frente_de_la_estructura_LRU(entradaExistenteEnTLB);
         }
 
-        return entradaExistenteEnTLB->marco;
+        return entradaExistenteEnTLB->marco * tamanio_pagina + desplazamiento;
     }
         else{
             free(entradaExistenteEnTLB);
         
             log_info(log_TLB, "PID: %u - TLB MISS - Pagina: %u", pcb->PID, numero_pagina);
-   
-            uint32_t desplazamiento = obtener_desplazamineto_pagina(direccion_logica);
     
             pedir_marco(numero_pagina);
             uint32_t marco = recibir_marco();
 
-            entrada_TLB* entradaTLB;
+            entrada_TLB* entradaTLB = malloc(sizeof(entrada_TLB));
             entradaTLB->id_proceso = pcb->PID;
             entradaTLB->pagina = numero_pagina;
             entradaTLB->marco = marco;    
@@ -86,7 +85,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
             }
             else{
                 if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
-                    FIFO(entradaTLB);
+                    FIFO(entradaTLB);      
                 }
                 else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
                     LRU(entradaTLB);
