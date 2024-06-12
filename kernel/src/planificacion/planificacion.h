@@ -56,9 +56,9 @@ int instruccionWait(PCB* proceso, t_buffer* buffer);
 int instruccionSignal(PCB* proceso, t_buffer* buffer);
 
 // Recibe un t_dispatch y planifica en funcion de lo que solicita
-void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer);
+void planificar(op_code operacion, PCB* proceso, t_buffer* buffer);
 
 // Inicia los hilos para la planificacion por FIFO
-void iniciarFIFO();
+void iniciarPlanificacion();
 
 #endif /* PLAN_H */

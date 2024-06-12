@@ -11,7 +11,7 @@
 #include <utils/serializacion.h>
 #include <planificadorLP.h>
 
-extern void (*planificar)(op_code, PCB*, t_buffer*);
+extern void planificar(op_code, PCB*, t_buffer*);
 extern t_log* logger;
 
 extern pthread_mutex_t mutexPlanificador;

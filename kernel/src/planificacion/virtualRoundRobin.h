@@ -17,4 +17,6 @@ typedef enum {
     COLA_PRIORITARIA
 } colaProveniente;
 
+void setVRR();
+
 #endif /* VRR_H */

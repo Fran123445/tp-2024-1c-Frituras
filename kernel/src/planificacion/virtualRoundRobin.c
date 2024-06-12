@@ -54,62 +54,39 @@ void asignarQuantum(PCB* proceso) {
     }
 }
 
-void planificarPorVRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
-    switch (operacion) {
-        case CREACION_PROCESO:
-            pthread_mutex_lock(&mutexNew);
-            PCB* proceso = queue_pop(colaNew);
-            enviarAReady(proceso);
-            pthread_mutex_unlock(&mutexNew);
-            break;
-        case ENVIAR_IO_GEN_SLEEP:
-            temporal_destroy(tiempoTranscurrido);
-            asignarQuantum(proceso);
-            enviarAIOGenerica(proceso, operacion, buffer);
-            cpuLibre = 0;
-            break;
-        case OPERACION_FINALIZADA:
-            if (proceso->quantum == quantumInicial) {
-                enviarAReady(proceso);
-            } else {
-                enviarAColaPrioritaria(proceso);
-            }
-            break;
-        case INSTRUCCION_WAIT:
-            cpuLibre = instruccionWait(proceso, buffer);
-            if (cpuLibre) { 
-                sem_post(&finalizarQuantum);
-            }
-            break;
-                break; 
-            break;
-        case INSTRUCCION_SIGNAL:
-            cpuLibre = instruccionSignal(proceso, buffer);
-            if (cpuLibre) { 
-                sem_post(&finalizarQuantum);
-            } 
-            break;
-                break; 
-            break;
-        case INSTRUCCION_EXIT:
-            sem_post(&finalizarQuantum);
-            enviarAExit(proceso, SUCCESS);
-            cpuLibre = 0;
-            break;
-        default:
-            pthread_mutex_lock(&mutexLogger);
-            log_error(logger, "Instruccion no válida");
-            pthread_mutex_unlock(&mutexLogger);
-            break;
-    }
+void enviarAIOGenericaVRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
+    temporal_destroy(tiempoTranscurrido);
+    asignarQuantum(proceso);
+    enviarAIOGenerica(proceso, operacion, buffer);
+    cpuLibre = 1;
+}
 
+void operacionFinalizadaVRR(PCB* proceso) {
+    if (proceso->quantum == quantumInicial) {
+        enviarAReady(proceso);
+    } else {
+        enviarAColaPrioritaria(proceso);
+    }
+}
+
+void criterioEnvioVRR() {
     if (cpuLibre && (!queue_is_empty(colaReady) || !queue_is_empty(colaPrioritaria))) {
         PCB* procesoAEnviar;
         colaProveniente cola = seleccionarSiguiente(procesoAEnviar);
         enviarProcesoACPU_RR(procesoAEnviar);
-        pidProcesoEnEjecucion = proceso->PID;
+        pidProcesoEnEjecucion = procesoAEnviar->PID;
         ultimoPrioritario = (cola == COLA_PRIORITARIA) ? 1 : 0;
         cpuLibre = 0;
         tiempoTranscurrido = temporal_create();
     }
+}
+
+void setVRR() {
+    IOGenerica = enviarAIOGenericaVRR;
+    IOFinalizada = operacionFinalizadaVRR;
+    instWait = waitRR;
+    instSignal = signalRR;
+    instExit = exitFIFO;
+    interrupcion = interrupcionRR;
+    criterioEnvio = criterioEnvioVRR;
 }

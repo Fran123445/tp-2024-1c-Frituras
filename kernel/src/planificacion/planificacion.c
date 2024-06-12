@@ -10,6 +10,15 @@ pthread_mutex_t mutexReady;
 pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
 pthread_mutex_t mutexLogger;
+int cpuLibre = 1;
+
+void (*IOGenerica)(PCB*, op_code, t_buffer*);
+void (*IOFinalizada)(PCB*);
+void (*instWait)(PCB*, t_buffer*);
+void (*instSignal)(PCB*, t_buffer*);
+void (*instExit)(PCB*);
+void (*criterioEnvio)();
+void (*interrupcion)();
 
 void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnNew, 0, 0);
@@ -145,8 +154,7 @@ int instruccionSignal(PCB* proceso, t_buffer* buffer) {
     return 0;
 }
 
-int cpuLibre = 1;
-void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
+void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
     switch (operacion) {
         case CREACION_PROCESO: // esta operacion viene desde el mismo kernel cuando se hace le paso de NEW a READY
             pthread_mutex_lock(&mutexNew);
@@ -155,21 +163,22 @@ void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
             pthread_mutex_unlock(&mutexNew);
             break;
         case ENVIAR_IO_GEN_SLEEP:
-            enviarAIOGenerica(proceso, operacion, buffer);
-            cpuLibre = 1;
+            IOGenerica(proceso, operacion, buffer);
             break;
         case OPERACION_FINALIZADA:
-            enviarAReady(proceso);
+            IOFinalizada(proceso);
             break;
         case INSTRUCCION_WAIT:
-            cpuLibre = instruccionWait(proceso, buffer);
+            instWait(proceso, buffer);
             break;
         case INSTRUCCION_SIGNAL:
-            cpuLibre = instruccionSignal(proceso, buffer);
+            instSignal(proceso, buffer);
             break;
         case INSTRUCCION_EXIT:
-            enviarAExit(proceso, SUCCESS);
-            cpuLibre = 1;
+            instExit(proceso);
+            break;
+        case INTERRUPCION:
+            interrupcion(proceso);
             break;
         default:
             pthread_mutex_lock(&mutexLogger);
@@ -178,13 +187,10 @@ void planificarPorFIFO(op_code operacion, PCB* proceso, t_buffer* buffer) {
             break;
     }
 
-    if (cpuLibre && !queue_is_empty(colaReady)) {
-        enviarProcesoACPU(sacarSiguienteDeReady());
-        cpuLibre = 0;
-    }
+    criterioEnvio();
 }
 
-void iniciarFIFO() {
+void iniciarPlanificacion() {
     pthread_create(&pth_colaExit,
 						NULL,
 						(void*) vaciarExit,

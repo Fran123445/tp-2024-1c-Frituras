@@ -6,6 +6,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <planificacion/planificacion.h>
+#include <planificacion/FIFO.h>
 
 extern int cpuLibre;
 
@@ -21,13 +22,16 @@ void esperarVuelta(PCB* proceso);
 // Envia el proceso a CPU e inicia el conteo del quantum
 void enviarProcesoACPU_RR(PCB*);
 
-// Envia una interrupcion a la CPU
-void enviarInterrupcion();
+void enviarAIOGenericaRR(PCB* proceso, op_code operacion, t_buffer* buffer);
 
-void ejecutarSiguienteRR();
+void waitRR(PCB* proceso, t_buffer* buffer);
 
-void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer);
+void signalRR(PCB* proceso, t_buffer* buffer);
 
-void iniciarRR();
+void interrupcionRR(PCB* proceso);
+
+void criterioEnvioRR();
+
+void setRR();
 
 #endif /* RR_H */

@@ -5,6 +5,7 @@
 #include <utils/server.h>
 #include <utils/client.h>
 #include <planificacion/planificacion.h>
+#include <planificacion/FIFO.h>
 #include <planificacion/roundRobin.h>
 #include <planificacion/virtualRoundRobin.h>
 #include "consola.h"
@@ -59,14 +60,13 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
     char* algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 
     if(!strcmp(algoritmo, "FIFO")) {
-        planificar = planificarPorFIFO;
-        iniciarFIFO();
+        setFIFO();
     } else if (!strcmp(algoritmo, "RR")) {
-        planificar = planificarPorRR;
-        iniciarRR();
+        setRR();
     } else {
-        //VRR
+        setVRR();
     }
+    iniciarPlanificacion();
 }
 
 int main(int argc, char* argv[]) {

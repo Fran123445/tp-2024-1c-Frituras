@@ -45,69 +45,43 @@ void enviarProcesoACPU_RR(PCB* proceso) {
     pthread_detach(quantum);
 }
 
-// Seguramente refactorice esto para tener un solo switch en vez de uno en cada uno
-void planificarPorRR(op_code operacion, PCB* proceso, t_buffer* buffer) {
-    switch (operacion) {
-        case CREACION_PROCESO:
-            pthread_mutex_lock(&mutexNew);
-            PCB* nuevoProceso = queue_pop(colaNew);
-            enviarAReady(nuevoProceso);
-            pthread_mutex_unlock(&mutexNew);
-            break;
-        case ENVIAR_IO_GEN_SLEEP:
-            sem_post(&finalizarQuantum);
-            enviarAIOGenerica(proceso, operacion, buffer);
-            cpuLibre = 1;
-            break;
-        case OPERACION_FINALIZADA:
-            enviarAReady(proceso);
-            break;
-        case INSTRUCCION_WAIT:
-            cpuLibre = instruccionWait(proceso, buffer);
-            if (cpuLibre) { 
-                sem_post(&finalizarQuantum);
-            }
-            break;
-        case INSTRUCCION_SIGNAL:
-            cpuLibre = instruccionSignal(proceso, buffer);
-            if (cpuLibre) { 
-                sem_post(&finalizarQuantum);
-            }
-            break;
-        case INSTRUCCION_EXIT:
-            sem_post(&finalizarQuantum);
-            enviarAExit(proceso, SUCCESS);
-            cpuLibre = 1;
-            break;
-        case INTERRUPCION:
-            enviarAReady(proceso);
-            cpuLibre = 1;
-            break;
-        default:
-            pthread_mutex_lock(&mutexLogger);
-            log_error(logger, "Instruccion no válida");
-            pthread_mutex_unlock(&mutexLogger);
-            break;
+void enviarAIOGenericaRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
+    sem_post(&finalizarQuantum);
+    enviarAIOGenerica(proceso, operacion, buffer);
+    cpuLibre = 1;
+}
+
+void waitRR(PCB* proceso, t_buffer* buffer) {
+    cpuLibre = instruccionWait(proceso, buffer);
+    if (cpuLibre) { 
+        sem_post(&finalizarQuantum);
     }
+}
 
+void signalRR(PCB* proceso, t_buffer* buffer) {
+    sem_post(&finalizarQuantum);
+    enviarAExit(proceso, SUCCESS);
+    cpuLibre = 1;
+}
 
+void interrupcionRR(PCB* proceso) {
+    enviarAReady(proceso);
+    cpuLibre = 1;
+}
+
+void criterioEnvioRR() {
     if (cpuLibre && !queue_is_empty(colaReady)) {
         enviarProcesoACPU_RR(sacarSiguienteDeReady());
         cpuLibre = 0;
     }
 }
 
-void iniciarRR() {
-    pthread_create(&pth_colaExit,
-						NULL,
-						(void*) vaciarExit,
-						NULL);
-    pthread_create(&pth_colaNew,
-						NULL,
-						(void*) procesoNewAReady,
-						NULL);
-    pthread_create(&pth_recibirProc,
-						NULL,
-						(void*) recibirDeCPU,
-						NULL);
+void setRR() {
+    IOGenerica = enviarAIOGenericaRR;
+    IOFinalizada = operacionFinalizadaFIFO;
+    instWait = waitRR;
+    instSignal = signalRR;
+    instExit = exitFIFO;
+    interrupcion = interrupcionRR;
+    criterioEnvio = criterioEnvioRR;
 }
