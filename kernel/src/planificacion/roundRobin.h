@@ -30,6 +30,8 @@ void signalRR(PCB* proceso, t_buffer* buffer);
 
 void interrupcionRR(PCB* proceso);
 
+void exitRR();
+
 void criterioEnvioRR();
 
 void setRR();

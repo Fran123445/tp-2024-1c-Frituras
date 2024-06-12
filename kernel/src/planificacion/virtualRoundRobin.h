@@ -7,6 +7,7 @@
 #include <commons/temporal.h>
 #include <commons/collections/queue.h>
 #include <utils/pcb.h>
+#include <planificacion/FIFO.h>
 #include <planificacion/roundRobin.h>
 
 extern t_queue* colaPrioritaria;

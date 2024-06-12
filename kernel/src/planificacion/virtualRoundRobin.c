@@ -87,7 +87,7 @@ void setVRR() {
     IOFinalizada = operacionFinalizadaVRR;
     instWait = waitRR;
     instSignal = signalRR;
-    instExit = exitFIFO;
+    instExit = exitRR;
     interrupcion = interrupcionRR;
     criterioEnvio = criterioEnvioVRR;
 }

@@ -66,6 +66,7 @@ void signalRR(PCB* proceso, t_buffer* buffer) {
 }
 
 void interrupcionRR(PCB* proceso) {
+    sem_post(&finalizarQuantum);
     enviarAReady(proceso);
     cpuLibre = 1;
 }
@@ -77,12 +78,17 @@ void criterioEnvioRR() {
     }
 }
 
+void exitRR(PCB* proceso) {
+    sem_post(&finalizarQuantum);
+    exitFIFO(proceso);
+}
+
 void setRR() {
     IOGenerica = enviarAIOGenericaRR;
     IOFinalizada = operacionFinalizadaFIFO;
     instWait = waitRR;
     instSignal = signalRR;
-    instExit = exitFIFO;
+    instExit = exitRR;
     interrupcion = interrupcionRR;
     criterioEnvio = criterioEnvioRR;
 }
