@@ -52,15 +52,16 @@ void* contenido_obtenido_de_memoria(uint32_t direccionLogica, uint32_t tam){
     return puntero_al_dato_leido;
 }
 
-void enviar_a_memoria_para_copiar(uint32_t direccion_logica_di, void* datos_a_escribir, uint32_t tam) {
-    uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica_di);
-    t_paquete* paquete = crear_paquete(COPY_STRING);
+void enviar_a_memoria_para_escritura(uint32_t direccion_logica, void* datos_a_escribir, uint32_t tam) {
+    uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+    t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_ESCRITURA);
     agregar_uint32_a_paquete(paquete, direccion_fisica);
-    agregar_paquete(paquete, datos_a_escribir,tam);
+    agregar_a_paquete(paquete, datos_a_escribir,tam);
     agregar_uint32_a_paquete(paquete, tam);
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
+
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
@@ -207,31 +208,76 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
 
     uint32_t direccionLogicaInicial = *(uint32_t*)reg_direccion;
 
+    if(tamanio_a_leer == 4){ // Hay que leer 4 bytes (Registros de 4 bytes)
     uint32_t pagina_inicial = obtener_numero_pagina(direccionLogicaInicial);
-
     uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_leer-1); //Porque, por ej, si son 4 bytes, lee del 30 al 33 (o sea, es leyendo el 30 incluído)
 
-    if(tamanio_a_leer == 4){ // Hay que leer 4 bytes (Registros de 4 bytes)
-        if(pagina_inicial == pagina_final){ //O sea, está en la misma página
+        if(pagina_inicial == pagina_final){ // Está en la misma página
             void* dato_leido = contenido_obtenido_de_memoria(direccionLogicaInicial, 4);
             memcpy(reg_datos, dato_leido, 4);
         }
-        else{  // El contenido está en más de 1 página (como máximo dividido entre 2 páginas debido al tamaño de los registros y que las páginas tienen tamaño >1 y múltiplos de 2)
-            int cant_bytes_a_leer_pagina_inicial = tamanio_pagina - (direccionLogicaInicial % tamanio_pagina);
+        else{ // El contenido está en más de 1 página
+            uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + 1; 
+            int bytes_leidos = 0;
+            
+            for(int i=0; i<cant_paginas_a_leer; i++){
+                int direccion_logica_actual = direccionLogicaInicial + bytes_leidos;
 
-            void* dato_leido1 = contenido_obtenido_de_memoria(direccionLogicaInicial, cant_bytes_a_leer_pagina_inicial);
-            memcpy(reg_datos, dato_leido1, cant_bytes_a_leer_pagina_inicial);
+                int cant_bytes_a_leer_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina); // En realidad calcula la cantidad de bytes restantes en la página desde la posición actual hasta el final de la página.
+                if (cant_bytes_a_leer_pagina > (tamanio_a_leer - bytes_leidos)) { // Ajustar la cantidad de bytes a leer si es mayor que la cantidad restante (esto es para la última página, debido a lo que calcula en realidad la cuenta anterior)
+                    cant_bytes_a_leer_pagina = tamanio_a_leer - bytes_leidos;
+                }
 
-            void* dato_leido2 = contenido_obtenido_de_memoria(direccionLogicaInicial + cant_bytes_a_leer_pagina_inicial, tamanio_a_leer - cant_bytes_a_leer_pagina_inicial); // A partir de donde terminó la lectura anterior lee lo que falta
-            memcpy(reg_datos + cant_bytes_a_leer_pagina_inicial, dato_leido2, tamanio_a_leer - cant_bytes_a_leer_pagina_inicial);
+                void* dato_leido1 = contenido_obtenido_de_memoria(direccion_logica_actual, cant_bytes_a_leer_pagina);
+                memcpy(reg_datos + bytes_leidos, dato_leido1, cant_bytes_a_leer_pagina);
+                bytes_leidos += cant_bytes_a_leer_pagina
+            }
         }
     }
     else{ // Hay que leer 1 byte (AX,BX,CX,DX)
         void* dato_leido = contenido_obtenido_de_memoria(direccionLogicaInicial, 1);
         memcpy(reg_datos, dato_leido, 1);
     }
-    
 }
+
+void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
+
+    void *reg_datos = obtenerRegistro(registroDatos);
+    void *reg_direccion = obtenerRegistro(registroDireccion);
+
+    size_t tamanio_a_escribir = tamanioRegistro(registroDatos);
+
+    uint32_t direccionLogicaInicial = *(uint32_t*)reg_direccion;
+
+    if(tamanio_a_escribir == 4){ 
+    uint32_t pagina_inicial = obtener_numero_pagina(direccionLogicaInicial);
+    uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_escribir-1); 
+
+        if(pagina_inicial == pagina_final){ 
+            enviar_a_memoria_para_escritura(direccionLogicaInicial, reg_datos, 4)
+        }
+        else{ 
+            uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + 1; 
+            int bytes_leidos = 0;
+            
+            for(int i=0; i<cant_paginas_a_leer; i++){
+                int direccion_logica_actual = direccionLogicaInicial + bytes_leidos;
+
+                int cant_bytes_a_leer_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina);
+                if (cant_bytes_a_leer_pagina > (tamanio_a_escribir - bytes_leidos)) { 
+                    cant_bytes_a_leer_pagina = tamanio_a_escribir - bytes_leidos;
+                }
+
+                enviar_a_memoria_para_escritura(direccion_logica_actual, reg_datos + bytes_leidos, cant_bytes_a_leer_pagina);
+                bytes_leidos += cant_bytes_a_leer_pagina
+            }
+        }
+    }
+    else{ 
+        enviar_a_memoria_para_escritura(direccionLogicaInicial, reg_datos, 1);
+    }
+}
+
 
 void COPY_STRING(uint32_t tam) {
     uint32_t *puntero_si = obtenerRegistro(SI);
@@ -250,7 +296,7 @@ void COPY_STRING(uint32_t tam) {
 
             void* datos_de_si = contenido_obtenido_de_memoria(direccion_actual_si, tam_parte);
 
-            enviar_a_memoria_para_copiar(direccion_actual_di, datos_de_si, tam_parte);
+            enviar_a_memoria_para_escritura(direccion_actual_di, datos_de_si, tam_parte);
 
             bytes_restantes -= tam_parte;
             direccion_actual_si += tam_parte;
@@ -259,7 +305,7 @@ void COPY_STRING(uint32_t tam) {
     } else {
         // Si entra todo en una sola pagina
         void* datos_a_copiar = contenido_obtenido_de_memoria(*puntero_si, tam);
-        enviar_a_memoria_para_copiar(*puntero_di, datos_a_copiar, tam);
+        enviar_a_memoria_para_escritura(*puntero_di, datos_a_copiar, tam);
     }
 }
 
