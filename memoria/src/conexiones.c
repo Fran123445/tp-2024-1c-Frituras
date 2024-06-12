@@ -12,6 +12,7 @@ pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
 t_log* log_memoria_io;
 
 void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
+    log_memoria_io = log_create("memoria-io.log","Memoria", true, LOG_LEVEL_TRACE);
     while (1) {
         int* socket_cliente = malloc(sizeof(int));
         pthread_t hilo;
