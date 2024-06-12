@@ -178,9 +178,12 @@ void execute(t_instruccion* instruccion){
         RESIZE(*(int *)instruccion->arg1);
         log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p", pcb->PID, instruccion->tipo, instruccion->arg1);
         break;
+        */
     case iCOPY_STRING:
-        COPY_STRING(*(int *)instruccion.arg1);
+        COPY_STRING(*(int *)instruccion->arg1);
+        log_info(log_ciclo, "PID: %u - Ejecutando: %u - Parametro 1: %p", pcb->PID, instruccion->tipo, instruccion->arg1);
         break;
+    /*
     case iWAIT:
         WAIT(instruccion.interfaz);
         break;

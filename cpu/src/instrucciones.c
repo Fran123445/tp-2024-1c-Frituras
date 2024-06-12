@@ -52,6 +52,15 @@ void* contenido_obtenido_de_memoria(uint32_t direccionLogica, uint32_t tam){
     return puntero_al_dato_leido;
 }
 
+void enviar_a_memoria_para_copiar(uint32_t direccion_logica_di, void* datos_a_escribir, uint32_t tam) {
+    uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica_di);
+    t_paquete* paquete = crear_paquete(COPY_STRING);
+    agregar_uint32_a_paquete(paquete, direccion_fisica);
+    agregar_paquete(paquete, datos_a_escribir,tam);
+    agregar_uint32_a_paquete(paquete, tam);
+    enviar_paquete(paquete, socket_memoria);
+    eliminar_paquete(paquete);
+}
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
@@ -223,6 +232,37 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
     }
     
 }
+
+void COPY_STRING(uint32_t tam) {
+    uint32_t *puntero_si = obtenerRegistro(SI);
+    uint32_t *puntero_di = obtenerRegistro(DI);
+
+    //verifico si los datos a pasar van a ocupar mas de una pagina
+    if (tam > tamanio_pagina) {
+        uint32_t bytes_restantes = tam;
+        uint32_t direccion_actual_si = *puntero_si;
+        uint32_t direccion_actual_di = *puntero_di;
+
+        // Copiar los datos por partes a memoria
+        while (bytes_restantes > 0) {
+            // Calcular la cantidad de bytes a copiar en esta parte
+            uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
+
+            void* datos_de_si = contenido_obtenido_de_memoria(direccion_actual_si, tam_parte);
+
+            enviar_a_memoria_para_copiar(direccion_actual_di, datos_de_si, tam_parte);
+
+            bytes_restantes -= tam_parte;
+            direccion_actual_si += tam_parte;
+            direccion_actual_di += tam_parte;
+        }
+    } else {
+        // Si entra todo en una sola pagina
+        void* datos_a_copiar = contenido_obtenido_de_memoria(*puntero_si, tam);
+        enviar_a_memoria_para_copiar(*puntero_di, datos_a_copiar, tam);
+    }
+}
+
 
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);
