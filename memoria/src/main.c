@@ -90,8 +90,9 @@ int main(int argc, char *argv[]){
     config_destroy(config);
     free(escucha_cpu);
     free(escucha_kernel);
+    free(memoria_contigua);
+
     list_destroy(lista_de_procesos);
     bitarray_destroy(mapa_de_marcos);
-
     return 0;
 }
