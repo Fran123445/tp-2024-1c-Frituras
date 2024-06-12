@@ -13,6 +13,7 @@ void enviarAColaPrioritaria(PCB* proceso) {
     pthread_mutex_lock(&mutexColaPrioritaria);
     cambiarEstado(proceso, ESTADO_READY);
     queue_push(colaPrioritaria, proceso);
+    logProcesosEnCola(ESTADO_READY, "READY+", colaPrioritaria);
     pthread_mutex_unlock(&mutexColaPrioritaria);
 
     if (!ultimoPrioritario) {
@@ -30,13 +31,13 @@ PCB* sacarSiguienteDeColaPrioritaria() {
     return proceso;
 }
 
-colaProveniente seleccionarSiguiente(PCB* proceso) {
+colaProveniente seleccionarSiguiente(PCB** proceso) {
     colaProveniente cola;
     if (!queue_is_empty(colaPrioritaria)) {
-        proceso = sacarSiguienteDeColaPrioritaria();
+        *proceso = sacarSiguienteDeColaPrioritaria();
         cola = COLA_PRIORITARIA;
     } else {
-        proceso = sacarSiguienteDeReady();
+        *proceso = sacarSiguienteDeReady();
         cola = COLA_READY;
     }
     
@@ -72,7 +73,7 @@ void operacionFinalizadaVRR(PCB* proceso) {
 void criterioEnvioVRR() {
     if (cpuLibre && (!queue_is_empty(colaReady) || !queue_is_empty(colaPrioritaria))) {
         PCB* procesoAEnviar;
-        colaProveniente cola = seleccionarSiguiente(procesoAEnviar);
+        colaProveniente cola = seleccionarSiguiente(&procesoAEnviar);
         enviarProcesoACPU_RR(procesoAEnviar);
         pidProcesoEnEjecucion = procesoAEnviar->PID;
         ultimoPrioritario = (cola == COLA_PRIORITARIA) ? 1 : 0;

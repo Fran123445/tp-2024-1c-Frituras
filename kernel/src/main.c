@@ -38,6 +38,7 @@ pthread_t pth_recibirProc;
 
 void inicializarColas() {
     colaNew = queue_create();
+    colaPrioritaria = queue_create();
     colaReady = queue_create();
     colaExit = queue_create();
     interfacesConectadas = list_create();

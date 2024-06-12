@@ -9,6 +9,7 @@
 #include <utils/pcb.h>
 #include <planificacion/roundRobin.h>
 
+extern t_queue* colaPrioritaria;
 extern int cpuLibre;
 extern bool procesoInterrumpido;
 
