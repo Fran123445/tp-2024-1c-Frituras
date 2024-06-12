@@ -257,19 +257,19 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
             enviar_a_memoria_para_escritura(direccionLogicaInicial, reg_datos, 4)
         }
         else{ 
-            uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + 1; 
-            int bytes_leidos = 0;
+            uint32_t cant_paginas_a_escribir = pagina_final - pagina_inicial + 1; 
+            int bytes_escritos = 0;
             
-            for(int i=0; i<cant_paginas_a_leer; i++){
-                int direccion_logica_actual = direccionLogicaInicial + bytes_leidos;
+            for(int i=0; i<cant_paginas_a_escribir; i++){
+                int direccion_logica_actual = direccionLogicaInicial + bytes_escritos;
 
-                int cant_bytes_a_leer_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina);
-                if (cant_bytes_a_leer_pagina > (tamanio_a_escribir - bytes_leidos)) { 
-                    cant_bytes_a_leer_pagina = tamanio_a_escribir - bytes_leidos;
+                int cant_bytes_a_escribir_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina);
+                if (cant_bytes_a_escribir_pagina > (tamanio_a_escribir - bytes_escritos)) { 
+                    cant_bytes_a_escribir_pagina = tamanio_a_escribir - bytes_escritos;
                 }
 
-                enviar_a_memoria_para_escritura(direccion_logica_actual, reg_datos + bytes_leidos, cant_bytes_a_leer_pagina);
-                bytes_leidos += cant_bytes_a_leer_pagina
+                enviar_a_memoria_para_escritura(direccion_logica_actual, reg_datos + bytes_escritos, cant_bytes_a_escribir_pagina);
+                bytes_escritos += cant_bytes_a_escribir_pagina
             }
         }
     }
