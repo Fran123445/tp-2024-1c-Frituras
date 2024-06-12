@@ -55,12 +55,17 @@ void* escuchar_kernel(void* argumento_kernel){
     }
 }
 t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
-    void* bitmap_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
-    if (!bitmap_memoria_usuario){
-        fprintf(stderr, "Error al crear bitmap");
-        return NULL;
+    char* bitarray_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
+    if (!bitarray_memoria_usuario){
+        fprintf(stderr, "Error al crear puntero al bitarray");
+        exit(EXIT_FAILURE);
     }
-    t_bitarray* mapa_de_marcos = bitarray_create_with_mode(bitmap_memoria_usuario, cant_marcos, LSB_FIRST);
+    t_bitarray* mapa_de_marcos = bitarray_create_with_mode(bitarray_memoria_usuario, cant_marcos, LSB_FIRST); // se lee el bit - significativo primero
+    if(mapa_de_marcos == NULL){
+        free(bitarray_memoria_usuario);
+        fprintf(stderr, "Error al crear el bitarray");
+        exit(EXIT_FAILURE);
+    }
     return mapa_de_marcos;
 }
 

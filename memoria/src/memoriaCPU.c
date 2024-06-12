@@ -78,7 +78,8 @@ void asignar_frames_a_paginas (int cant_pags_total, t_proceso_memoria* proceso){
         informacion_de_tabla* tabla = malloc(sizeof(informacion_de_tabla));
 
         if (tabla == NULL){
-            fprintf(stderr, "No hay memoria dispo para la tabla");
+            fprintf(stderr, "No hay memoria dispo para la tabla"); 
+            pthread_mutex_unlock(&mutex_bitarray_marcos_libres);
             exit(EXIT_FAILURE);
         }
 
@@ -119,7 +120,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
     char* instruccion = obtener_instruccion(socket_kernel,(proceso->pc), (proceso->pid));
     if(instruccion == NULL){
         fprintf(stderr, "Error de la instruccion obtenida");
-        free (proceso);
+        free(proceso);
         return;
     }
     sleep(tiempo_retardo/1000);
@@ -128,7 +129,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
     enviar_paquete(paquete, socket_cpu);
     eliminar_paquete(paquete);
     free(instruccion);
-    free (proceso);
+    free(proceso);
 }
 
 void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
@@ -190,10 +191,12 @@ void acceso_tabla_paginas(int socket_cpu, int tiempo_retardo){
             t_proceso_memoria* proceso = hallar_proceso(pid);
             if(proceso == NULL){
                 fprintf(stderr, "No se encuentra el PID en la lista de procesos");
+                liberar_buffer(buffer);
                 return;
             }
             if(pagina_a_buscar < 0 || pagina_a_buscar >= list_size(proceso->tabla_del_proceso)){
                 fprintf(stderr, "Error: Nro de página no válido");
+                liberar_buffer(buffer);
                 return;
             }
             sleep(tiempo_retardo/1000);
