@@ -103,5 +103,6 @@ void finalizar_proceso(int socket_kernel, int tiempo_retardo){
         log_info(log_tabla_pags, "Destruccion Tabla Paginas - PID: %d- Tamaño: %d", pid_proceso, list_size(proceso_a_finalizar->tabla_del_proceso));
         eliminar_proceso_de_lista_de_procesos(pid_proceso);
         liberar_buffer(buffer);
+        pthread_mutex_destroy(mutex_lista_procesos);
     }
 }

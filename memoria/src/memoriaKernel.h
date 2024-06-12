@@ -3,7 +3,7 @@
 #include <string.h>
 #include "estructuras.h"
 
-extern pthread_mutex_t mutex_tablas_paginas;
+extern pthread_mutex_t mutex_lista_procesos;
 t_proceso_memoria* creacion_proceso(int socket_kernel, int tiempo_retardo);
 void abrir_archivo_path(int socket_kernel, int tiempo_retardo);
 void eliminar_proceso(int pid_proceso);

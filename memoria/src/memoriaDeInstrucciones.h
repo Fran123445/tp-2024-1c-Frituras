@@ -8,8 +8,8 @@
 #include<pthread.h>
 #include <semaphore.h>
 #include "estructuras.h"
+#include "memoriaKernel.h"
 
-extern pthread_mutex_t mutex_lista_procesos;
 t_proceso_memoria* hallar_proceso(int PID);
 void destruir_proceso(t_proceso_memoria* proceso);
 void eliminar_proceso_de_lista_de_procesos(int PID);

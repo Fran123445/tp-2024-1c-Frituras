@@ -91,8 +91,10 @@ int main(int argc, char *argv[]){
     free(escucha_cpu);
     free(escucha_kernel);
     free(memoria_contigua);
-
     list_destroy(lista_de_procesos);
     bitarray_destroy(mapa_de_marcos);
+    pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
+    pthread_mutex_destroy(&mutex_lista_procesos);
+    pthread_mutex_destroy(&mutex_log_memoria_io);
     return 0;
 }

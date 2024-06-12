@@ -39,4 +39,3 @@ char* obtener_instruccion(int socket_kernel, int pc, int pid){
     char* instruccion_char = list_get(lista_instrucciones, pc);
     return instruccion_char;
 }
- 
