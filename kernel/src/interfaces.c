@@ -1,7 +1,5 @@
 #include "interfaces.h"
 
-void (*planificar)(op_code, PCB*, t_buffer*);
-
 void esperarClientesIO(t_conexion_escucha* params) {
     while(1) {
         int* socket_cliente = malloc(sizeof(int));
@@ -27,9 +25,7 @@ void esperarClientesIO(t_conexion_escucha* params) {
                 // A implementar
                 break;
             default:
-                pthread_mutex_lock(&mutexLogger);
                 log_error(logger, "Conexión inválida de una interfaz");
-                pthread_mutex_unlock(&mutexLogger);
                 break;
         }
         
@@ -56,6 +52,8 @@ void administrarInterfazGenerica(int* socket_cliente) {
     list_add(interfacesConectadas, interfaz);
     pthread_mutex_unlock(&mutexListaInterfaces);
 
+    op_code op;
+
     while (1) {
         t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
         sem_wait(&interfaz->semaforo);
@@ -68,11 +66,9 @@ void administrarInterfazGenerica(int* socket_cliente) {
         enviar_paquete(paquete, *socket_cliente);
         eliminar_paquete(paquete);
 
-        op_code op = recibir_operacion(*socket_cliente);
-        if (op < 0) {
-            pthread_mutex_lock(&mutexLogger);
+        op = recibir_operacion(*socket_cliente);
+        if (op <= 0) {
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
-            pthread_mutex_unlock(&mutexLogger);
             enviarAExit(solicitud->proceso, INVALID_WRITE); // no se si es el motivo indicado, otra vez
             free(solicitud);
             break;

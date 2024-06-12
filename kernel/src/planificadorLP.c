@@ -46,9 +46,7 @@ char* enumEstadoAString(estado_proceso estado) {
 void cambiarEstado(PCB* proceso, estado_proceso estado) {
     estado_proceso estadoAnterior = proceso->estado;
     proceso->estado = estado;
-    pthread_mutex_lock(&mutexLogger);
     log_info(logger, "PID: %d - Estado Anterior: %s - Estado Actual: %s", proceso->PID, enumEstadoAString(estadoAnterior), enumEstadoAString(proceso->estado));
-    pthread_mutex_unlock(&mutexLogger);
 }
 
 void enviarAExit(PCB* pcb, motivo_exit motivo) {
@@ -71,9 +69,7 @@ void enviarAReady(PCB* pcb) {
     queue_push(colaReady, pcb);
 
     // No se si dejar esto adentro del mutex de ready
-    pthread_mutex_lock(&mutexLogger);
     logProcesosEnCola(ESTADO_READY, "READY", colaReady);
-    pthread_mutex_unlock(&mutexLogger);
 
     pthread_mutex_unlock(&mutexReady);
 }
@@ -106,9 +102,7 @@ void vaciarExit() {
                 motivo = "INVALID WRITE"; break;
         }
 
-        pthread_mutex_lock(&mutexLogger);
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
-        pthread_mutex_unlock(&mutexLogger);
 
         sem_post(&gradoMultiprogramacion);
         liberar_pcb(procesoAFinalizar->pcb);
@@ -187,9 +181,7 @@ void iniciarProceso(char* path) {
 
     eliminar_paquete(paquete);
 
-    pthread_mutex_lock(&mutexLogger);
     log_info(logger, "Se crea el proceso %d en NEW", siguientePID);
-    pthread_mutex_unlock(&mutexLogger);
 
     recibir_operacion(socketMemoria);
 

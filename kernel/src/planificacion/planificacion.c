@@ -9,7 +9,6 @@ pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
 pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
-pthread_mutex_t mutexLogger;
 int cpuLibre = 1;
 
 void (*IOGenerica)(PCB*, op_code, t_buffer*);
@@ -31,7 +30,6 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     pthread_mutex_init(&mutexReady, NULL);
     pthread_mutex_init(&mutexListaProcesos, NULL);
     pthread_mutex_init(&mutexListaInterfaces, NULL);
-    pthread_mutex_init(&mutexLogger, NULL); // no se si dejarlo aca
 }
 
 void procesoNewAReady() {
@@ -184,9 +182,7 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             interrupcion(proceso);
             break;
         default:
-            pthread_mutex_lock(&mutexLogger);
             log_error(logger, "Instruccion no válida");
-            pthread_mutex_unlock(&mutexLogger);
             break;
     }
 

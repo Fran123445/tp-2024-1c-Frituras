@@ -29,6 +29,7 @@ void esperarVuelta(PCB* proceso) {
     // esto es por si el proceso termina o no de ejecutarse antes que se cumpla el quantum
     if (procesoInterrumpido) {
         pthread_join(esperaQuantum, NULL);
+        log_info(logger, "Proceso %d interrumpido por fin de quantum", proceso->PID);
         return;
     }
 

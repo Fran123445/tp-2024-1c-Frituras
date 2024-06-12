@@ -23,8 +23,6 @@ extern int socketCPUInterrupt;
 
 extern sem_t finalizarQuantum;
 
-extern pthread_mutex_t mutexLogger;
-
 void inicializarSemaforosYMutex();
 
 // Espera a que lleguen procesos a la cola NEW para pasarlos a READY si el grado de multiprogramacion lo permite
