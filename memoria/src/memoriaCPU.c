@@ -123,7 +123,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
         free(proceso);
         return;
     }
-    sleep(tiempo_retardo/1000);
+    usleep(tiempo_retardo * 1000);
     t_paquete* paquete = crear_paquete(ENVIO_DE_INSTRUCCIONES);
     agregar_string_a_paquete(paquete,instruccion);
     enviar_paquete(paquete, socket_cpu);
@@ -155,13 +155,14 @@ void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
                 int cant_paginas_nuevas = ceil(tamanio_nuevo/config_get_int_value(config, "TAM_PAGINA"));
                 int total_paginas_a_agregar = cant_paginas_nuevas - cant_paginas_viejas;
                 chequear_espacio_memoria(total_paginas_a_agregar, socket_cpu);
+                usleep(tiempo_retardo * 1000);
                 log_info(log_resize, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
                 proceso->tamanio_proceso = tamanio_nuevo;
                 proceso->tabla_del_proceso = agregar_n_entradas_vacias(total_paginas_a_agregar, proceso->tabla_del_proceso);
                 asignar_frames_a_paginas(total_paginas_a_agregar,proceso);
             }else if (proceso->tamanio_proceso > tamanio_nuevo){
                 log_info(log_resize, "Reduccion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
-                sleep(tiempo_retardo/1000);
+                usleep(tiempo_retardo * 1000);
                 int paginas_viejas = ceil(proceso->tamanio_proceso/config_get_int_value(config, "TAM_PAGINA"));
                 int paginas_nuevas = ceil(tamanio_nuevo/config_get_int_value(config, "TAM_PAGINA"));
                 int total_paginas_a_sacar = paginas_viejas - paginas_nuevas;
@@ -199,7 +200,7 @@ void acceso_tabla_paginas(int socket_cpu, int tiempo_retardo){
                 liberar_buffer(buffer);
                 return;
             }
-            sleep(tiempo_retardo/1000);
+            usleep(tiempo_retardo * 1000);
             informacion_de_tabla* entrada = list_get(proceso->tabla_del_proceso, pagina_a_buscar);
             int marco = entrada->marco;
             t_paquete* paquete = crear_paquete(ACCESO_TABLAS_PAGINAS);

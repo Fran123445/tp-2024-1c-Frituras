@@ -13,7 +13,7 @@ pthread_mutex_t mutex_lista_procesos = PTHREAD_MUTEX_INITIALIZER;
 
 t_proceso_memoria* creacion_proceso(int socket_kernel, int tiempo_retardo) {
     op_code cod_op = recibir_operacion(socket_kernel);
-    sleep(tiempo_retardo/1000);
+    usleep(tiempo_retardo * 1000);
     log_tabla_pags = log_create("Tabla_de_Pags_Memoria", "Memoria", false, LOG_LEVEL_INFO);
     if(cod_op == CREACION_PROCESO){
         t_proceso_memoria* proceso = malloc(sizeof(proceso));
@@ -93,7 +93,7 @@ void frames_libres_por_fin_proceso(t_proceso_memoria* proceso_a_eliminar){
 
 void finalizar_proceso(int socket_kernel, int tiempo_retardo){
     op_code cod_op = recibir_operacion(socket_kernel);
-    sleep(tiempo_retardo/1000);
+    usleep(tiempo_retardo * 1000);
     log_tabla_pags = log_create("Tabla_de_Pags_Memoria", "Memoria", false, LOG_LEVEL_INFO);
     if(cod_op == FIN_PROCESO){
         t_buffer* buffer = recibir_buffer(socket_kernel);
