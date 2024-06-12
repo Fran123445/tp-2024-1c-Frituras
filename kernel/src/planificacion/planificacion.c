@@ -116,6 +116,9 @@ void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
     } else {
         enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
     }
+
+    free(infoInterfaz->nombre);
+    free(infoInterfaz);
 }
 
 int instruccionWait(PCB* proceso, t_buffer* buffer) {
