@@ -2,13 +2,6 @@
 
 pthread_mutex_t mutex_memoria_contigua = PTHREAD_MUTEX_INITIALIZER;
 
-void imprimir_memoria(void *memoria, size_t direccion_fisica, size_t tamanio_a_escribir) {
-    unsigned char *ptr = (unsigned char *)memoria + direccion_fisica;
-    for (size_t i = 0; i < tamanio_a_escribir; ++i) {
-        printf("%02X ", ptr[i]);
-    }
-    printf("\n");
-}
 void escribir_memoria(int socket, int tiempo_retardo, t_config* config){
     op_code cod_op = recibir_operacion(socket);
     if(cod_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
@@ -33,8 +26,6 @@ void escribir_memoria(int socket, int tiempo_retardo, t_config* config){
         pthread_mutex_unlock(&mutex_memoria_contigua);
         t_paquete* paquete = crear_paquete(ESCRITURA_REALIZADA_OK);
         enviar_paquete(paquete, socket);
-        imprimir_memoria(memoria_contigua, direccion_fisica, tamanio_a_escribir);
-
         free(valor_a_escribir);
         liberar_buffer(buffer);
         eliminar_paquete(paquete);

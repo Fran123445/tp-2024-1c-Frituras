@@ -27,8 +27,8 @@ void iniciar_servidores(t_config* config){
     escucha_io->modulo= MEMORIA;
     escucha_io->socket_servidor= socket_servidor_memoria;
 
-  //  socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
-    // socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
+    socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
 
 
 }
@@ -90,18 +90,18 @@ int main(int argc, char *argv[]){
     int cant_marcos = calcular_marcos(config);
     mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
 
-    //pthread_t hilo_kernel;
-    //pthread_create(&hilo_kernel,NULL, escuchar_kernel, (void*)params_kernel);
-   // pthread_t hilo_cpu;
-   // pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
+    pthread_t hilo_kernel;
+    pthread_create(&hilo_kernel,NULL, escuchar_kernel, (void*)params_kernel);
+    pthread_t hilo_cpu;
+    pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
     pthread_t hilo_io;
     pthread_create(&hilo_io, NULL,escuchar_io,(void*)params_io);
-  //  pthread_join(hilo_cpu, NULL);
- //   pthread_join(hilo_kernel, NULL);
+    pthread_join(hilo_cpu, NULL);
+    pthread_join(hilo_kernel, NULL);
     pthread_join(hilo_io,NULL);
     config_destroy(config);
-   // free(escucha_cpu);
-   // free(escucha_kernel);
+    free(escucha_cpu);
+    free(escucha_kernel);
     free(memoria_contigua);
     list_destroy(lista_de_procesos);
     bitarray_destroy(mapa_de_marcos);
