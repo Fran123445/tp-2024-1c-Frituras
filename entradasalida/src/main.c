@@ -46,8 +46,11 @@ int main(int argc, char* argv[]) {
 
 
     t_paquete* paquete1 = crear_paquete(CONEXION_STDIN);
+    enviar_paquete(paquete1, conexion_memoria);
     t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_ESCRITURA);
     char* prueba = "Hola";
+    uint32_t df = 10;
+    agregar_uint32_a_paquete(paquete, df);
     agregar_string_a_paquete(paquete, prueba);
     enviar_paquete(paquete, conexion_memoria);
     eliminar_paquete(paquete);

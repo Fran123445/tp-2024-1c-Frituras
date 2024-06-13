@@ -8,7 +8,6 @@
 #include <semaphore.h>
 #include "accesoEspacioUsuario.h"
 #include "conexiones.h"
-#include "main.h"
 
 pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
 t_log* log_memoria_io;
@@ -51,7 +50,7 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
             op_code code_op = recibir_operacion(*socket_cliente);
             if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
                 funcion = ejecutar_escribir_memoria;
-            }else if{
+            }else{
                 return; // falta implementar lectura
             }
             

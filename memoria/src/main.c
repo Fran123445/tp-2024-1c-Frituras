@@ -30,8 +30,6 @@ void iniciar_servidores(t_config* config){
   //  socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
     // socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
 
-    pthread_t hilo_io;
-    pthread_create(&hilo_io, NULL, (void*) esperar_clientes_IO, escucha_io );
 
 }
 

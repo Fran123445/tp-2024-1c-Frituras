@@ -113,11 +113,15 @@ t_buffer* recibir_buffer(int socket_cliente){
 
 	return buffer;
 }
-
-void buffer_read(t_buffer* buffer, void* data) {
-    int size_data;
+int read_buffer_tamanio (t_buffer* buffer){
+	int size_data;
 	memcpy(&size_data, buffer->stream, sizeof(int));
-    memcpy(data, buffer->stream + sizeof(int), size_data);
+	return size_data;
+}
+void buffer_read(t_buffer* buffer, void* data) {
+
+    int size_data = read_buffer_tamanio(buffer);
+	memcpy(data, buffer->stream + sizeof(int), size_data);
 
     uint32_t nuevo_size = buffer->size - size_data - sizeof(int);
     void* nuevo_stream = malloc(nuevo_size);

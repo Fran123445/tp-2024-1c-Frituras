@@ -1,3 +1,6 @@
+#ifndef MAIN_H
+#define MAIN_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +19,7 @@
 extern int socket_kernel;
 extern int socket_cpu;
 extern int socket_io;
+extern t_config* config;
 extern t_bitarray* mapa_de_marcos;
 void* escuchar_kernel();
 void* escuchar_cpu();
@@ -36,3 +40,5 @@ typedef struct{
     int tiempo_retardo;
     t_config* config;
 }t_parametros_io;
+
+#endif /*MAIN_H */
