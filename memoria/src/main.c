@@ -3,6 +3,7 @@
 #include "memoriaCPU.h"
 #include "conexiones.h"
 #include "memoriaContigua.h"
+#include "accesoEspacioUsuario.h"
 
 int socket_kernel = 0;
 int socket_cpu = 0;
@@ -42,6 +43,7 @@ void* escuchar_cpu(void* argumento_cpu){
         mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
         resize_proceso(socket_cpu, config,tiempo_retardo);
         acceso_tabla_paginas(socket_cpu,tiempo_retardo);
+        escribir_memoria(socket_cpu,tiempo_retardo,config);
 
     }
 }
