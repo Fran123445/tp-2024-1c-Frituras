@@ -33,6 +33,7 @@ typedef enum {
     //CPU o IO - Memoria
     ACCESO_ESPACIO_USUARIO_LECTURA,
     ACCESO_ESPACIO_USUARIO_ESCRITURA,
+    ESCRITURA_REALIZADA_OK,
     CONEXION_DIAL_FS,
     //Memoria de Instrucciones - CPU
     ENVIO_DE_INSTRUCCIONES,
@@ -71,6 +72,7 @@ void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccio
 void agregar_interfaz_generica_a_paquete(t_paquete* paquete, t_interfaz_generica* interfaz);
 
 int buffer_read_int(t_buffer* buffer);
+void buffer_read(t_buffer* buffer, void* data);
 uint32_t buffer_read_uint32(t_buffer* buffer);
 char* buffer_read_string(t_buffer* buffer);
 PCB* buffer_read_pcb(t_buffer* buffer);

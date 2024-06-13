@@ -14,6 +14,7 @@ t_conexion_escucha* escucha_io;
 t_config* config;
 t_parametros_cpu* params_cpu;
 t_parametros_kernel* params_kernel;
+t_parametros_io* params_io;
 t_bitarray* mapa_de_marcos;
 
 void iniciar_servidores(t_config* config){
@@ -54,6 +55,14 @@ void* escuchar_kernel(void* argumento_kernel){
 
     }
 }
+void* escuchar_io(void* argumento_io){
+    t_parametros_io* params_io = (t_parametros_io*)argumento_io;
+    //Ignorar warning, params_io se usa para los parámetros del hilo sin problema dentro del main :D
+    int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
+    esperar_clientes_IO(escucha_io,tiempo_retardo, config);
+
+}
+
 t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
     char* bitarray_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
     if (!bitarray_memoria_usuario){
@@ -85,8 +94,11 @@ int main(int argc, char *argv[]){
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, (void*)params_kernel);
     pthread_t hilo_cpu;
     pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
+    pthread_t hilo_io;
+    pthread_create(&hilo_io, NULL,escuchar_io,(void*)params_io);
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
+    pthread_join(hilo_io,NULL);
     config_destroy(config);
     free(escucha_cpu);
     free(escucha_kernel);

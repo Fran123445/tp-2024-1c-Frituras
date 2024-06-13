@@ -6,12 +6,20 @@
 #include <utils/server.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include "accesoEspacioUsuario.h"
 #include "conexiones.h"
+#include "main.h"
 
 pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
 t_log* log_memoria_io;
+void* ejecutar_escribir_memoria(void* args){
+    t_parametros_io* parametros = (t_parametros_io*)args;
+    escribir_memoria(parametros->socket,parametros->tiempo_retardo,parametros->config);
+    free(parametros);
+    return NULL;
+}
 
-void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
+void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo, t_config* config){
     log_memoria_io = log_create("memoria-io.log","Memoria", true, LOG_LEVEL_TRACE);
     while (1) {
         int* socket_cliente = malloc(sizeof(int));
@@ -21,16 +29,24 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
         free(socket_cliente);
         break;
        }
-        void (*funcion)(int*);
-
+        void* (*funcion)(void*); //ptero a funcion q toma arg void y devuelve void (ejecutar_escribir_memoria)
+        t_parametros_io* parametros = malloc(sizeof(t_parametros_io));
+        parametros->socket=*socket_cliente;
+        parametros->tiempo_retardo = tiempo_retardo;
+        parametros->config=config;
+        
         switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_STDIN:
-                funcion = &funcion_io;
+            while(1){
+                funcion = ejecutar_escribir_memoria;
                 break;
+            }
             case CONEXION_STDOUT:
-                // A implementar
+            //esta solo lee
                 break;
             case CONEXION_DIAL_FS:
+            funcion = ejecutar_escribir_memoria;
+            //falta que leaa
             break;
 
             default:
@@ -41,12 +57,9 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
         }
         pthread_create(&hilo,
                         NULL,
-                        (void*) funcion,
-                        socket_cliente);
+                        funcion,
+                        parametros);
         pthread_detach(hilo);
     }
        }
        
-void funcion_io(int* socket_cliente){
-    // a implementar
-}

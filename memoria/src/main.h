@@ -30,3 +30,9 @@ typedef struct{
     int socket_kernel;
     int tiempo_retardo;
 }t_parametros_kernel;
+
+typedef struct{
+    int socket;
+    int tiempo_retardo;
+    t_config* config;
+}t_parametros_io;
