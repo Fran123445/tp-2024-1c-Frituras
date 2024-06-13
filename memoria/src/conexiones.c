@@ -20,6 +20,7 @@ void* ejecutar_escribir_memoria(void* args){
 }
 
 void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo, t_config* config){
+
     log_memoria_io = log_create("memoria-io.log","Memoria", true, LOG_LEVEL_TRACE);
     while (1) {
         int* socket_cliente = malloc(sizeof(int));
@@ -38,6 +39,7 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
         switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_STDIN:
             while(1){
+                recibir_operacion(ACCESO_ESPACIO_USUARIO_ESCRITURA);
                 funcion = ejecutar_escribir_memoria;
                 break;
             }

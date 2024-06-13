@@ -32,20 +32,25 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
 }
 
+
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create(argv[2]);
+    t_config* nuevo_config = config_create("entradasalida.config");
     if (nuevo_config == NULL) {
         exit(1);
     }; 
 
     int conexion_kernel = crear_conexion(config_get_string_value(nuevo_config,"IP_KERNEL"), config_get_string_value(nuevo_config, "PUERTO_KERNEL"), IO);
-
+    int conexion_memoria = crear_conexion(config_get_string_value(nuevo_config,"IP_MEMORIA"), config_get_string_value(nuevo_config, "PUERTO_MEMORIA"), IO);
     char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
 
-    if(!strcmp(tipo,"GENERICA")){
-        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
-    }
+
+    t_paquete* paquete1 = crear_paquete(CONEXION_STDIN);
+    t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_ESCRITURA);
+    char* prueba = "Hola";
+    agregar_string_a_paquete(paquete, prueba);
+    enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
 
     return 0;
 }
