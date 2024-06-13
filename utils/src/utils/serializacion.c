@@ -213,7 +213,9 @@ int recibir_operacion(int socket_cliente)
 	op_code cod_op;
 	int tamanioBuffer;
 
-	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0) {
+
+	ssize_t bytes = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
+	if(bytes > 0) {
 		// revisa si el tamaño del buffer es 0, de ser asi lo saca del buffer del socket
 		recv(socket_cliente, &tamanioBuffer, sizeof(int), MSG_PEEK);
 		if(tamanioBuffer == 0) {
@@ -224,7 +226,6 @@ int recibir_operacion(int socket_cliente)
 	}
 	else
 	{
-		close(socket_cliente);
-		return -1;
+		return close(socket_cliente);
 	}
 }
