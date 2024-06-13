@@ -12,6 +12,7 @@
 
 pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
 t_log* log_memoria_io;
+
 void* ejecutar_escribir_memoria(void* args){
     t_parametros_io* parametros = (t_parametros_io*)args;
     escribir_memoria(parametros->socket,parametros->tiempo_retardo,parametros->config);
@@ -30,7 +31,7 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
         free(socket_cliente);
         break;
        }
-        void* (*funcion)(void*); //ptero a funcion q toma arg void y devuelve void (ejecutar_escribir_memoria)
+        void* (*funcion)(void*); //puntero a funcion q toma arg void y devuelve void (ejecutar_escribir_memoria)
         t_parametros_io* parametros = malloc(sizeof(t_parametros_io));
         parametros->socket=*socket_cliente;
         parametros->tiempo_retardo = tiempo_retardo;
@@ -47,7 +48,13 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
             //esta solo lee
                 break;
             case CONEXION_DIAL_FS:
-            funcion = ejecutar_escribir_memoria;
+            op_code code_op = recibir_operacion(*socket_cliente);
+            if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
+                funcion = ejecutar_escribir_memoria;
+            }else if{
+                return; // falta implementar lectura
+            }
+            
             //falta que leaa
             break;
 
