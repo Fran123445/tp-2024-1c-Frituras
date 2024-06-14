@@ -44,7 +44,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
 
     interfaz->nombreInterfaz = buffer_read_string(buffer);
     interfaz->tipo = INTERFAZ_GENERICA;
-    interfaz->cola = queue_create();
+    interfaz->procesosBloqueados = queue_create();
     pthread_mutex_init(&(interfaz->mutex), NULL);
     sem_init(&(interfaz->semaforo), 0, 0);
 
@@ -59,7 +59,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
         sem_wait(&interfaz->semaforo);
 
         pthread_mutex_lock(&interfaz->mutex);
-        t_solicitudIOGenerica* solicitud = queue_pop(interfaz->cola);
+        t_solicitudIOGenerica* solicitud = queue_pop(interfaz->procesosBloqueados);
         pthread_mutex_unlock(&interfaz->mutex);
 
         agregar_int_a_paquete(paquete, solicitud->unidadesTrabajo);

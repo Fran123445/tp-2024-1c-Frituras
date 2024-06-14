@@ -25,7 +25,7 @@ typedef enum {
 typedef struct {
     char* nombreInterfaz;
     tipoInterfaz tipo;
-    t_queue* cola;
+    t_queue* procesosBloqueados;
     pthread_mutex_t mutex;
     sem_t semaforo;
 } t_IOConectado;
