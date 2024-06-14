@@ -83,6 +83,7 @@ int main(int argc, char *argv[]){
 
     config = config_create("memoria.config");
     if (config == NULL){
+    fprintf(stderr, "Error en la configuracion");
         exit(1);
     }
     iniciar_servidores(config);

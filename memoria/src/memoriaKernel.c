@@ -14,11 +14,11 @@ pthread_mutex_t mutex_lista_procesos = PTHREAD_MUTEX_INITIALIZER;
 t_proceso_memoria* creacion_proceso(int socket_kernel, int tiempo_retardo) {
     op_code cod_op = recibir_operacion(socket_kernel);
     usleep(tiempo_retardo * 1000);
-    log_tabla_pags = log_create("Tabla_de_Pags_Memoria.log", "Memoria", true, LOG_LEVEL_INFO);
     if(cod_op == CREACION_PROCESO){
         t_proceso_memoria* proceso = malloc(sizeof(proceso));
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
+        log_tabla_pags = log_create("Tabla_de_Pags_Memoria.log", "Memoria", true, LOG_LEVEL_INFO);
         proceso->pid=pid_proceso;
         char* path_proceso = buffer_read_string(buffer);
         proceso->path= path_proceso;
