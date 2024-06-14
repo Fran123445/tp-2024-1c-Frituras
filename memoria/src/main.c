@@ -50,12 +50,14 @@ void* escuchar_cpu(){
         case ACCESO_ESPACIO_USUARIO_ESCRITURA:
             escribir_memoria(socket_cpu);
             break;
+        default:
+            fprintf(stderr, "COD_OP inválido");
+            break;
         }
     }
 }
 
 void* escuchar_kernel(){
-    //params_kernel usado para pasar los parámetros al hilo sin problema. ignorar warning.
     while(1){
         abrir_archivo_path(socket_kernel);
         finalizar_proceso(socket_kernel);
