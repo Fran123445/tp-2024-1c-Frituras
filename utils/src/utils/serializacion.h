@@ -18,15 +18,20 @@ typedef enum {
     // Kernel - CPU
     ENVIO_PCB,
     //Bidireccional Kernel - CPU
-    INTERRUPCION,
+    FINALIZAR_PROCESO,
+    FIN_DE_Q,
     // CPU - KERNEL
     INSTRUCCION_EXIT,
     INSTRUCCION_WAIT,
     INSTRUCCION_SIGNAL,
     ENVIAR_IO_GEN_SLEEP,
+    ENVIAR_IO_STDIN_READ,
+    ENVIAR_IO_STDOUT_WRITE,
     // CPU - Memoria
     ENVIO_PC,
     ENVIO_RESIZE,
+    OUT_OF_MEMORY,
+    RESIZE_ACEPTADO,
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
