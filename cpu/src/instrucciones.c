@@ -62,6 +62,16 @@ void enviar_a_memoria_para_escritura(uint32_t direccion_logica, void* datos_a_es
     eliminar_paquete(paquete);
 }
 
+void enviar_a_kernel(op_code cod_op,char* interfaz,uint32_t direccion_logica,uint32_t tamaño){
+    uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+    t_paquete* paquete = crear_paquete(cod_op);
+    agregar_PCB_a_paquete(paquete,pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+    agregar_uint32_a_paquete(paquete, direccion_fisica);
+    agregar_uint32_a_paquete(paquete, tamaño);
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
@@ -208,36 +218,26 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
 
     uint32_t direccionLogicaInicial = *(uint32_t*)reg_direccion;
 
-    if(tamanio_a_leer == 4){ // Hay que leer 4 bytes (Registros de 4 bytes)
     uint32_t pagina_inicial = obtener_numero_pagina(direccionLogicaInicial);
     uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_leer-1); //Porque, por ej, si son 4 bytes, lee del 30 al 33 (o sea, es leyendo el 30 incluído)
 
-        if(pagina_inicial == pagina_final){ // Está en la misma página
-            void* dato_leido = contenido_obtenido_de_memoria(direccionLogicaInicial, 4);
-            memcpy(reg_datos, dato_leido, 4);
-        }
-        else{ // El contenido está en más de 1 página
-            uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + 1; 
-            int bytes_leidos = 0;
-            
-            for(int i=0; i<cant_paginas_a_leer; i++){
-                int direccion_logica_actual = direccionLogicaInicial + bytes_leidos;
-
-                int cant_bytes_a_leer_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina); // En realidad calcula la cantidad de bytes restantes en la página desde la posición actual hasta el final de la página.
-                if (cant_bytes_a_leer_pagina > (tamanio_a_leer - bytes_leidos)) { // Ajustar la cantidad de bytes a leer si es mayor que la cantidad restante (esto es para la última página, debido a lo que calcula en realidad la cuenta anterior)
-                    cant_bytes_a_leer_pagina = tamanio_a_leer - bytes_leidos;
-                }
-
-                void* dato_leido1 = contenido_obtenido_de_memoria(direccion_logica_actual, cant_bytes_a_leer_pagina);
-                memcpy(reg_datos + bytes_leidos, dato_leido1, cant_bytes_a_leer_pagina);
-                bytes_leidos += cant_bytes_a_leer_pagina
-            }
-        }
+    if(pagina_inicial == pagina_final){ // Está en la misma página
+        void* dato_leido = contenido_obtenido_de_memoria(direccionLogicaInicial, tamanio_a_escribir);
+        memcpy(reg_datos, dato_leido, tamanio_a_escribir);
     }
-    else{ // Hay que leer 1 byte (AX,BX,CX,DX)
-        void* dato_leido = contenido_obtenido_de_memoria(direccionLogicaInicial, 1);
-        memcpy(reg_datos, dato_leido, 1);
-    }
+    else{ // El contenido está en más de 1 página
+        uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + 1; 
+        int bytes_leidos = 0;
+
+        for(int i=0; i<cant_paginas_a_leer; i++){
+            int direccion_logica_actual = direccionLogicaInicial + bytes_leidos;                
+            int cant_bytes_a_leer_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina); // En realidad calcula la cantidad de bytes restantes en la página desde la posición actual hasta el final de la página.        if (cant_bytes_a_leer_pagina > (tamanio_a_leer - bytes_leidos)) { // Ajustar la cantidad de bytes a leer si es mayor que la cantidad restante (esto es para la última página, debido a lo que calcula en realidad la cuenta anterior)
+            ant_bytes_a_leer_pagina = tamanio_a_leer - bytes_leidos;
+        }
+        void* dato_leido1 = contenido_obtenido_de_memoria(direccion_logica_actual, cant_bytes_a_leer_pagina);
+        memcpy(reg_datos + bytes_leidos, dato_leido1, cant_bytes_a_leer_pagina);
+        bytes_leidos += cant_bytes_a_leer_pagina;
+        }
 }
 
 void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
@@ -249,58 +249,48 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
 
     uint32_t direccionLogicaInicial = *(uint32_t*)reg_direccion;
 
-    if(tamanio_a_escribir == 4){ 
     uint32_t pagina_inicial = obtener_numero_pagina(direccionLogicaInicial);
     uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_escribir-1); 
 
-        if(pagina_inicial == pagina_final){ 
-            enviar_a_memoria_para_escritura(direccionLogicaInicial, reg_datos, 4)
-        }
-        else{ 
-            uint32_t cant_paginas_a_escribir = pagina_final - pagina_inicial + 1; 
-            int bytes_escritos = 0;
-            
-            for(int i=0; i<cant_paginas_a_escribir; i++){
-                int direccion_logica_actual = direccionLogicaInicial + bytes_escritos;
-
-                int cant_bytes_a_escribir_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina);
-                if (cant_bytes_a_escribir_pagina > (tamanio_a_escribir - bytes_escritos)) { 
-                    cant_bytes_a_escribir_pagina = tamanio_a_escribir - bytes_escritos;
-                }
-
-                enviar_a_memoria_para_escritura(direccion_logica_actual, reg_datos + bytes_escritos, cant_bytes_a_escribir_pagina);
-                bytes_escritos += cant_bytes_a_escribir_pagina
-            }
-        }
+    if(pagina_inicial == pagina_final){ 
+        enviar_a_memoria_para_escritura(direccionLogicaInicial, reg_datos, tamanio_a_escribir);
     }
     else{ 
-        enviar_a_memoria_para_escritura(direccionLogicaInicial, reg_datos, 1);
+        uint32_t cant_paginas_a_escribir = pagina_final - pagina_inicial + 1; 
+        int bytes_escritos = 0;
+
+        for(int i=0; i<cant_paginas_a_escribir; i++){
+            int direccion_logica_actual = direccionLogicaInicial + bytes_escritos;
+            int cant_bytes_a_escribir_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina);
+            if (cant_bytes_a_escribir_pagina > (tamanio_a_escribir - bytes_escritos)) { 
+                cant_bytes_a_escribir_pagina = tamanio_a_escribir - bytes_escritos;
+            }
+            enviar_a_memoria_para_escritura(direccion_logica_actual, reg_datos + bytes_escritos, cant_bytes_a_escribir_pagina);
+            bytes_escritos += cant_bytes_a_escribir_pagina;
+        }
     }
 }
 
-
 void COPY_STRING(uint32_t tam) {
-    uint32_t *puntero_si = obtenerRegistro(SI);
-    uint32_t *puntero_di = obtenerRegistro(DI);
+    uint32_t direccion_logica_si = *(uint32_t*)obtenerRegistro(SI);
+    uint32_t direccion_logica_di = *(uint32_t*)obtenerRegistro(DI);
 
     //verifico si los datos a pasar van a ocupar mas de una pagina
     if (tam > tamanio_pagina) {
         uint32_t bytes_restantes = tam;
-        uint32_t direccion_actual_si = *puntero_si;
-        uint32_t direccion_actual_di = *puntero_di;
 
         // Copiar los datos por partes a memoria
         while (bytes_restantes > 0) {
             // Calcular la cantidad de bytes a copiar en esta parte
             uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
 
-            void* datos_de_si = contenido_obtenido_de_memoria(direccion_actual_si, tam_parte);
+            void* datos_de_si = contenido_obtenido_de_memoria(direccion_logica_si, tam_parte);
 
-            enviar_a_memoria_para_escritura(direccion_actual_di, datos_de_si, tam_parte);
+            enviar_a_memoria_para_escritura(direccion_logica_di, datos_de_si, tam_parte);
 
             bytes_restantes -= tam_parte;
-            direccion_actual_si += tam_parte;
-            direccion_actual_di += tam_parte;
+            direccion_logica_si += tam_parte;
+            direccion_logica_di += tam_parte;
         }
     } else {
         // Si entra todo en una sola pagina
@@ -309,6 +299,65 @@ void COPY_STRING(uint32_t tam) {
     }
 }
 
+void IO_STDIN_READ(char* interfaz,registrosCPU registroDireccion, registrosCPU registroTamaño){
+
+    void *tamaño = obtenerRegistro(registroTamaño);
+    void *reg_direccion = obtenerRegistro(registroDireccion);
+
+    uint32_t direccion_logica = *reg_direccion;
+    uint32_t tam = *tamaño;
+    
+    if(tam > tamanio_pagina) {
+        uint32_t bytes_restantes = tam;
+
+        // Copiar los datos por partes a memoria
+        while (bytes_restantes > 0) {
+            // Calcular la cantidad de bytes a copiar en esta parte
+            uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
+
+            enviar_a_kernel(ENVIAR_IO_STDIN_READ,interfaz,direccion_logica,tam_parte);
+
+            bytes_restantes -= tam_parte;
+            direccion_logica += tam_parte;
+        }
+    } else {
+        enviar_a_kernel(ENVIAR_IO_STDIN_READ,interfaz,direccion_logica,tam);
+    }
+
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
+
+void IO_STDOUT_WRITE(char* interfaz,registrosCPU registroDireccion, registrosCPU registroTamaño){
+
+    void *tamaño = obtenerRegistro(registroTamaño);
+    void *reg_direccion = obtenerRegistro(registroDireccion);
+
+    uint32_t direccion_logica = *reg_direccion;
+    uint32_t tam = *tamaño;
+
+    if(tam > tamanio_pagina) {
+        uint32_t bytes_restantes = tam;
+
+        // Copiar los datos por partes a memoria
+        while (bytes_restantes > 0) {
+            // Calcular la cantidad de bytes a copiar en esta parte
+            uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
+
+            enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE,interfaz,direccion_logica,tam_parte);
+
+            bytes_restantes -= tam_parte;
+            direccion_logica += tam_parte;
+        }
+    } else {
+        enviar_a_kernel(ENVIAR_IO_STDIN_READ,interfaz,direccion_logica,tam);
+    }
+
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
 
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);

@@ -10,7 +10,11 @@ void SUM(registrosCPU registroDestino, registrosCPU registroOrigen);
 void SUB(registrosCPU registroDestino, registrosCPU registroOrigen);
 void JNZ(registrosCPU registro, int instruccion);
 void IO_GEN_SLEEP(char* interfaz,int unidades_trabajo);
+void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion);
+void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos);
 void COPY_STRING(uint32_t tam);
+void IO_STDIN_READ(char* interfaz,registrosCPU registroDireccion, registrosCPU registroTamaño);
+void IO_STDOUT_WRITE(char* interfaz,registrosCPU registroDireccion, registrosCPU registroTamaño);
 void EXIT();
 
 

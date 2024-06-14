@@ -235,8 +235,8 @@ int check_interrupt() {
     pthread_mutex_lock(&mutexInterrupt);
     if (hay_interrupcion) {
         hay_interrupcion = 0;
-        enviar_pcb(INTERRUPCION);
         pthread_mutex_unlock(&mutexInterrupt);
+        enviar_pcb(cod_op_int);
         return 1;
     } else {
         pthread_mutex_unlock(&mutexInterrupt);
@@ -255,11 +255,17 @@ void realizar_ciclo_de_instruccion(){
         if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
             break;
         }
+        if(instruccion_a_ejecutar->tipo == iIO_STDIN_READ){
+            break;
+        }
+        if(instruccion_a_ejecutar->tipo == iIO_STDOUT_WRITE){
+            break;
+        }
         if (instruccion_a_ejecutar->tipo == iEXIT){
             break;
         }
         if (check_interrupt()) {
-            enviar_pcb(INTERRUPCION);
+            //enviar_pcb(cod_op_int); este no va, lo dejo por las dudas pero enviar el pcb ya lo hace check interrupt cuando hay una interruccion
             break;
         }
     }
