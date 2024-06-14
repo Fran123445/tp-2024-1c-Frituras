@@ -17,7 +17,7 @@ void enviarAColaPrioritaria(PCB* proceso) {
     pthread_mutex_unlock(&mutexColaPrioritaria);
 
     if (!ultimoPrioritario) {
-        enviarInterrupcion(pidProcesoEnEjecucion);
+        enviarInterrupcion(pidProcesoEnEjecucion, FIN_DE_Q); // habria que o crear un opcode nuevo o cambiarle el nombre a ese
         ultimoPrioritario = 1;
     }
 }

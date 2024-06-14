@@ -27,7 +27,8 @@ typedef struct {
 
 extern t_log* logger;
 
-extern int socketMemoria;;
+extern int socketMemoria;
+extern int socketCPUInterrupt;
 
 extern int quantumInicial;
 
@@ -49,6 +50,9 @@ extern t_list* listadoProcesos;
 extern int siguientePID;
 
 void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola);
+
+// Envia una interrupcion a CPU
+void enviarInterrupcion(int PID, op_code motivo);
 
 // Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria
 void vaciarExit();

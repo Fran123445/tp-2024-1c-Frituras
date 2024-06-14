@@ -26,6 +26,13 @@ void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola) {
     free(string);
 }
 
+void enviarInterrupcion(int PID, op_code motivo) {
+    t_paquete* paquete = crear_paquete(motivo);
+    agregar_int_a_paquete(paquete, PID);
+    enviar_paquete(paquete, socketCPUInterrupt);
+    eliminar_paquete(paquete);
+}
+
 char* enumEstadoAString(estado_proceso estado) {
     char* string;
 

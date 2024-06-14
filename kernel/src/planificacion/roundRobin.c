@@ -2,16 +2,9 @@
 
 bool procesoInterrumpido;
 
-void enviarInterrupcion(int PID) {
-    t_paquete* paquete = crear_paquete(FIN_DE_Q);
-    agregar_int_a_paquete(paquete, PID);
-    enviar_paquete(paquete, socketCPUInterrupt);
-    eliminar_paquete(paquete);
-}
-
 void esperarQuantumCompleto(PCB* proceso) {
     usleep(proceso->quantum*1000);
-    enviarInterrupcion(proceso->PID);
+    enviarInterrupcion(proceso->PID, FIN_DE_Q);
 
     procesoInterrumpido = 1;
 }
