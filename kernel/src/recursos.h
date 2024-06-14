@@ -17,8 +17,6 @@ typedef struct {
     t_queue* procesosBloqueados;
 } t_recurso;
 
-extern t_list* listaRecursos;
-
 // Lee los recursos del archivo de configuracion e instancia para cada uno
 // un t_recurso
 void leerRecursosDeConfig(t_config* config);

@@ -107,6 +107,10 @@ void vaciarExit() {
                 motivo = "INVALID RESOURCE"; break;
             case INVALID_INTERFACE:
                 motivo = "INVALID INTERFACE"; break;
+            case OOM:
+                motivo = "OUT OF MEMORY"; break;
+            case INTERRUPTED_BY_USER:
+                motivo = "INTERRUPTED BY USER"; break;
         }
 
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
@@ -132,6 +136,7 @@ t_queue* enumEstadoACola(int estado) {
             return NULL;
     }
 }
+
 
 PCB* hallarPCB(int PID) {
     bool _mismoPID(PCB* proceso) {
@@ -199,6 +204,59 @@ void iniciarProceso(char* path) {
     sem_post(&procesosEnNew);
 }
 
+bool sacarDeCola(t_queue* cola, int PID) {
+    PCB* proceso = NULL;
+    bool _mismoPID(PCB* pcb) {
+        return proceso->PID == PID;
+    };
+
+    proceso = list_remove_by_condition(cola->elements, (bool (*)(void*)) _mismoPID);
+
+    return proceso != NULL;
+}
+
+void sacarProcesoBloqueado(int PID) {
+    // quedo bastante fea la cosa pero es lo que hay
+    int hallado = 0;
+
+    void _sacarDeColaInterfaz(t_IOConectado* interfaz) {
+        if (hallado) return;
+        hallado = sacarDeCola(interfaz->procesosBloqueados, PID);
+    };
+
+    void _sacarDeColaRecuros(t_recurso* recurso) {
+        if (hallado) return;
+        hallado = sacarDeCola(recurso->procesosBloqueados, PID);
+    };
+
+    list_iterate(interfacesConectadas, (void *) _sacarDeColaInterfaz);
+    if (hallado) return;
+    list_iterate(listaRecursos, (void *) _sacarDeColaRecuros);
+}
+
 void finalizarProceso(int PID) {
-    /*  eventualmente se rehará */
+    pthread_mutex_lock(&mutexPlanificador);
+
+    PCB* proceso = hallarPCB(PID);
+    
+    switch(proceso->estado) {
+        case ESTADO_EXEC:
+            enviarInterrupcion(PID, FINALIZAR_PROCESO);
+            pthread_mutex_unlock(&mutexPlanificador);
+            return;
+        case ESTADO_BLOCKED:
+            sacarProcesoBloqueado(PID);
+            break;
+        case ESTADO_NEW:
+            sacarDeCola(colaNew, PID);
+            break;
+        case ESTADO_READY:
+            sacarDeCola(colaReady, PID);
+            break;
+        default:
+            break;
+    }
+
+    enviarAExit(proceso, INTERRUPTED_BY_USER);
+    pthread_mutex_unlock(&mutexPlanificador);
 }

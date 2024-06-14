@@ -13,6 +13,7 @@
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
 #include <interfaces.h>
+#include <recursos.h>
 typedef enum {
     SUCCESS,
     INVALID_RESOURCE,
@@ -46,6 +47,7 @@ extern t_queue* colaReady;
 extern t_queue* colaExit;
 extern t_list* interfacesConectadas;
 extern t_list* listadoProcesos;
+extern t_list* listaRecursos;
 
 extern int siguientePID;
 
