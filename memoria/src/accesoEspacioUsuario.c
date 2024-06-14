@@ -4,8 +4,7 @@ pthread_mutex_t mutex_memoria_contigua = PTHREAD_MUTEX_INITIALIZER;
 
 void* escribir_memoria(int socket){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
-    op_code cod_op = recibir_operacion(socket);
-    if(cod_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
+    
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
         uint32_t tamanio_a_escribir = buffer_read_uint32(buffer);
@@ -37,13 +36,11 @@ void* escribir_memoria(int socket){
         free(valor_a_escribir);
         liberar_buffer(buffer);
         eliminar_paquete(paquete);
-    }
 }
 
 void* leer_memoria(int socket){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
-    op_code cod_op = recibir_operacion(socket);
-    if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
+
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
         uint32_t tamanio_a_leer = buffer_read_uint32(buffer);
@@ -69,5 +66,4 @@ void* leer_memoria(int socket){
         free(contenido_leido);
         liberar_buffer(buffer);
         eliminar_paquete(paquete);
-    }
 }

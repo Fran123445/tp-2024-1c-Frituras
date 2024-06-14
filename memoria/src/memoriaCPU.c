@@ -133,8 +133,6 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu){
 }
 
 void* resize_proceso(int socket_cpu){
-    op_code cod_op = recibir_operacion(socket_cpu);
-    if (cod_op == ENVIO_RESIZE){
         t_buffer* buffer = recibir_buffer(socket_cpu);
         int pid = buffer_read_int(buffer);
         int tamanio_nuevo = buffer_read_int(buffer);
@@ -180,12 +178,9 @@ void* resize_proceso(int socket_cpu){
         eliminar_paquete(paquete);
         log_destroy(log_resize);
         liberar_buffer(buffer); 
-    }
 }
 
 void* acceso_tabla_paginas(int socket_cpu){
-    op_code cod_op = recibir_operacion(socket_cpu);
-        if(cod_op == ACCESO_TABLAS_PAGINAS){
             t_buffer* buffer = recibir_buffer(socket_cpu);
             int pid = buffer_read_int(buffer);
             int pagina_a_buscar = buffer_read_int(buffer);
@@ -208,5 +203,4 @@ void* acceso_tabla_paginas(int socket_cpu){
             enviar_paquete(paquete, socket_cpu);
             liberar_buffer(buffer);
             eliminar_paquete(paquete);
-        }
 }

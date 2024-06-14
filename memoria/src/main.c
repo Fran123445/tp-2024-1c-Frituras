@@ -33,28 +33,24 @@ void iniciar_servidores(t_config* config){
 
 void* escuchar_cpu(){
     while(1){
-        mandar_instruccion_cpu(socket_kernel, socket_cpu);
-
-        // Hilo para el resize
-        pthread_t hilo_resize;
-        pthread_create(&hilo_resize, NULL, resize_proceso, (void*)socket_cpu);
-
-        // Hilo para acceso tabla paginas
-        pthread_t hilo_acceso_tabla_paginas;
-        pthread_create(&hilo_acceso_tabla_paginas, NULL, acceso_tabla_paginas, (void*)socket_cpu);
-
-        // Hilo para escritura
-        pthread_t hilo_escribir_memoria;
-        pthread_create(&hilo_escribir_memoria, NULL, escribir_memoria, (void*)socket_cpu);
-
-        // Hilo para lectura
-        pthread_t hilo_leer_memoria;
-        pthread_create(&hilo_escribir_memoria, NULL, leer_memoria, (void*)socket_cpu);
-
-        pthread_join(hilo_resize, NULL);
-        pthread_join(hilo_acceso_tabla_paginas, NULL);
-        pthread_join(hilo_escribir_memoria,NULL);
-        pthread_join(hilo_leer_memoria,NULL);
+    op_code cod_op = recibir_operacion(socket_cpu);
+    switch (cod_op) {
+        case ENVIO_DE_INSTRUCCIONES:
+            mandar_instruccion_cpu(socket_kernel, socket_cpu);
+            break;
+        case ENVIO_RESIZE:
+            resize_proceso(socket_cpu);
+            break;
+        case ACCESO_TABLAS_PAGINAS:
+            acceso_tabla_paginas(socket_cpu);
+            break;
+        case ACCESO_ESPACIO_USUARIO_LECTURA:
+            leer_memoria(socket_cpu);
+            break;
+        case ACCESO_ESPACIO_USUARIO_ESCRITURA:
+            escribir_memoria(socket_cpu);
+            break;
+        }
     }
 }
 
@@ -119,7 +115,7 @@ int main(int argc, char *argv[]){
     pthread_create(&hilo_cpu, NULL, escuchar_cpu, NULL);
 
     pthread_t hilo_io;
-    pthread_create(&hilo_io, NULL,escuchar_io, NULL);
+    pthread_create(&hilo_io, NULL, escuchar_io, NULL);
 
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
