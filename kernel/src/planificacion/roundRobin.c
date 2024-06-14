@@ -65,7 +65,7 @@ void signalRR(PCB* proceso, t_buffer* buffer) {
 }
 
 void interrupcionRR(PCB* proceso) {
-    sem_post(&finalizarQuantum);
+    cortarQuantum();
     enviarAReady(proceso);
     cpuLibre = 1;
 }
