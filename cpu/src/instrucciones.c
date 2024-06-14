@@ -283,35 +283,33 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
     }
 }
 
-void COPY_STRING(uint32_t tam) {
-    uint32_t direccion_logica_si = *(uint32_t*)obtenerRegistro(SI);
-    uint32_t direccion_logica_di = *(uint32_t*)obtenerRegistro(DI);
+void COPY_STRING(uint32_t tam){
+    uint32_t direccion_logica_si = *(uint32_t *)obtenerRegistro(SI);
+    uint32_t direccion_logica_di = *(uint32_t *)obtenerRegistro(DI);
 
-    //verifico si los datos a pasar van a ocupar mas de una pagina
-    if (tam > tamanio_pagina) {
-        uint32_t bytes_restantes = tam;
+    if (tam > tamanio_pagina){ // CHEQUEA SI LOS DATOS ESTAN Y HAY QUE ESCRIBIRLOS EN MAS DE UNA PAGINA
+        
+        uint32_t bytes_a_escribir = tam;
 
-        // Copiar los datos por partes a memoria
-        while (bytes_restantes > 0) {
-            // Calcular la cantidad de bytes a copiar en esta parte
-            uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
+        while (bytes_a_escribir > 0){
+            uint32_t tam_a_escribir = (bytes_a_escribir > tamanio_pagina) ? tamanio_pagina : bytes_a_escribir;
 
             uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
-            void* datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam_parte);
+            void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam_a_escribir);
             log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, *datos_de_si);
 
             uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
-            enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam_parte);
+            enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam_a_escribir);
             log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, datos_de_si);
 
-            bytes_restantes -= tam_parte;
-            direccion_logica_si += tam_parte;
-            direccion_logica_di += tam_parte;
+            bytes_a_escribir -= tam_a_escribir;
+            direccion_logica_si += tam_a_escribir;
+            direccion_logica_di += tam_a_escribir;
         }
-    } else {
-        // Si entra todo en una sola pagina
+    }
+    else{// Si entra todo en una sola pagina
         uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
-        void* datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam);
+        void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam);
         log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, datos_de_si);
 
         uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
@@ -320,31 +318,29 @@ void COPY_STRING(uint32_t tam) {
     }
 }
 
-void IO_STDIN_READ(char* interfaz,registrosCPU registroDireccion, registrosCPU registroTamaño){
+void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
 
-    void *tamaño = obtenerRegistro(registroTamaño);
-    void *reg_direccion = obtenerRegistro(registroDireccion);
-
-    uint32_t direccion_logica = *(uint32_t*)reg_direccion;
-    uint32_t tam = *tamaño;
+    uint32_t tam = *(uint32_t *)obtenerRegistro(registroTamaño);
+    uint32_t direccion_logica = *(uint32_t *)obtenerRegistro(registroDireccion);
     
-    if(tam > tamanio_pagina) {
-        uint32_t bytes_restantes = tam;
+
+    if (tam > tamanio_pagina){
+        uint32_t bytes_a_enviar = tam;
 
         // Copiar los datos por partes a memoria
-        while (bytes_restantes > 0) {
-            // Calcular la cantidad de bytes a copiar en esta parte
-            uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
+        while (bytes_a_enviar > 0){
+            uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
 
             uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-            enviar_a_kernel(ENVIAR_IO_STDIN_READ,interfaz,direccion_fisica,tam_parte);
+            enviar_a_kernel(ENVIAR_IO_STDIN_READ, interfaz, direccion_fisica, cant_de_bytes_a_enviar);
 
-            bytes_restantes -= tam_parte;
-            direccion_logica += tam_parte;
+            bytes_a_enviar -= cant_de_bytes_a_enviar;
+            direccion_logica += cant_de_bytes_a_enviar;
         }
-    } else {
+    }
+    else{
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-        enviar_a_kernel(ENVIAR_IO_STDIN_READ,interfaz,direccion_fisica,tam);
+        enviar_a_kernel(ENVIAR_IO_STDIN_READ, interfaz, direccion_fisica, tam);
     }
 
     pthread_mutex_lock(&mutexInterrupt);
@@ -352,7 +348,7 @@ void IO_STDIN_READ(char* interfaz,registrosCPU registroDireccion, registrosCPU r
     pthread_mutex_unlock(&mutexInterrupt);
 }
 
-void IO_STDOUT_WRITE(char* interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
+void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
 
     void *tamaño = obtenerRegistro(registroTamaño);
     void *reg_direccion = obtenerRegistro(registroDireccion);
@@ -360,23 +356,24 @@ void IO_STDOUT_WRITE(char* interfaz, registrosCPU registroDireccion, registrosCP
     uint32_t direccion_logica = *reg_direccion;
     uint32_t tam = *tamaño;
 
-    if(tam > tamanio_pagina) {
-        uint32_t bytes_restantes = tam;
+    if (tam > tamanio_pagina){
+        uint32_t bytes_a_enviar = tam;
 
         // Copiar los datos por partes a memoria
-        while (bytes_restantes > 0) {
+        while (bytes_a_enviar > 0){
             // Calcular la cantidad de bytes a copiar en esta parte
-            uint32_t tam_parte = (bytes_restantes > tamanio_pagina) ? tamanio_pagina : bytes_restantes;
+            uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
 
             uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-            enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE,interfaz,direccion_fisica,tam_parte);
+            enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE, interfaz, direccion_fisica, cant_de_bytes_a_enviar);
 
-            bytes_restantes -= tam_parte;
-            direccion_logica += tam_parte;
+            bytes_a_enviar -= cant_de_bytes_a_enviar;
+            direccion_logica += cant_de_bytes_a_enviar;
         }
-    } else {
+    }
+    else{
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-        enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE,interfaz,direccion_fisica,tam);
+        enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE, interfaz, direccion_fisica, tam);
     }
 
     pthread_mutex_lock(&mutexInterrupt);
