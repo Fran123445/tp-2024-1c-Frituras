@@ -27,6 +27,7 @@ void pedir_contenido_memoria(uint32_t direccion_fisica, uint32_t tam){
     t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_LECTURA);
     agregar_uint32_a_paquete(paquete, direccion_fisica);
     agregar_uint32_a_paquete(paquete, tam);
+    agregar_int_a_paquete(paquete, pcb->PID);
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
@@ -55,6 +56,7 @@ void enviar_a_memoria_para_escritura(uint32_t direccion_fisica, void* datos_a_es
     t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_ESCRITURA);
     agregar_uint32_a_paquete(paquete, direccion_fisica);
     agregar_uint32_a_paquete(paquete, tam);
+    agregar_int_a_paquete(paquete, pcb->PID);
     agregar_a_paquete(paquete, datos_a_escribir,tam);
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
