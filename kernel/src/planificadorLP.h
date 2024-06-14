@@ -16,9 +16,10 @@
 typedef enum {
     SUCCESS,
     INVALID_RESOURCE,
-    INVALID_WRITE
+    INVALID_INTERFACE,
+    OOM,
+    INTERRUPTED_BY_USER
 } motivo_exit;
-
 typedef struct {
     PCB* pcb;
     motivo_exit motivo;

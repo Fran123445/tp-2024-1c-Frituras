@@ -69,7 +69,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
         op = recibir_operacion(*socket_cliente);
         if (op <= 0) {
             log_error(logger, "La operación de IO genérica no se pudo completar exitosamente");
-            enviarAExit(solicitud->proceso, INVALID_WRITE); // no se si es el motivo indicado, otra vez
+            enviarAExit(solicitud->proceso, INVALID_INTERFACE);
             free(solicitud);
             break;
         }

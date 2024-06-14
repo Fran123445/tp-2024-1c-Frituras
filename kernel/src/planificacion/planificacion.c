@@ -114,7 +114,7 @@ void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
 
         sem_post(&interfaz->semaforo);
     } else {
-        enviarAExit(proceso, INVALID_WRITE); // no se si seria el motivo mas indicado
+        enviarAExit(proceso, INVALID_INTERFACE);
     }
 
     free(infoInterfaz->nombre);

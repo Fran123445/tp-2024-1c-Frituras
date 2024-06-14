@@ -90,7 +90,7 @@ void vaciarExit() {
 
         t_paquete* paquete = crear_paquete(FIN_PROCESO);
         agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
-        enviar_paquete(paquete, socketMemoria);
+        //enviar_paquete(paquete, socketMemoria);
         eliminar_paquete(paquete);
 
         switch(procesoAFinalizar->motivo) {
@@ -98,8 +98,8 @@ void vaciarExit() {
                 motivo = "SUCCESS"; break;
             case INVALID_RESOURCE:
                 motivo = "INVALID RESOURCE"; break;
-            case INVALID_WRITE:
-                motivo = "INVALID WRITE"; break;
+            case INVALID_INTERFACE:
+                motivo = "INVALID INTERFACE"; break;
         }
 
         log_info(logger, "Finaliza el proceso %d - Motivo: %s", procesoAFinalizar->pcb->PID, motivo);
