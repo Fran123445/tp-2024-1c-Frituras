@@ -39,8 +39,16 @@ void iniciarInterfazSTDIN(int socket, t_config* config, char* nombre) {
 
     char* texto;
     printf("Ingrese texto: ");
-    fgets(texto, sizeof(texto), stdin);
+    if (fgets(texto, sizeof(texto), stdin) == NULL) {
+        fprintf(stderr, "Error texto usuario\n");
+        exit(-1);
+    }
+
     int texto_len = strlen(texto);
+
+    if (texto_len > 0 && texto[texto_len - 1] == '\n') {
+        texto[--texto_len] = '\0';  // Elimina el salto de linea final (si existe)
+    }
 
     int enviado = 0;
 
@@ -81,34 +89,22 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
     int conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, IO);
     
     char* texto_completo = NULL;
-    int texto_completo_len = 0;
 
-    while (1) {
-        ssize_t reciv = recibir_operacion(socket);
+    ssize_t reciv = recibir_operacion(socket);
 
-        if (reciv < 0) {
-            exit(-1);
-        }
+    if (reciv < 0) {
+        exit(-1);
+    }
+    t_buffer* buffer = recibir_buffer(socket);
+    uint32_t direccion_fisica = buffer_read_uint32(buffer);
+    uint32_t tam = buffer_read_uint32(buffer);
 
-        t_buffer* buffer = recibir_buffer(socket);
-        uint32_t direccion_fisica = buffer_read_uint32(buffer);
-        uint32_t tam = buffer_read_uint32(buffer);
-
-        char* texto_pagina = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam);
+    texto_completo = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam);
             
-        // Concatenar la página recibida al texto completo
-        texto_completo = realloc(texto_completo, texto_completo_len + strlen(texto_pagina) + 1);
-        strcat(texto_completo, texto_pagina);
-        texto_completo_len += strlen(texto_pagina);
 
-        // Liberar recursos
-        free(texto_pagina);
-
-        eliminar_buffer(buffer);
-
-    }   
     printf("STDOUT: %s\n", texto_completo);
     free(texto_completo);
+    
     t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
     enviar_paquete(paquete ,socket);
     eliminar_paquete(paquete);
