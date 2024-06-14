@@ -18,7 +18,7 @@
 #include "mmu.h"
 #include "algoritmosSustitucion.h"
 
-extern t_log* log_ciclo;
+extern t_log* log_cpu;
 extern PCB* pcb;
 extern int socket_memoria;
 extern int socket_kernel_d;

@@ -8,7 +8,7 @@ int socket_kernel_i;
 int socket_servidor_d;
 int socket_servidor_i;
 
-t_log* log_ciclo;
+t_log* log_cpu;
 
 volatile int hay_interrupcion = 0;
 
