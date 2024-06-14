@@ -26,6 +26,7 @@ typedef enum {
     ENVIAR_IO_GEN_SLEEP,
     // CPU - Memoria
     ENVIO_PC,
+    ENVIO_TAMANIO_PAGINA,
     ENVIO_RESIZE,
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path

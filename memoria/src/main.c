@@ -29,8 +29,6 @@ void iniciar_servidores(t_config* config){
 
     socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
     socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
-
-
 }
 
 void* escuchar_cpu(){
@@ -87,6 +85,13 @@ t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
     return mapa_de_marcos;
 }
 
+void enviar_tamanio_pagina_a_cpu(){
+    t_paquete* paquete = crear_paquete(ENVIO_TAMANIO_PAGINA);
+    agregar_int_a_paquete(paquete, tam_pagina);
+    enviar_paquete(paquete, socket_cpu);
+    eliminar_paquete(paquete);
+}
+
 int main(int argc, char *argv[]){
     lista_de_procesos = list_create();
 
@@ -95,6 +100,7 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "Error en la configuracion");
         exit(1);
     }
+
     iniciar_servidores(config);
     memoria_contigua = iniciar_memoria(config);
     int cant_marcos = calcular_marcos(config);
@@ -103,6 +109,8 @@ int main(int argc, char *argv[]){
     tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
     tam_pagina = config_get_int_value(config, "TAM_PAGINA");
+
+    enviar_tamanio_pagina_a_cpu();
 
     pthread_t hilo_kernel;
     pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
