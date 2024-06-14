@@ -19,26 +19,13 @@
 extern int socket_kernel;
 extern int socket_cpu;
 extern int socket_io;
+extern int tiempo_retardo;
+extern int tam_memoria;
+extern int tam_pagina; 
 extern t_config* config;
 extern t_bitarray* mapa_de_marcos;
 void* escuchar_kernel();
 void* escuchar_cpu();
 
-typedef struct{
-    int socket_kernel;
-    int socket_cpu;
-    int tiempo_retardo;
-}t_parametros_cpu;
-
-typedef struct{
-    int socket_kernel;
-    int tiempo_retardo;
-}t_parametros_kernel;
-
-typedef struct{
-    int socket;
-    int tiempo_retardo;
-    t_config* config;
-}t_parametros_io;
 
 #endif /*MAIN_H */

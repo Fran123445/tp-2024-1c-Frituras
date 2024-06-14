@@ -16,4 +16,5 @@
 #include "main.h"
 
 extern pthread_mutex_t mutex_memoria_contigua;
-void escribir_memoria(int socket, int tiempo_retardo, t_config* config);
+void* escribir_memoria(int socket);
+void* leer_memoria(int socket);

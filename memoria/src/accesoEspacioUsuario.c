@@ -2,7 +2,7 @@
 
 pthread_mutex_t mutex_memoria_contigua = PTHREAD_MUTEX_INITIALIZER;
 
-void escribir_memoria(int socket, int tiempo_retardo, t_config* config){
+void* escribir_memoria(int socket){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     op_code cod_op = recibir_operacion(socket);
     if(cod_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
@@ -11,7 +11,6 @@ void escribir_memoria(int socket, int tiempo_retardo, t_config* config){
         uint32_t tamanio_a_escribir = buffer_read_uint32(buffer);
         uint32_t pid = buffer_read_int(buffer);
 
-        int tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
         if(direccion_fisica + tamanio_a_escribir > tam_memoria){
             fprintf(stderr, "Direccion o tamanio a escribir invalido, sobrepasa la memoria");
             exit(EXIT_FAILURE);
@@ -21,7 +20,7 @@ void escribir_memoria(int socket, int tiempo_retardo, t_config* config){
         if(valor_a_escribir == NULL){
             fprintf(stderr, "Valor a escribir en memoria no asignado");
             liberar_buffer(buffer);
-            return;
+            exit(EXIT_FAILURE);
         }
         buffer_read(buffer, valor_a_escribir);
 
@@ -41,16 +40,15 @@ void escribir_memoria(int socket, int tiempo_retardo, t_config* config){
     }
 }
 
-void leer_memoria(int socket, int tiempo_retardo, t_config* config){
+void* leer_memoria(int socket){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     op_code cod_op = recibir_operacion(socket);
     if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
-        uint32_t tamanio_a_leer = read_buffer_uint32(buffer);
-        uint32_t pid = read_buffer_int(buffer);
+        uint32_t tamanio_a_leer = buffer_read_uint32(buffer);
+        uint32_t pid = buffer_read_uint32(buffer);
 
-        int tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
         if(direccion_fisica + tamanio_a_leer > tam_memoria){
             fprintf(stderr, "Direccion o tamanio a leer invalido, sobrepasa la memoria");
             exit(EXIT_FAILURE);

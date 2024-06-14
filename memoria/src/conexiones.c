@@ -12,14 +12,8 @@
 pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
 t_log* log_memoria_io;
 
-void* ejecutar_escribir_memoria(void* args){
-    t_parametros_io* parametros = (t_parametros_io*)args;
-    escribir_memoria(parametros->socket,parametros->tiempo_retardo,parametros->config);
-    free(parametros);
-    return NULL;
-}
 
-void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo, t_config* config){
+void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
 
     log_memoria_io = log_create("memoria-io.log","Memoria", true, LOG_LEVEL_TRACE);
     while (1) {
@@ -31,16 +25,12 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
         break;
        }
         void* (*funcion)(void*); //puntero a funcion q toma arg void y devuelve void (ejecutar_escribir_memoria)
-        t_parametros_io* parametros = malloc(sizeof(t_parametros_io));
-        parametros->socket=*socket_cliente;
-        parametros->tiempo_retardo = tiempo_retardo;
-        parametros->config=config;
         
         switch(recibir_operacion(*socket_cliente)) {
             case CONEXION_STDIN:
             while(1){
                 recibir_operacion(ACCESO_ESPACIO_USUARIO_ESCRITURA);
-                funcion = ejecutar_escribir_memoria;
+                funcion = escribir_memoria;
                 break;
             }
             case CONEXION_STDOUT:
@@ -49,7 +39,7 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
             case CONEXION_DIAL_FS:
             op_code code_op = recibir_operacion(*socket_cliente);
             if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
-                funcion = ejecutar_escribir_memoria;
+                funcion = escribir_memoria;
             }else{
                 return; // falta implementar lectura
             }
@@ -66,8 +56,8 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion, int tiempo_retardo,
         pthread_create(&hilo,
                         NULL,
                         funcion,
-                        parametros);
+                        (void*)socket_cliente);
         pthread_detach(hilo);
     }
-       }
+}
        

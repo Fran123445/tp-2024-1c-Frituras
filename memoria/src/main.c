@@ -9,13 +9,13 @@ int socket_kernel = 0;
 int socket_cpu = 0;
 int socket_io = 0;
 int socket_servidor_memoria;
+int tiempo_retardo;
+int tam_memoria;
+int tam_pagina; 
 t_conexion_escucha* escucha_cpu;
 t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
-t_parametros_cpu* params_cpu;
-t_parametros_kernel* params_kernel;
-t_parametros_io* params_io;
 t_bitarray* mapa_de_marcos;
 
 void iniciar_servidores(t_config* config){
@@ -33,34 +33,43 @@ void iniciar_servidores(t_config* config){
 
 }
 
-void* escuchar_cpu(void* argumento_cpu){
-    t_parametros_cpu* params_cpu = (t_parametros_cpu*)argumento_cpu;
-    //params_cpu usado para pasar los parámetros al hilo sin problema. ignorar warning.
-    int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
+void* escuchar_cpu(){
     while(1){
-        mandar_instruccion_cpu(socket_kernel,socket_cpu, tiempo_retardo);
-        resize_proceso(socket_cpu, config,tiempo_retardo);
-        acceso_tabla_paginas(socket_cpu,tiempo_retardo);
-        escribir_memoria(socket_cpu,tiempo_retardo,config);
+        mandar_instruccion_cpu(socket_kernel, socket_cpu);
 
+        // Hilo para el resize
+        pthread_t hilo_resize;
+        pthread_create(&hilo_resize, NULL, resize_proceso, (void*)socket_cpu);
+
+        // Hilo para acceso tabla paginas
+        pthread_t hilo_acceso_tabla_paginas;
+        pthread_create(&hilo_acceso_tabla_paginas, NULL, acceso_tabla_paginas, (void*)socket_cpu);
+
+        // Hilo para escritura
+        pthread_t hilo_escribir_memoria;
+        pthread_create(&hilo_escribir_memoria, NULL, escribir_memoria, (void*)socket_cpu);
+
+        // Hilo para lectura
+        pthread_t hilo_leer_memoria;
+        pthread_create(&hilo_escribir_memoria, NULL, leer_memoria, (void*)socket_cpu);
+
+        pthread_join(hilo_resize, NULL);
+        pthread_join(hilo_acceso_tabla_paginas, NULL);
+        pthread_join(hilo_escribir_memoria,NULL);
+        pthread_join(hilo_leer_memoria,NULL);
     }
 }
-void* escuchar_kernel(void* argumento_kernel){
-    t_parametros_kernel* params_kernel = (t_parametros_kernel*)argumento_kernel;
+
+void* escuchar_kernel(){
     //params_kernel usado para pasar los parámetros al hilo sin problema. ignorar warning.
-    int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     while(1){
-        abrir_archivo_path(socket_kernel, tiempo_retardo);
-        finalizar_proceso(socket_kernel, tiempo_retardo);
-
+        abrir_archivo_path(socket_kernel);
+        finalizar_proceso(socket_kernel);
     }
 }
-void* escuchar_io(void* argumento_io){
-    t_parametros_io* params_io = (t_parametros_io*)argumento_io;
-    //Ignorar warning, params_io se usa para los parámetros del hilo sin problema dentro del main :D
-    int tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
-    esperar_clientes_IO(escucha_io,tiempo_retardo, config);
 
+void* escuchar_io(){
+    esperar_clientes_IO(escucha_io);
 }
 
 t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
@@ -91,15 +100,23 @@ int main(int argc, char *argv[]){
     int cant_marcos = calcular_marcos(config);
     mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
 
+    tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
+    tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
+    tam_pagina = config_get_int_value(config, "TAM_PAGINA");
+
     pthread_t hilo_kernel;
-    pthread_create(&hilo_kernel,NULL, escuchar_kernel, (void*)params_kernel);
+    pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
+
     pthread_t hilo_cpu;
-    pthread_create(&hilo_cpu, NULL, escuchar_cpu, (void*)params_cpu);
+    pthread_create(&hilo_cpu, NULL, escuchar_cpu, NULL);
+
     pthread_t hilo_io;
-    pthread_create(&hilo_io, NULL,escuchar_io,(void*)params_io);
+    pthread_create(&hilo_io, NULL,escuchar_io, NULL);
+
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
     pthread_join(hilo_io,NULL);
+
     config_destroy(config);
     free(escucha_cpu);
     free(escucha_kernel);
@@ -109,5 +126,6 @@ int main(int argc, char *argv[]){
     pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
     pthread_mutex_destroy(&mutex_lista_procesos);
     pthread_mutex_destroy(&mutex_log_memoria_io);
+
     return 0;
 }

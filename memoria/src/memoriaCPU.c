@@ -112,7 +112,7 @@ t_proceso_memoria* recibir_proceso_cpu(int socket_cpu){
     } return NULL;
 }
 
-void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retardo){
+void mandar_instruccion_cpu(int socket_kernel, int socket_cpu){
     t_proceso_memoria* proceso = recibir_proceso_cpu(socket_cpu);
     if (proceso == NULL){
         fprintf(stderr, "Error al recibir proceso desde CPU");
@@ -132,7 +132,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
     free(proceso);
 }
 
-void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
+void* resize_proceso(int socket_cpu){
     op_code cod_op = recibir_operacion(socket_cpu);
     if (cod_op == ENVIO_RESIZE){
         t_buffer* buffer = recibir_buffer(socket_cpu);
@@ -142,7 +142,7 @@ void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
         t_log* log_resize = log_create("Resize_Proceso_Memoria", "Memoria", false, LOG_LEVEL_INFO);
         t_paquete* paquete;
         if(proceso->tamanio_proceso < tamanio_nuevo){
-                if(tamanio_nuevo > (config_get_int_value(config, "TAM_MEMORIA"))){
+                if(tamanio_nuevo > tam_memoria){
                     fprintf(stderr, "Error: se pide mas memoria que la que hay");
                     paquete = crear_paquete(OUT_OF_MEMORY);
                     enviar_paquete(paquete, socket_cpu);
@@ -151,8 +151,8 @@ void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
                     liberar_buffer(buffer);
                     exit(EXIT_FAILURE);
                 }
-                int cant_paginas_viejas = ceil(proceso->tamanio_proceso/config_get_int_value(config, "TAM_PAGINA"));
-                int cant_paginas_nuevas = ceil(tamanio_nuevo/config_get_int_value(config, "TAM_PAGINA"));
+                int cant_paginas_viejas = ceil(proceso->tamanio_proceso/tam_pagina);
+                int cant_paginas_nuevas = ceil(tamanio_nuevo/tam_pagina);
                 int total_paginas_a_agregar = cant_paginas_nuevas - cant_paginas_viejas;
                 chequear_espacio_memoria(total_paginas_a_agregar, socket_cpu);
                 usleep(tiempo_retardo * 1000);
@@ -163,8 +163,8 @@ void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
             }else if (proceso->tamanio_proceso > tamanio_nuevo){
                 log_info(log_resize, "Reduccion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
                 usleep(tiempo_retardo * 1000);
-                int paginas_viejas = ceil(proceso->tamanio_proceso/config_get_int_value(config, "TAM_PAGINA"));
-                int paginas_nuevas = ceil(tamanio_nuevo/config_get_int_value(config, "TAM_PAGINA"));
+                int paginas_viejas = ceil(proceso->tamanio_proceso/tam_pagina);
+                int paginas_nuevas = ceil(tamanio_nuevo/tam_pagina);
                 int total_paginas_a_sacar = paginas_viejas - paginas_nuevas;
                 proceso->tamanio_proceso = tamanio_nuevo;
                 marcar_frames_como_libres(total_paginas_a_sacar, proceso->tabla_del_proceso);
@@ -173,17 +173,17 @@ void resize_proceso(int socket_cpu,t_config* config, int tiempo_retardo){
         }else{
             log_info(log_resize, "Resize pedido es el tamanio que ya tiene el proceso");
             liberar_buffer(buffer);
-            return;
+            return NULL;
         }
         paquete = crear_paquete(RESIZE_ACEPTADO);
         enviar_paquete(paquete,socket_cpu);
         eliminar_paquete(paquete);
         log_destroy(log_resize);
         liberar_buffer(buffer); 
-}
+    }
 }
 
-void acceso_tabla_paginas(int socket_cpu, int tiempo_retardo){
+void* acceso_tabla_paginas(int socket_cpu){
     op_code cod_op = recibir_operacion(socket_cpu);
         if(cod_op == ACCESO_TABLAS_PAGINAS){
             t_buffer* buffer = recibir_buffer(socket_cpu);
@@ -193,12 +193,12 @@ void acceso_tabla_paginas(int socket_cpu, int tiempo_retardo){
             if(proceso == NULL){
                 fprintf(stderr, "No se encuentra el PID en la lista de procesos");
                 liberar_buffer(buffer);
-                return;
+                return NULL;
             }
             if(pagina_a_buscar < 0 || pagina_a_buscar >= list_size(proceso->tabla_del_proceso)){
                 fprintf(stderr, "Error: Nro de página no válido");
                 liberar_buffer(buffer);
-                return;
+                return NULL;
             }
             usleep(tiempo_retardo * 1000);
             informacion_de_tabla* entrada = list_get(proceso->tabla_del_proceso, pagina_a_buscar);
