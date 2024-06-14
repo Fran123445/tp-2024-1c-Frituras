@@ -207,7 +207,7 @@ void iniciarProceso(char* path) {
 bool sacarDeCola(t_queue* cola, int PID) {
     PCB* proceso = NULL;
     bool _mismoPID(PCB* pcb) {
-        return proceso->PID == PID;
+        return pcb->PID == PID;
     };
 
     proceso = list_remove_by_condition(cola->elements, (bool (*)(void*)) _mismoPID);
