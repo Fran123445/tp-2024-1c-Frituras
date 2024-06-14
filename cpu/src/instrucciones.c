@@ -25,8 +25,8 @@ void enviar_tamanio_resize_a_memoria(int tamanio_en_bytes){
 
 void pedir_contenido_memoria(uint32_t direccion_fisica, uint32_t tam){
     t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_LECTURA);
-    agregar_uint32_a_paquete(paquete, tam);
     agregar_uint32_a_paquete(paquete, direccion_fisica);
+    agregar_uint32_a_paquete(paquete, tam);
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
@@ -46,7 +46,7 @@ void* recibir_contenido_memoria(){
 void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam){
     pedir_contenido_memoria(direccion_fisica, tam);
     void* contenido_leido = recibir_contenido_memoria();  //le pido a memoria el contenido de la pagina
-    void* puntero_al_dato_leido = &contenido_leido; // Si no uso esto para el memcpy me tira seg. fault
+    // void* puntero_al_dato_leido = &contenido_leido; Me parece que esto ya no hace falta, veremos si hay seg. fault o no
 
     return puntero_al_dato_leido;
 }
@@ -54,8 +54,8 @@ void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam){
 void enviar_a_memoria_para_escritura(uint32_t direccion_fisica, void* datos_a_escribir, uint32_t tam) {
     t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_ESCRITURA);
     agregar_uint32_a_paquete(paquete, direccion_fisica);
-    agregar_a_paquete(paquete, datos_a_escribir,tam);
     agregar_uint32_a_paquete(paquete, tam);
+    agregar_a_paquete(paquete, datos_a_escribir,tam);
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
