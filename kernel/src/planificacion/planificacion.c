@@ -4,6 +4,7 @@ sem_t procesosEnNew;
 sem_t procesosEnExit;
 sem_t gradoMultiprogramacion;
 sem_t finalizarQuantum;
+sem_t quantumFinalizado;
 pthread_mutex_t mutexExit;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexReady;
@@ -24,6 +25,7 @@ void inicializarSemaforosYMutex(int multiprogramacion) {
     sem_init(&procesosEnExit, 0, 0);
     sem_init(&gradoMultiprogramacion, 0, multiprogramacion);
     sem_init(&finalizarQuantum, 0, 0);
+    sem_init(&quantumFinalizado, 0, 0);
     pthread_mutex_init(&mutexPlanificador, NULL);
     pthread_mutex_init(&mutexExit, NULL);
     pthread_mutex_init(&mutexNew, NULL);
@@ -178,7 +180,7 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
         case INSTRUCCION_EXIT:
             instExit(proceso);
             break;
-        case INTERRUPCION:
+        case FIN_DE_Q:
             interrupcion(proceso);
             break;
         default:

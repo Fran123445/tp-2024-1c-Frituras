@@ -9,9 +9,12 @@
 #include <planificacion/FIFO.h>
 
 extern int cpuLibre;
+extern sem_t quantumFinalizado;
 
 // Envia una interrupcion por fin de quantum
 void enviarInterrupcion(int PID);
+
+void cortarQuantum();
 
 // Duerme el hilo hasta pasado el tiempo correspondiente al quantum
 void esperarQuantumCompleto(PCB* proceso);

@@ -3,7 +3,7 @@
 bool procesoInterrumpido;
 
 void enviarInterrupcion(int PID) {
-    t_paquete* paquete = crear_paquete(INTERRUPCION);
+    t_paquete* paquete = crear_paquete(FIN_DE_Q);
     agregar_int_a_paquete(paquete, PID);
     enviar_paquete(paquete, socketCPUInterrupt);
     eliminar_paquete(paquete);
@@ -30,10 +30,16 @@ void esperarVuelta(PCB* proceso) {
     if (procesoInterrumpido) {
         pthread_join(esperaQuantum, NULL);
         log_info(logger, "Proceso %d interrumpido por fin de quantum", proceso->PID);
+        sem_post(&quantumFinalizado);
         return;
     }
 
     pthread_cancel(esperaQuantum);
+}
+
+void cortarQuantum() {
+    sem_post(&finalizarQuantum);
+    sem_wait(&quantumFinalizado);
 }
 
 void enviarProcesoACPU_RR(PCB* proceso) {
@@ -47,7 +53,7 @@ void enviarProcesoACPU_RR(PCB* proceso) {
 }
 
 void enviarAIOGenericaRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
-    sem_post(&finalizarQuantum);
+    cortarQuantum();
     enviarAIOGenerica(proceso, operacion, buffer);
     cpuLibre = 1;
 }
@@ -60,7 +66,7 @@ void waitRR(PCB* proceso, t_buffer* buffer) {
 }
 
 void signalRR(PCB* proceso, t_buffer* buffer) {
-    sem_post(&finalizarQuantum);
+    cortarQuantum();
     enviarAExit(proceso, SUCCESS);
     cpuLibre = 1;
 }
@@ -79,7 +85,7 @@ void criterioEnvioRR() {
 }
 
 void exitRR(PCB* proceso) {
-    sem_post(&finalizarQuantum);
+    cortarQuantum();
     exitFIFO(proceso);
 }
 

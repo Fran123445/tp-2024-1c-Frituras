@@ -45,7 +45,7 @@ colaProveniente seleccionarSiguiente(PCB** proceso) {
 }
 
 void asignarQuantum(PCB* proceso) {
-    sem_post(&finalizarQuantum);
+    cortarQuantum();
     temporal_stop(tiempoTranscurrido);
 
     if (!procesoInterrumpido) {
