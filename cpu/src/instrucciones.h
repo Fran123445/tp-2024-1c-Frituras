@@ -9,6 +9,7 @@ void SET(registrosCPU registro, int valor);
 void SUM(registrosCPU registroDestino, registrosCPU registroOrigen);
 void SUB(registrosCPU registroDestino, registrosCPU registroOrigen);
 void JNZ(registrosCPU registro, int instruccion);
+void RESIZE(int tamanio_en_bytes);
 void IO_GEN_SLEEP(char* interfaz,int unidades_trabajo);
 void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion);
 void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos);
