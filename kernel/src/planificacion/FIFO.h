@@ -6,7 +6,7 @@
 #include <planificacion/planificacion.h>
 
 
-extern void (*IOGenerica)(PCB*, op_code, t_buffer*);
+extern void (*instIO)(PCB*, op_code, t_buffer*);
 extern void (*IOFinalizada)(PCB*);
 extern void (*instWait)(PCB*, t_buffer*);
 extern void (*instSignal)(PCB*, t_buffer*);

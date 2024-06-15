@@ -43,7 +43,7 @@ void leerBufferYPlanificar(op_code operacion);
 void recibirDeCPU();
 
 // Envia el proceso pasado por parametro a la IO generica en el buffer
-void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer);
+void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer);
 
 // Realiza WAIT sobre un recurso y se lo asigna al proceso pasado por parametro
 // Devuelve 0 si el proceso fue devuelto a la CPU y 1 si el proceso fue bloqueado o enviado a exit

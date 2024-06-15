@@ -47,7 +47,7 @@ void enviarProcesoACPU_RR(PCB* proceso) {
 
 void enviarAIOGenericaRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
     cortarQuantum();
-    enviarAIOGenerica(proceso, operacion, buffer);
+    enviarAIO(proceso, operacion, buffer);
     cpuLibre = 1;
 }
 
@@ -83,7 +83,7 @@ void exitRR(PCB* proceso) {
 }
 
 void setRR() {
-    IOGenerica = enviarAIOGenericaRR;
+    instIO = enviarAIOGenericaRR;
     IOFinalizada = operacionFinalizadaFIFO;
     instWait = waitRR;
     instSignal = signalRR;
