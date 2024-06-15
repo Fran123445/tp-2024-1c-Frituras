@@ -104,13 +104,13 @@ int main(int argc, char *argv[]){
     t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     iniciar_servidores(config);
 
-    memoria_contigua = iniciar_memoria(config);
-    int cant_marcos = calcular_marcos(config);
-    mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
-
     tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
     tam_pagina = config_get_int_value(config, "TAM_PAGINA");
+
+    memoria_contigua = iniciar_memoria(config);
+    int cant_marcos = calcular_marcos(config);
+    mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
 
     enviar_tamanio_pagina_a_cpu();
 
