@@ -97,6 +97,15 @@ t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer
     return solicitud;
 }
 
+t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buffer) {
+    t_solicitudIOSTDIN_OUT* solicitud = malloc(sizeof(t_solicitudIOSTDIN_OUT));
+    solicitud->proceso = proceso;
+    solicitud->dirFisica = buffer_read_uint32(buffer);
+    solicitud->tamanio = buffer_read_int(buffer);
+
+    return solicitud;
+}
+
 bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion) {
 
     bool opValida;

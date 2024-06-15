@@ -35,10 +35,17 @@ typedef struct {
     int unidadesTrabajo;
 } t_solicitudIOGenerica;
 
+typedef struct {
+    PCB* proceso;
+    uint32_t dirFisica;
+    int tamanio;
+} t_solicitudIOSTDIN_OUT;
+
 void esperarClientesIO(t_conexion_escucha* params);
 void administrarInterfazGenerica(int* socket_cliente);
 t_IOConectada* hallarInterfazConectada(char* nombre);
 bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion);
 t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer);
+t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buffer);
 
 #endif /* CONN_H */
