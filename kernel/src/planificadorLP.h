@@ -1,5 +1,5 @@
-#ifndef PROC_H
-#define PROC_H
+#ifndef PLANLP_H
+#define PLANLP_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,14 +12,15 @@
 #include <commons/string.h>
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
-
-extern pthread_mutex_t mutexLogger;
+#include <interfaces.h>
+#include <recursos.h>
 typedef enum {
     SUCCESS,
     INVALID_RESOURCE,
-    INVALID_WRITE
+    INVALID_INTERFACE,
+    OOM,
+    INTERRUPTED_BY_USER
 } motivo_exit;
-
 typedef struct {
     PCB* pcb;
     motivo_exit motivo;
@@ -27,12 +28,12 @@ typedef struct {
 
 extern t_log* logger;
 
-extern int socketMemoria;;
+extern int socketMemoria;
+extern int socketCPUInterrupt;
 
 extern int quantumInicial;
 
 extern sem_t procesosEnNew;
-extern sem_t procesosEnReady;
 extern sem_t procesosEnExit;
 extern sem_t gradoMultiprogramacion;
 extern pthread_mutex_t mutexNew;
@@ -46,8 +47,26 @@ extern t_queue* colaReady;
 extern t_queue* colaExit;
 extern t_list* interfacesConectadas;
 extern t_list* listadoProcesos;
+extern t_list* listaRecursos;
 
 extern int siguientePID;
+
+void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola);
+
+// Envia una interrupcion a CPU
+void enviarInterrupcion(int PID, op_code motivo);
+
+// Espera a que lleguen PCBs a exit para eliminarlos y liberar memoria
+void vaciarExit();
+
+// Envia un proceso a la cola Exit con su respectivo motivo
+void enviarAExit(PCB* pcb, motivo_exit motivo);
+
+// Cambia el estado de un proceso y loggea el estado anterior y el nuevo
+void cambiarEstado(PCB* proceso, estado_proceso estado);
+
+// Envia un proceso a la cola Ready
+void enviarAReady(PCB* pcb);
 
 // Devuelve un string con el nombre del dato enumerado 
 char* enumEstadoAString(estado_proceso);
@@ -67,4 +86,4 @@ t_queue* enumEstadoACola(int);
 // Saca el PCB enviado por parametro de la cola enviada por parametro.
 void sacarProceso(t_queue*, PCB*);
 
-#endif /* PROC_H */
+#endif /* PLANLP_H */

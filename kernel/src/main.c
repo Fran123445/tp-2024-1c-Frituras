@@ -4,11 +4,14 @@
 #include <commons/config.h>
 #include <utils/server.h>
 #include <utils/client.h>
+#include <planificacion/planificacion.h>
+#include <planificacion/FIFO.h>
+#include <planificacion/roundRobin.h>
+#include <planificacion/virtualRoundRobin.h>
 #include "consola.h"
-#include "procesos.h"
-#include "planificacion.h"
+#include "planificadorLP.h"
 #include "interfaces.h"
-#include "roundRobin.h"
+#include "recursos.h"
 
 int socketCPUDispatch;
 int socketCPUInterrupt;
@@ -16,6 +19,9 @@ int socketMemoria;
 
 int siguientePID;
 int quantumInicial;
+
+pthread_mutex_t mutexPlanificador;
+
 t_queue* colaNew;
 t_queue* colaReady;
 t_queue* colaExit;
@@ -32,6 +38,7 @@ pthread_t pth_recibirProc;
 
 void inicializarColas() {
     colaNew = queue_create();
+    colaPrioritaria = queue_create();
     colaReady = queue_create();
     colaExit = queue_create();
     interfacesConectadas = list_create();
@@ -39,11 +46,6 @@ void inicializarColas() {
 }
 
 void liberarVariablesGlobales() {    
-    finalizarHilos();
-    pthread_join(pth_colaExit, NULL);
-    pthread_join(pth_colaNew, NULL);
-    pthread_join(pth_colaReady, NULL);
-    pthread_join(pth_recibirProc, NULL);
     log_destroy(logger);
     queue_destroy_and_destroy_elements(colaNew, free);
     queue_destroy_and_destroy_elements(colaExit, free);
@@ -59,12 +61,13 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
     char* algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 
     if(!strcmp(algoritmo, "FIFO")) {
-        planificacionPorFIFO();
+        setFIFO();
     } else if (!strcmp(algoritmo, "RR")) {
-        planificacionPorRR();
+        setRR();
     } else {
-        //VRR
+        setVRR();
     }
+    iniciarPlanificacion();
 }
 
 int main(int argc, char* argv[]) {
@@ -105,7 +108,8 @@ int main(int argc, char* argv[]) {
 
     seleccionarAlgoritmoPlanificacion(config);
 
-    //iniciarProceso("instrucciones1.txt");
+    leerRecursosDeConfig(config);
+
     solicitarInput();
     
     config_destroy(config);
