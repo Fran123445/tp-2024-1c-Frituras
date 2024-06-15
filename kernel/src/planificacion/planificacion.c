@@ -92,13 +92,13 @@ void recibirDeCPU() {
 }
 
 void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
-    t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
-    t_IOConectada* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
+    char* nombreInterfaz = buffer_read_string(buffer);
+    t_IOConectada* interfaz = hallarInterfazConectada(nombreInterfaz);
 
     if (comprobarOperacionValida(interfaz, operacion)) {
         t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
         solicitud->proceso = proceso;
-        solicitud->unidadesTrabajo = infoInterfaz->unidades_trabajo;
+        solicitud->unidadesTrabajo = buffer_read_int(buffer);
 
         pthread_mutex_lock(&interfaz->mutex);
 
@@ -117,8 +117,7 @@ void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
         enviarAExit(proceso, INVALID_INTERFACE);
     }
 
-    free(infoInterfaz->nombre);
-    free(infoInterfaz);
+    free(nombreInterfaz);
 }
 
 int instruccionWait(PCB* proceso, t_buffer* buffer) {
