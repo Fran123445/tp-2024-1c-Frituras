@@ -1,4 +1,9 @@
 #include "main.h"
+#include "instrucciones.h"
+#include "interrupciones.h"
+#include "cicloDeInstrucciones.h"
+#include "mmu.h"
+#include "algoritmosSustitucion.h"
 
 int socket_memoria;
 
@@ -16,6 +21,7 @@ PCB* pcb;
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 t_instruccion* sum;
 t_instruccion* set1;
 t_instruccion* set2;
@@ -25,6 +31,9 @@ t_instruccion* instrucciones[4];
 =======
 >>>>>>> main
 =======
+=======
+char* algoritmoSustitucionTLB;
+>>>>>>> Cpu
 int cant_entradas_TLB;
 int tamanio_pagina; 
 >>>>>>> Cpu
@@ -93,7 +102,7 @@ int main(int argc, char* argv[]) {
     TLB = list_create();
     cant_entradas_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
 
-    char* algoritmoSustitucionTLB = config_get_string_value(config, "ALGORITMO_TLB");
+    algoritmoSustitucionTLB = config_get_string_value(config, "ALGORITMO_TLB");
 
     if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
         cola_FIFO = queue_create();

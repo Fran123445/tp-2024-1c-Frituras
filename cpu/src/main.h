@@ -1,3 +1,6 @@
+#ifndef MAIN_H_
+#define MAIN_H_
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,11 +15,6 @@
 #include <utils/serializacion.h>
 #include <utils/server.h>
 #include <utils/client.h>
-#include "instrucciones.h"
-#include "interrupciones.h"
-#include "cicloDeInstrucciones.h"
-#include "mmu.h"
-#include "algoritmosSustitucion.h"
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -37,3 +35,5 @@ extern volatile int hay_interrupcion;
 extern char* algoritmoSustitucionTLB;
 extern int cant_entradas_TLB;
 extern int tamanio_pagina;
+
+#endif /* MAIN_H_ */

@@ -3,11 +3,14 @@
 
 #include "main.h"
 
+extern t_queue* cola_FIFO;
+extern t_list* estructura_LRU;
+
 typedef struct {
     int id_proceso;
     uint32_t pagina;
     uint32_t marco;
-} entrada_TLB;
+}entrada_TLB;
 
 extern t_list* TLB;
 
