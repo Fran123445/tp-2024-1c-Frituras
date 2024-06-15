@@ -3,6 +3,7 @@
 
 #include "main.h"
 
+extern op_code cod_op_int;
 extern pthread_mutex_t mutexInterrupt;
 
 void recibir_interrupcion();

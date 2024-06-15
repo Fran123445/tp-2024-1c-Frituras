@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <commons/log.h>
 #include <commons/config.h>
-#include <commons/log.h>
+#include <commons/collections/queue.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <stddef.h> 
@@ -15,15 +15,25 @@
 #include "instrucciones.h"
 #include "interrupciones.h"
 #include "cicloDeInstrucciones.h"
+#include "mmu.h"
+#include "algoritmosSustitucion.h"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 extern t_instruccion* instrucciones[4];
 =======
 
 extern t_log* log_ciclo;
 >>>>>>> main
+=======
+extern t_log* log_cpu;
+>>>>>>> Cpu
 extern PCB* pcb;
 extern int socket_memoria;
 extern int socket_kernel_d;
 extern int socket_kernel_i;
 extern volatile int hay_interrupcion;
+
+extern char* algoritmoSustitucionTLB;
+extern int cant_entradas_TLB;
+extern int tamanio_pagina;
