@@ -17,8 +17,11 @@ t_conexion_escucha* escucha_kernel;
 t_conexion_escucha* escucha_io;
 t_config* config;
 t_bitarray* mapa_de_marcos;
+t_log* log_memoria;
+
 
 void iniciar_servidores(t_config* config){
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     t_log* log_memoria = log_create("memoria_kernel", "Memoria",true, LOG_LEVEL_TRACE);
@@ -30,6 +33,10 @@ void iniciar_servidores(t_config* config){
 >>>>>>> Memoria
 
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_memoria);
+=======
+    t_log* log_servidor = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
+    socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_servidor);
+>>>>>>> Memoria
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
     escucha_io->modulo= MEMORIA;
@@ -98,6 +105,7 @@ void enviar_tamanio_pagina_a_cpu(){
     eliminar_paquete(paquete);
 }
 
+
 int main(int argc, char *argv[]){
     lista_de_procesos = list_create();
 
@@ -107,7 +115,9 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
+    t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     iniciar_servidores(config);
+
     memoria_contigua = iniciar_memoria(config);
     int cant_marcos = calcular_marcos(config);
     mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
@@ -140,11 +150,11 @@ int main(int argc, char *argv[]){
     free(escucha_cpu);
     free(escucha_kernel);
     free(memoria_contigua);
+
+    log_destroy(log_memoria);
     list_destroy(lista_de_procesos);
     bitarray_destroy(mapa_de_marcos);
     pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
-    pthread_mutex_destroy(&mutex_lista_procesos);
-    pthread_mutex_destroy(&mutex_log_memoria_io);
 
     return 0;
 }

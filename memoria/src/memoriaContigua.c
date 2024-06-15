@@ -4,8 +4,7 @@
 void* memoria_contigua;
 
 void* iniciar_memoria (t_config* config) {
-    int tamanio_memoria = config_get_int_value(config, "TAM_MEMORIA");
-    void* memoria_contigua = malloc(tamanio_memoria);
+    void* memoria_contigua = malloc(tam_memoria);
     if(memoria_contigua == NULL){
         fprintf(stderr,"Error al asignar memoria");
         return NULL;
@@ -14,9 +13,7 @@ void* iniciar_memoria (t_config* config) {
 }
 
 int calcular_marcos (t_config* config){
-    int tamanio_memoria = config_get_int_value(config, "TAM_MEMORIA");
-    int tam_pag = config_get_int_value(config, "TAM_PAGINA");
-    int cant_marcos = tamanio_memoria/tam_pag;
+    int cant_marcos = tam_memoria/tam_pagina;
     return cant_marcos;
 }
 

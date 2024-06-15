@@ -9,9 +9,6 @@
 #include "accesoEspacioUsuario.h"
 #include "conexiones.h"
 
-pthread_mutex_t mutex_log_memoria_io = PTHREAD_MUTEX_INITIALIZER;
-t_log* log_memoria_io;
-
 // Funciones auxiliares requeridas para pasarle como parámetro al hilo
 
 void* ejecutar_leer_memoria(void* arg) {
@@ -29,8 +26,6 @@ void* ejecutar_escribir_memoria(void* arg) {
 // Función para esperar los clientes
 
 void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
-
-    log_memoria_io = log_create("memoria-io.log","Memoria", true, LOG_LEVEL_TRACE);
 
     while (1) {
         int* socket_cliente = malloc(sizeof(int));
@@ -69,9 +64,7 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
                 break;
 
             default:
-                pthread_mutex_lock(&mutex_log_memoria_io);
-                log_error(log_memoria_io, "Conexión inválida de una interfaz");
-                pthread_mutex_unlock(&mutex_log_memoria_io);
+                log_error(log_memoria, "Conexión inválida de una interfaz");
                 break;
         }
 

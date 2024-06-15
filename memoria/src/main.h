@@ -24,6 +24,8 @@ extern int tam_memoria;
 extern int tam_pagina; 
 extern t_config* config;
 extern t_bitarray* mapa_de_marcos;
+extern t_log* log_memoria;
+
 void* escuchar_kernel();
 void* escuchar_cpu();
 

@@ -3,7 +3,6 @@
 pthread_mutex_t mutex_memoria_contigua = PTHREAD_MUTEX_INITIALIZER;
 
 void* escribir_memoria(int socket){
-    t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
@@ -39,7 +38,6 @@ void* escribir_memoria(int socket){
 }
 
 void* leer_memoria(int socket){
-    t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
 
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
