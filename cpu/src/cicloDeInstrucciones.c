@@ -1,4 +1,5 @@
 #include "cicloDeInstrucciones.h"
+#include "interrupciones.h"
 #include <semaphore.h>
 
 
@@ -95,7 +96,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->arg2 = argumento2;
-            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,1)));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
             break;
         case iSUB:
@@ -136,6 +137,57 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
             instruccion->interfaz = list_get(lista,1);
+            break;
+        case iMOV_IN:
+            instruccion->tipo = iMOV_IN;
+            *argumento = string_a_registro(list_get(lista, 1));
+            *argumento2 = string_a_registro(list_get(lista, 2));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 1)));
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->sizeArg3 = 0;
+            break;
+        case iMOV_OUT:
+            instruccion->tipo = iMOV_OUT;
+            *argumento = string_a_registro(list_get(lista, 1));
+            *argumento2 = string_a_registro(list_get(lista, 2));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 1)));
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->sizeArg3 = 0;
+            break;
+        case iCOPY_STRING:
+            valor = atoi(list_get(lista, 1));
+            *valor_ptr = valor;
+            instruccion->tipo = iCOPY_STRING;
+            instruccion->arg1 = valor_ptr;
+            instruccion->sizeArg1 = sizeof(uint32_t);
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+            break;
+        case iIO_STDIN_READ:
+            instruccion->tipo = iIO_STDIN_READ;
+            instruccion->interfaz = list_get(lista, 1);
+            *argumento = string_a_registro(list_get(lista, 2));
+            *argumento2 = string_a_registro(list_get(lista, 3));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
+            instruccion->sizeArg3 = 0;
+            break;
+        case iIO_STDOUT_WRITE:
+            instruccion->tipo = iIO_STDOUT_WRITE;
+            instruccion->interfaz = list_get(lista, 1);
+            *argumento = string_a_registro(list_get(lista, 2));
+            *argumento2 = string_a_registro(list_get(lista, 3));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
+            instruccion->sizeArg3 = 0;
             break;
         case iEXIT:
             instruccion->tipo = iEXIT;
@@ -223,7 +275,6 @@ void execute(t_instruccion* instruccion){
         log_error(log_cpu, "La instruccion es inválida");
         break;
     }
-    //log_destroy(log_cpu);
 }
 
 int check_interrupt() {
@@ -231,7 +282,6 @@ int check_interrupt() {
     if (hay_interrupcion) {
         hay_interrupcion = 0;
         pthread_mutex_unlock(&mutexInterrupt);
-        enviar_pcb(cod_op_int);
         return 1;
     } else {
         pthread_mutex_unlock(&mutexInterrupt);
@@ -260,7 +310,7 @@ void realizar_ciclo_de_instruccion(){
             break;
         }
         if (check_interrupt()) {
-            //enviar_pcb(cod_op_int); este no va, lo dejo por las dudas pero enviar el pcb ya lo hace check interrupt cuando hay una interruccion
+            enviar_pcb(cod_op_int);
             break;
         }
     }

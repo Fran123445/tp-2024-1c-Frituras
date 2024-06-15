@@ -1,4 +1,5 @@
-#include "main.h"
+#include "algoritmosSustitucion.h"
+#include "mmu.h"
 
 t_queue* cola_FIFO;
 t_list* estructura_LRU;

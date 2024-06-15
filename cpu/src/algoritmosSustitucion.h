@@ -2,6 +2,7 @@
 #define algoritmosSustitucion_H_
 
 #include "main.h"
+#include "mmu.h"
 
 extern t_queue* cola_FIFO;
 extern t_list* estructura_LRU;

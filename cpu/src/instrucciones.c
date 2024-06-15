@@ -1,4 +1,5 @@
 #include "instrucciones.h"
+#include "interrupciones.h"
 
 void* obtenerRegistro(registrosCPU registro) {
     void* lista_de_registros[11] = {
@@ -36,7 +37,7 @@ void* recibir_contenido_memoria(){
     op_code cod_op = recibir_operacion(socket_memoria);
     if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
         t_buffer* buffer = recibir_buffer(socket_memoria);
-        void* data;
+        void* data = NULL;
         buffer_read(buffer, data);
         liberar_buffer(buffer);
         return data;
@@ -242,7 +243,7 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
                 void* dato_leido = contenido_obtenido_de_memoria(direccion_fisica_actual, cant_bytes_a_leer_pagina);
                 log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %d", direccion_fisica_actual, *(uint32_t*)dato_leido);
                 memcpy(reg_datos + bytes_leidos, dato_leido, cant_bytes_a_leer_pagina);
-                bytes_leidos += cant_bytes_a_leer_pagina
+                bytes_leidos += cant_bytes_a_leer_pagina;
             }
         }
 }
@@ -296,7 +297,7 @@ void COPY_STRING(uint32_t tam){
 
             uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
             void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam_a_escribir);
-            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, *datos_de_si);
+            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, datos_de_si);
 
             uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
             enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam_a_escribir);
@@ -350,11 +351,8 @@ void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU 
 
 void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
 
-    void *tamaño = obtenerRegistro(registroTamaño);
-    void *reg_direccion = obtenerRegistro(registroDireccion);
-
-    uint32_t direccion_logica = *reg_direccion;
-    uint32_t tam = *tamaño;
+    uint32_t tam = *(uint32_t *)obtenerRegistro(registroTamaño);
+    uint32_t direccion_logica = *(uint32_t *)obtenerRegistro(registroTamaño);
 
     if (tam > tamanio_pagina){
         uint32_t bytes_a_enviar = tam;
