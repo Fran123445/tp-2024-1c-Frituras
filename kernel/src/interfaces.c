@@ -37,13 +37,13 @@ void esperarClientesIO(t_conexion_escucha* params) {
     }
 }
 
-void administrarInterfazGenerica(int* socket_cliente) {
+t_IOConectado* IOConectado_create(int socket_cliente, tipoInterfaz tipo) {
     t_IOConectado* interfaz = malloc(sizeof(t_IOConectado));
 
-    t_buffer* buffer = recibir_buffer(*socket_cliente);
+    t_buffer* buffer = recibir_buffer(socket_cliente);
 
     interfaz->nombreInterfaz = buffer_read_string(buffer);
-    interfaz->tipo = INTERFAZ_GENERICA;
+    interfaz->tipo = tipo;
     interfaz->procesosBloqueados = queue_create();
     pthread_mutex_init(&(interfaz->mutex), NULL);
     sem_init(&(interfaz->semaforo), 0, 0);
@@ -51,6 +51,13 @@ void administrarInterfazGenerica(int* socket_cliente) {
     pthread_mutex_lock(&mutexListaInterfaces);
     list_add(interfacesConectadas, interfaz);
     pthread_mutex_unlock(&mutexListaInterfaces);
+
+    return interfaz;
+}
+
+void administrarInterfazGenerica(int* socket_cliente) {
+
+    t_IOConectado* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_GENERICA);
 
     op_code op;
 
