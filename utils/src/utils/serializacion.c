@@ -58,7 +58,7 @@ void agregar_string_array_a_paquete(t_paquete* paquete, char** string_array) {
 	void _agregar_string(char* string) {
 		agregar_string_a_paquete(paquete, string);
 	};
-
+	
 	string_iterate_lines(string_array, (void *) _agregar_string);
 }
 
