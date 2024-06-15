@@ -12,7 +12,7 @@ pthread_mutex_t mutexListaProcesos;
 pthread_mutex_t mutexListaInterfaces;
 int cpuLibre = 1;
 
-void (*IOGenerica)(PCB*, op_code, t_buffer*);
+void (*instIO)(PCB*, op_code, t_buffer*);
 void (*IOFinalizada)(PCB*);
 void (*instWait)(PCB*, t_buffer*);
 void (*instSignal)(PCB*, t_buffer*);
@@ -91,14 +91,24 @@ void recibirDeCPU() {
     }
 }
 
-void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
+void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
     char* nombreInterfaz = buffer_read_string(buffer);
     t_IOConectada* interfaz = hallarInterfazConectada(nombreInterfaz);
 
+    void* solicitud;
+
     if (comprobarOperacionValida(interfaz, operacion)) {
-        t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
-        solicitud->proceso = proceso;
-        solicitud->unidadesTrabajo = buffer_read_int(buffer);
+        switch(operacion) {
+            case ENVIAR_IO_GEN_SLEEP:
+                solicitud = solicitudIOGenerica_create(proceso, buffer);
+                break;
+            case ENVIAR_IO_STDIN_READ:
+            case ENVIAR_IO_STDOUT_WRITE:
+                solicitud = solicitudIOSTDIN_OUT_create(proceso, buffer);
+                break;
+            default:
+                break; 
+        }
 
         pthread_mutex_lock(&interfaz->mutex);
 
@@ -165,7 +175,9 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             pthread_mutex_unlock(&mutexNew);
             break;
         case ENVIAR_IO_GEN_SLEEP:
-            IOGenerica(proceso, operacion, buffer);
+        case ENVIAR_IO_STDIN_READ:
+        case ENVIAR_IO_STDOUT_WRITE:
+            instIO(proceso, operacion, buffer);
             break;
         case OPERACION_FINALIZADA:
             IOFinalizada(proceso);
