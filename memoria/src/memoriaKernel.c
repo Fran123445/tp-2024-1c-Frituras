@@ -8,7 +8,7 @@
 #include "main.h"
 
 t_list* lista_de_procesos = NULL;
-t_log* log_tabla_pags; 
+
 pthread_mutex_t mutex_lista_procesos = PTHREAD_MUTEX_INITIALIZER;
 
 t_proceso_memoria* creacion_proceso(int socket_kernel) {
@@ -18,7 +18,7 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
         t_proceso_memoria* proceso = malloc(sizeof(proceso));
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
-        log_tabla_pags = log_create("Tabla_de_Pags_Memoria.log", "Memoria", true, LOG_LEVEL_INFO);
+
         proceso->pid=pid_proceso;
         char* path_proceso = buffer_read_string(buffer);
         proceso->path= path_proceso;
@@ -30,7 +30,7 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
         pthread_mutex_lock (&mutex_lista_procesos);
         list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!
         pthread_mutex_unlock(&mutex_lista_procesos);
-        log_info(log_tabla_pags, "Creacion Tabla de Paginas - PID: %d- Tamaño: %d", proceso->pid, list_size(proceso->tabla_del_proceso));
+        log_info(log_memoria, "Creacion Tabla de Paginas - PID: %d- Tamaño: %d", proceso->pid, list_size(proceso->tabla_del_proceso));
         return proceso;
     }
     return NULL;
@@ -46,7 +46,8 @@ void abrir_archivo_path(int socket_kernel){
     if (file == NULL){
             fprintf(stderr, "Archivo vacio");
             free(path);
-        }
+    }
+
     char* linea = NULL;
     size_t tamanio = 0;
     ssize_t leidos;
@@ -55,7 +56,6 @@ void abrir_archivo_path(int socket_kernel){
         if(linea[leidos - 1] == '\n'){
             linea[leidos - 1] = '\0';
         }
-
         char *linea_copia = strdup(linea);
         if (linea_copia == NULL){
             perror("Error al copiar linea");
@@ -65,6 +65,7 @@ void abrir_archivo_path(int socket_kernel){
         }
         list_add(proceso->instrucciones, linea_copia);
     }
+    
     t_paquete* paquete = crear_paquete(PAQUETE); // NO BORRAR! esto es para que conecten bien los módulos 
     enviar_paquete(paquete, socket_kernel);
 
@@ -77,31 +78,37 @@ void eliminar_proceso(int pid_proceso){
     list_remove(lista_de_procesos, (proceso->pid));
     free(proceso);
 }
+
 void frames_libres_por_fin_proceso(t_proceso_memoria* proceso_a_eliminar){
     int tamanio_tabla = list_size(proceso_a_eliminar->tabla_del_proceso);
 
     for(int i = 0; i < tamanio_tabla; i++){
         informacion_de_tabla* entrada = list_get(proceso_a_eliminar->tabla_del_proceso, i);
-        pthread_mutex_lock(&mutex_bitarray_marcos_libres);
 
         if(entrada->validez){
+            pthread_mutex_lock(&mutex_bitarray_marcos_libres);
             bitarray_clean_bit(mapa_de_marcos,entrada->marco);
+            pthread_mutex_unlock(&mutex_bitarray_marcos_libres);
         }
-        pthread_mutex_unlock(&mutex_bitarray_marcos_libres);
     }
-    }
+}
 
 void finalizar_proceso(int socket_kernel){
     op_code cod_op = recibir_operacion(socket_kernel);
+
     usleep(tiempo_retardo * 1000);
-    log_tabla_pags = log_create("Tabla_de_Pags_Memoria", "Memoria", false, LOG_LEVEL_INFO);
+
     if(cod_op == FIN_PROCESO){
         t_buffer* buffer = recibir_buffer(socket_kernel);
         int pid_proceso= buffer_read_int(buffer);
         t_proceso_memoria* proceso_a_finalizar = hallar_proceso(pid_proceso);
+
         frames_libres_por_fin_proceso(proceso_a_finalizar);
-        log_info(log_tabla_pags, "Destruccion Tabla Paginas - PID: %d- Tamaño: %d", pid_proceso, list_size(proceso_a_finalizar->tabla_del_proceso));
+
+        log_info(log_memoria, "Destruccion Tabla Paginas - PID: %d- Tamaño: %d", pid_proceso, list_size(proceso_a_finalizar->tabla_del_proceso));
+
         eliminar_proceso_de_lista_de_procesos(pid_proceso);
+
         liberar_buffer(buffer);
     }
 }
