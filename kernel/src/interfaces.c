@@ -97,10 +97,12 @@ bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion) {
         case INTERFAZ_GENERICA:
             opValida = operacion == ENVIAR_IO_GEN_SLEEP;
             break;
-        /*case INTERFAZ_STDIN:
-            opValida = operacion == IO_STDIN_READ;
+        case INTERFAZ_STDIN:
+            opValida = operacion == ENVIAR_IO_STDIN_READ;
+            break;
         case INTERFAZ_STDOUT:
-            opValida = operacion == IO_STDOUT_WRITE;*/
+            opValida = operacion == ENVIAR_IO_STDOUT_WRITE;
+            break;
         // Falta todo lo de FS
         default:
             opValida = false;
