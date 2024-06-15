@@ -21,7 +21,7 @@ t_log* log_memoria;
 
 
 void iniciar_servidores(t_config* config){
-    t_log* log_servidor = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
+    t_log* log_servidor = log_create("memoriaa.log", "Memoria",true, LOG_LEVEL_TRACE);
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_servidor);
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
@@ -101,8 +101,8 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     iniciar_servidores(config);
+    log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
 
     tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     tam_memoria = config_get_int_value(config, "TAM_MEMORIA");

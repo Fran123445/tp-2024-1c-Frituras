@@ -1,3 +1,7 @@
+#ifndef MEM_CPU_H
+#define MEM_CPU_H
+
+
 #include <utils/serializacion.h>
 #include "estructuras.h"
 
@@ -13,3 +17,4 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu);
 void* resize_proceso(int socket_cpu);
 void* acceso_tabla_paginas(int socket_cpu);
 
+#endif

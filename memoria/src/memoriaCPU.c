@@ -101,18 +101,14 @@ void asignar_frames_a_paginas (int cant_pags_total, t_proceso_memoria* proceso){
 }
 
 t_proceso_memoria* recibir_proceso_cpu(int socket_cpu){
-    op_code cod_op = recibir_operacion(socket_cpu);
-    if (cod_op == ENVIO_PC){
-        t_proceso_memoria* proceso_cpu = malloc(sizeof(t_proceso_memoria));
-        t_buffer* buffer = recibir_buffer(socket_cpu);
-        int pid = buffer_read_int(buffer);
-        uint32_t pc = buffer_read_uint32(buffer);
-        liberar_buffer(buffer);
-        proceso_cpu->pid = pid;
-        proceso_cpu->pc= pc;
-        return proceso_cpu;
-    } 
-    return NULL;
+    t_proceso_memoria* proceso_cpu = malloc(sizeof(t_proceso_memoria));
+    t_buffer* buffer = recibir_buffer(socket_cpu);
+    int pid = buffer_read_int(buffer);
+    uint32_t pc = buffer_read_uint32(buffer);
+    liberar_buffer(buffer);
+    proceso_cpu->pid = pid;
+    proceso_cpu->pc= pc;
+    return proceso_cpu;
 }
 
 void mandar_instruccion_cpu(int socket_kernel, int socket_cpu){

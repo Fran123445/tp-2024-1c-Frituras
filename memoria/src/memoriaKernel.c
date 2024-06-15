@@ -1,11 +1,4 @@
-#include <utils/serializacion.h>
-#include <stdlib.h>
-#include <string.h>
-#include <commons/collections/list.h>
-#include "estructuras.h"
-#include "memoriaDeInstrucciones.h"
-#include "memoriaCPU.h"
-#include "main.h"
+#include "memoriaKernel.h"
 
 t_list* lista_de_procesos = NULL;
 
@@ -21,12 +14,12 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
 
         proceso->pid=pid_proceso;
         char* path_proceso = buffer_read_string(buffer);
+        liberar_buffer(buffer);
         proceso->path= path_proceso;
         proceso->tabla_del_proceso = list_create(); // info arranca como lista vacía ya q arranca todo vacío
         proceso->tamanio_proceso = 0;
         proceso->instrucciones = list_create(); // arranca vacía pq todavia no le llegan las instrucciones
         proceso->pc = 0; // esto es para ya tenerlo seteado, pero luego se va a cambiar
-        liberar_buffer(buffer);
         pthread_mutex_lock (&mutex_lista_procesos);
         list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!
         pthread_mutex_unlock(&mutex_lista_procesos);
