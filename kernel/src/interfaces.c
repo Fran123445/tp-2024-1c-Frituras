@@ -37,8 +37,8 @@ void esperarClientesIO(t_conexion_escucha* params) {
     }
 }
 
-t_IOConectado* IOConectado_create(int socket_cliente, tipoInterfaz tipo) {
-    t_IOConectado* interfaz = malloc(sizeof(t_IOConectado));
+t_IOConectada* IOConectado_create(int socket_cliente, tipoInterfaz tipo) {
+    t_IOConectada* interfaz = malloc(sizeof(t_IOConectada));
 
     t_buffer* buffer = recibir_buffer(socket_cliente);
 
@@ -57,7 +57,7 @@ t_IOConectado* IOConectado_create(int socket_cliente, tipoInterfaz tipo) {
 
 void administrarInterfazGenerica(int* socket_cliente) {
 
-    t_IOConectado* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_GENERICA);
+    t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_GENERICA);
 
     op_code op;
 
@@ -89,7 +89,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
     } 
 }
 
-bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion) {
+bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion) {
 
     bool opValida;
 
@@ -110,14 +110,14 @@ bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion) {
     return opValida;
 }
 
-t_IOConectado* hallarInterfazConectada(char* nombre) {
+t_IOConectada* hallarInterfazConectada(char* nombre) {
 
-    bool _mismoNombre(t_IOConectado* interfaz) {
+    bool _mismoNombre(t_IOConectada* interfaz) {
         return !strcmp(nombre, interfaz->nombreInterfaz);
     };
 
     pthread_mutex_lock(&mutexListaInterfaces);
-    t_IOConectado* interfaz = list_find(interfacesConectadas, (void *) _mismoNombre);
+    t_IOConectada* interfaz = list_find(interfacesConectadas, (void *) _mismoNombre);
     pthread_mutex_unlock(&mutexListaInterfaces);
 
     return interfaz;

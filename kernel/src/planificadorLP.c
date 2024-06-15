@@ -219,7 +219,7 @@ void sacarProcesoBloqueado(int PID) {
     // quedo bastante fea la cosa pero es lo que hay
     int hallado = 0;
 
-    void _sacarDeColaInterfaz(t_IOConectado* interfaz) {
+    void _sacarDeColaInterfaz(t_IOConectada* interfaz) {
         if (hallado) return;
         hallado = sacarDeCola(interfaz->procesosBloqueados, PID);
     };

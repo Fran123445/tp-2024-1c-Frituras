@@ -93,7 +93,7 @@ void recibirDeCPU() {
 
 void enviarAIOGenerica(PCB* proceso, op_code operacion, t_buffer* buffer) {
     t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
-    t_IOConectado* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
+    t_IOConectada* interfaz = hallarInterfazConectada(infoInterfaz->nombre);
 
     if (comprobarOperacionValida(interfaz, operacion)) {
         t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));

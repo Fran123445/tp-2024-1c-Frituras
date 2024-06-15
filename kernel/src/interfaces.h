@@ -28,7 +28,7 @@ typedef struct {
     t_queue* procesosBloqueados;
     pthread_mutex_t mutex;
     sem_t semaforo;
-} t_IOConectado;
+} t_IOConectada;
 
 typedef struct {
     PCB* proceso;
@@ -37,7 +37,7 @@ typedef struct {
 
 void esperarClientesIO(t_conexion_escucha* params);
 void administrarInterfazGenerica(int* socket_cliente);
-t_IOConectado* hallarInterfazConectada(char* nombre);
-bool comprobarOperacionValida(t_IOConectado* interfaz, op_code operacion);
+t_IOConectada* hallarInterfazConectada(char* nombre);
+bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion);
 
 #endif /* CONN_H */
