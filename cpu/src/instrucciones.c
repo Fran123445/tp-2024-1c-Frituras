@@ -49,7 +49,7 @@ void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam){
     void* contenido_leido = recibir_contenido_memoria();  //le pido a memoria el contenido de la pagina
     // void* puntero_al_dato_leido = &contenido_leido; Me parece que esto ya no hace falta, veremos si hay seg. fault o no
 
-    return puntero_al_dato_leido;
+    return contenido_leido;
 }
 
 void enviar_a_memoria_para_escritura(uint32_t direccion_fisica, void* datos_a_escribir, uint32_t tam) {
