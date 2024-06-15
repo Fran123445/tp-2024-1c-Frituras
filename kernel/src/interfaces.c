@@ -89,6 +89,14 @@ void administrarInterfazGenerica(int* socket_cliente) {
     } 
 }
 
+t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer) {
+    t_solicitudIOGenerica* solicitud = malloc(sizeof(t_solicitudIOGenerica));
+    solicitud->proceso = proceso;
+    solicitud->unidadesTrabajo = buffer_read_int(buffer);
+
+    return solicitud;
+}
+
 bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion) {
 
     bool opValida;
