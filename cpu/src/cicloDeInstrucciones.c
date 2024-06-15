@@ -208,15 +208,15 @@ void execute(t_instruccion* instruccion){
         break;
     case iMOV_IN:
         MOV_IN(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: MOV_IN - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        log_info(log_cpu, "PID: %u - Ejecutando: MOV_IN - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         break;
     case iMOV_OUT:
         MOV_OUT(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: MOV_OUT - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        log_info(log_cpu, "PID: %u - Ejecutando: MOV_OUT - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         break;
     case iSUM:
         SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: SUM - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        log_info(log_cpu, "PID: %u - Ejecutando: SUM - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         break;
     case iSUB:
         SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
@@ -224,15 +224,15 @@ void execute(t_instruccion* instruccion){
         break;
     case iJNZ:
         JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: JNZ - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), *(int*)instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: JNZ - Parametro 1: %s, Parametro 2: %u", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), *(int*)instruccion->arg2);
         break;
     case iRESIZE:
         RESIZE(*(int *)instruccion->arg1);
-        log_info(log_cpu, "PID: %u - Ejecutando: RESIZE - Parametro 1: %p", pcb->PID, *(int*)instruccion->arg1);
+        log_info(log_cpu, "PID: %u - Ejecutando: RESIZE - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
         break;
     case iCOPY_STRING:
         COPY_STRING(*(int *)instruccion->arg1);
-        log_info(log_cpu, "PID: %u - Ejecutando: COPY_STRING - Parametro 1: %p", pcb->PID, *(int*)instruccion->arg1);
+        log_info(log_cpu, "PID: %u - Ejecutando: COPY_STRING - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
         break;
     /*
     case iWAIT:
@@ -248,11 +248,11 @@ void execute(t_instruccion* instruccion){
         break;
     case iIO_STDIN_READ:
         IO_STDIN_READ((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %s, Parametro 2: %p, Parametro 3: %p", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));   
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));   
         break;
     case iIO_STDOUT_WRITE:
         IO_STDOUT_WRITE((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %p, Parametro 2: %p, Parametro 3: %p", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));    
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %p, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));    
         break;
     /*
     case iIO_FS_CREATE:

@@ -83,7 +83,6 @@ void SET(registrosCPU registro, int valor){
 
     size_t tam_reg = tamanioRegistro(registro);
 
-
     switch (tam_reg) {
         case sizeof(uint8_t):
             *(uint8_t *)reg_a_setear = (uint8_t)valor; 
@@ -125,6 +124,7 @@ void SUM(registrosCPU registroDestino, registrosCPU registroOrigen){
             }
             break;
     }
+
 }
 
 void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){ 
