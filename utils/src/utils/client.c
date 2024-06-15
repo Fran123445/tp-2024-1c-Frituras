@@ -21,6 +21,7 @@ int crear_conexion(char *ip, char* puerto, modulo_code modulo)
 
 	// Ahora que tenemos el socket, vamos a conectarlo pero primero verificamos que se pueda conectar
 	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen)==-1){
+		freeaddrinfo(server_info);
 		log_error(error,"Conexión fallida");
 		return -1;
 	}

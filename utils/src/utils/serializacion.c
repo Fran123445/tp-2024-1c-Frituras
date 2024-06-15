@@ -44,8 +44,22 @@ void agregar_int_a_paquete(t_paquete* paquete, int valor) {
 	agregar_a_paquete(paquete, &valor, sizeof(int));
 }
 
+void agregar_uint32_a_paquete(t_paquete* paquete, uint32_t valor) {
+	agregar_a_paquete(paquete, &valor, sizeof(uint32_t));
+}
+
 void agregar_string_a_paquete(t_paquete* paquete, char* string) {
 	agregar_a_paquete(paquete, string, strlen(string)+1);
+}
+
+void agregar_string_array_a_paquete(t_paquete* paquete, char** string_array) {
+	agregar_int_a_paquete(paquete, string_array_size(string_array));
+
+	void _agregar_string(char* string) {
+		agregar_string_a_paquete(paquete, string);
+	};
+	
+	string_iterate_lines(string_array, (void *) _agregar_string);
 }
 
 void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccion) {
@@ -58,7 +72,14 @@ void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccio
 }
 
 void agregar_PCB_a_paquete(t_paquete* paquete, PCB* pcb) {
-	agregar_a_paquete(paquete, pcb, sizeof(PCB));
+
+	agregar_int_a_paquete(paquete, pcb->PID);
+	agregar_uint32_a_paquete(paquete, pcb->programCounter);
+	agregar_int_a_paquete(paquete, pcb->quantum);
+	agregar_int_a_paquete(paquete, pcb->estado);
+	agregar_a_paquete(paquete, &pcb->registros, sizeof(registros_cpu));
+	agregar_string_array_a_paquete(paquete, pcb->recursosAsignados);
+
 }
 
 void agregar_interfaz_generica_a_paquete(t_paquete* paquete, t_interfaz_generica* interfaz) {
@@ -78,7 +99,6 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente)
 
 void eliminar_paquete(t_paquete* paquete)
 {
-    
     free(paquete->buffer->stream);
 	free(paquete->buffer);
 	free(paquete);
@@ -93,11 +113,15 @@ t_buffer* recibir_buffer(int socket_cliente){
 
 	return buffer;
 }
-
-void buffer_read(t_buffer* buffer, void* data) {
-    int size_data;
+int read_buffer_tamanio (t_buffer* buffer){
+	int size_data;
 	memcpy(&size_data, buffer->stream, sizeof(int));
-    memcpy(data, buffer->stream + sizeof(int), size_data);
+	return size_data;
+}
+void buffer_read(t_buffer* buffer, void* data) {
+
+    int size_data = read_buffer_tamanio(buffer);
+	memcpy(data, buffer->stream + sizeof(int), size_data);
 
     uint32_t nuevo_size = buffer->size - size_data - sizeof(int);
     void* nuevo_stream = malloc(nuevo_size);
@@ -122,6 +146,9 @@ uint32_t buffer_read_uint32(t_buffer* buffer) {
 }
 
 char* buffer_read_string(t_buffer* buffer) {
+	// esto podria modificarlo, ya que le esta dando un tope al tamaño
+	// de los strings que recibimos, pero tendria que modificar buffer_read y
+	// en este momento por lo menos no tengo ganas
     char* string = malloc(sizeof(char)*128);
 
     buffer_read(buffer, string);
@@ -129,10 +156,28 @@ char* buffer_read_string(t_buffer* buffer) {
     return string;
 }
 
+char** buffer_read_string_array(t_buffer* buffer) {
+	int size = buffer_read_int(buffer);
+	char** string_array = string_array_new();
+
+	for(int i = 0; i < size; i++) {
+		char* string = buffer_read_string(buffer);
+		string_array_push(&string_array, string);
+	}
+
+	return string_array;
+}
+
 PCB* buffer_read_pcb(t_buffer* buffer) {
 	PCB* pcb = malloc(sizeof(PCB));
-	buffer_read(buffer, pcb);
 
+	pcb->PID = buffer_read_int(buffer);
+	pcb->programCounter = buffer_read_uint32(buffer);
+	pcb->quantum = buffer_read_int(buffer);
+	pcb->estado = buffer_read_int(buffer);
+	buffer_read(buffer, &pcb->registros);
+	pcb->recursosAsignados = buffer_read_string_array(buffer);
+	
     return pcb;
 }
 
@@ -152,14 +197,6 @@ t_instruccion* buffer_read_instruccion(t_buffer* buffer) {
 	return inst;
 }
 
-t_dispatch* buffer_read_dispatch(t_buffer* buffer) {
-	t_dispatch* dispatch = malloc(sizeof(t_dispatch));
-	dispatch->proceso = buffer_read_pcb(buffer);
-	dispatch->instruccion = buffer_read_instruccion(buffer);
-
-	return dispatch;
-}
-
 t_interfaz_generica* buffer_read_interfaz_generica(t_buffer* buffer) {
     t_interfaz_generica* interfaz = malloc(sizeof(t_interfaz_generica));
 
@@ -176,13 +213,28 @@ void liberar_buffer(t_buffer* buffer) {
 
 int recibir_operacion(int socket_cliente)
 {
+<<<<<<< HEAD
 	int cod_op;
 	ssize_t resultado = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
 	if(resultado > 0)
+=======
+	op_code cod_op;
+	int tamanioBuffer;
+
+
+	ssize_t bytes = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
+	if(bytes > 0) {
+		// revisa si el tamaño del buffer es 0, de ser asi lo saca del buffer del socket
+		recv(socket_cliente, &tamanioBuffer, sizeof(int), MSG_PEEK);
+		if(tamanioBuffer == 0) {
+			recv(socket_cliente, &tamanioBuffer, sizeof(int), MSG_WAITALL);
+		}
+
+>>>>>>> main
 		return cod_op;
+	}
 	else
 	{
-		close(socket_cliente);
-		return -1;
+		return close(socket_cliente);
 	}
 }

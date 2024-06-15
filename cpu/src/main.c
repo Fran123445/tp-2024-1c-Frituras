@@ -8,15 +8,20 @@ int socket_kernel_i;
 int socket_servidor_d;
 int socket_servidor_i;
 
+t_log* log_ciclo;
+
 volatile int hay_interrupcion = 0;
 PCB* pcb;
 
+<<<<<<< HEAD
 t_instruccion* sum;
 t_instruccion* set1;
 t_instruccion* set2;
 t_instruccion* exitt; 
 
 t_instruccion* instrucciones[4];
+=======
+>>>>>>> main
 
 void iniciar_servidores(t_config* config) {
     t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", true, LOG_LEVEL_TRACE);
@@ -55,6 +60,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+<<<<<<< HEAD
+=======
+    log_ciclo = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
+
+>>>>>>> main
     pthread_mutex_init(&mutexInterrupt, NULL);
 
    
@@ -75,6 +85,7 @@ int main(int argc, char* argv[]) {
     pthread_join(threadEscuchaInterrupt, NULL);
 
     config_destroy(config);
+    log_destroy(log_ciclo);
     liberar_conexion(socket_memoria);
     pthread_mutex_destroy(&mutexInterrupt);
 

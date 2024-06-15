@@ -3,7 +3,10 @@
 #include <utils/client.h>
 #include <utils/server.h>
 #include <utils/serializacion.h>
+<<<<<<< HEAD
 //Falta agregar hilos para diferentes conexiones 
+=======
+>>>>>>> main
 
 void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
@@ -44,8 +47,13 @@ int main(int argc, char* argv[]) {
 
     char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
 
+<<<<<<< HEAD
     if(!strcmp(tipo,"IO_GEN_SLEEP")){
         iniciarInterfazGenerica(conexion_kernel, nuevo_config, "Interfaz1");
+=======
+    if(!strcmp(tipo,"GENERICA")){
+        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
+>>>>>>> main
     }
 
     return 0;

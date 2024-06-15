@@ -29,4 +29,3 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu, int tiempo_retard
     enviar_paquete(paquete, socket_cpu);
     eliminar_paquete(paquete);
 }
-

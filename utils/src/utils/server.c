@@ -36,7 +36,11 @@ int iniciar_servidor(char *puerto, t_log *log)
 	if (listen(socket_servidor, MAXCONN) < 0) {
 		log_error(loggerServ, "Error listen");
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> main
 	freeaddrinfo(servinfo);
 	log_trace(loggerServ, "Listo para escuchar a mi cliente");
 	return socket_servidor;

@@ -32,6 +32,8 @@ void enviarAExit(PCB* pcb, motivo_exit motivo) {
     cambiarEstado(pcb, ESTADO_EXIT);
     queue_push(colaExit, aExit);
     pthread_mutex_unlock(&mutexExit);
+    
+    sem_post(&procesosEnExit);
 }
 
 void procesosReadyLog(char** lista) {
@@ -97,8 +99,6 @@ void vaciarExit() {
         pthread_mutex_unlock(&mutexLogger);
 
         sem_post(&gradoMultiprogramacion);
-
-        free(motivo);
         free(procesoAFinalizar->pcb);
         free(procesoAFinalizar);
     }
@@ -183,7 +183,11 @@ void recibirDeCPU() {
 }
 
 void planificarRecibido(op_code operacion, t_buffer* buffer) {
-    PCB* proceso = buffer_read_pcb(buffer);
+    PCB* procesoExec = buffer_read_pcb(buffer);
+    PCB* proceso = hallarPCB(procesoExec->PID);
+
+    *proceso = *procesoExec;
+
     switch (operacion) {
         case ENVIAR_IO_GEN_SLEEP:
             t_interfaz_generica* infoInterfaz = buffer_read_interfaz_generica(buffer);
@@ -216,6 +220,7 @@ void planificarRecibido(op_code operacion, t_buffer* buffer) {
             pthread_mutex_unlock(&mutexLogger);
             break;
     }
+    sem_post(&cpuDisponible);
 }
 
 void planificacionPorFIFO() {
