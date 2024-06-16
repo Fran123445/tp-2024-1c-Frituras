@@ -74,7 +74,7 @@ void agregar_instruccion_a_paquete(t_paquete* paquete, t_instruccion* instruccio
 void agregar_PCB_a_paquete(t_paquete* paquete, PCB* pcb) {
 
 	agregar_int_a_paquete(paquete, pcb->PID);
-	agregar_uint32_a_paquete(paquete, pcb->programCounter);
+	agregar_uint32_a_paquete(paquete, pcb->registros.PC);
 	agregar_int_a_paquete(paquete, pcb->quantum);
 	agregar_int_a_paquete(paquete, pcb->estado);
 	agregar_a_paquete(paquete, &pcb->registros, sizeof(registros_cpu));
@@ -173,7 +173,7 @@ PCB* buffer_read_pcb(t_buffer* buffer) {
 	PCB* pcb = malloc(sizeof(PCB));
 
 	pcb->PID = buffer_read_int(buffer);
-	pcb->programCounter = buffer_read_uint32(buffer);
+	pcb->registros.PC = buffer_read_uint32(buffer);
 	pcb->quantum = buffer_read_int(buffer);
 	pcb->estado = buffer_read_int(buffer);
 	buffer_read(buffer, &pcb->registros);
