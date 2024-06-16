@@ -27,7 +27,7 @@ void enviar_pcb(op_code motivo){
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
-
+ 
 void enviar_PC_a_memoria(uint32_t pc){
     t_paquete* paquete = crear_paquete(ENVIO_DE_INSTRUCCIONES);
     agregar_int_a_paquete(paquete, pcb->PID);
@@ -54,17 +54,17 @@ char* obtener_instruccion_de_memoria(){
 char* fetch(){
     int pid = pcb->PID;
  
-    log_info(log_cpu, "PID: %u - FETCH - Program Counter: %u", pid, pcb->programCounter);
+    log_info(log_cpu, "PID: %u - FETCH - Program Counter: %u", pid, pcb->registros.PC);
 
-    enviar_PC_a_memoria(pcb->programCounter);
+    enviar_PC_a_memoria(pcb->registros.PC);
     char* instruccionEncontrada = obtener_instruccion_de_memoria();
 
-    pcb->programCounter++;
+    pcb->registros.PC ++;
 
     return instruccionEncontrada;
 }
 
-t_instruccion* decode(char* instruccion_sin_decodificar){
+t_instruccion*  decode(char* instruccion_sin_decodificar){
 
     t_list* lista = dividir_cadena_en_tokens(instruccion_sin_decodificar);
     t_tipoInstruccion tipo_de_instruccion = string_a_tipo_instruccion(list_get(lista,0));
@@ -138,6 +138,15 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
             instruccion->interfaz = list_get(lista,1);
+            break;
+        case iRESIZE:
+            valor = atoi(list_get(lista, 1));
+            *valor_ptr = valor;
+            instruccion->tipo = iRESIZE;
+            instruccion->arg1 = valor_ptr;
+            instruccion->sizeArg1 = sizeof(uint32_t);
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
             break;
         case iMOV_IN:
             instruccion->tipo = iMOV_IN;
@@ -302,6 +311,13 @@ void realizar_ciclo_de_instruccion(){
         
         execute(instruccion_a_ejecutar);
         // Verificar condiciones de salida 
+        if(instruccion_a_ejecutar->tipo == iRESIZE){
+            op_code cod_op = recibir_operacion(socket_memoria);
+            if(cod_op == OUT_OF_MEMORY){
+            enviar_pcb(cod_op);
+            break;
+            }
+        }
         if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
             break;
         }
