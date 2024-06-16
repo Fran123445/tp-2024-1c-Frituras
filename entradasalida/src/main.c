@@ -147,30 +147,15 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
 
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create("entradasalida.config");
+    t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
     }; 
 
     int conexion_kernel = crear_conexion(config_get_string_value(nuevo_config,"IP_KERNEL"), config_get_string_value(nuevo_config, "PUERTO_KERNEL"), IO);
     conexion_memoria = crear_conexion(config_get_string_value(nuevo_config, "IP_MEMORIA"), config_get_string_value(nuevo_config, "PUERTO_MEMORIA"), IO);
-    int conexion_memoria = crear_conexion(config_get_string_value(nuevo_config,"IP_MEMORIA"), config_get_string_value(nuevo_config, "PUERTO_MEMORIA"), IO);
+
     char* tipo = config_get_string_value(nuevo_config,"TIPO_INTERFAZ");
-
-
-    t_paquete* paquete1 = crear_paquete(CONEXION_STDIN);
-    enviar_paquete(paquete1, conexion_memoria);
-    t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_ESCRITURA);
-    char* prueba = "Hola";
-    uint32_t df = 10;
-    agregar_uint32_a_paquete(paquete, df);
-    agregar_string_a_paquete(paquete, prueba);
-    enviar_paquete(paquete, conexion_memoria);
-    eliminar_paquete(paquete);
-
-    if(!strcmp(tipo,"IO_STDIN_READ")){
-        iniciarInterfazSTDIN(conexion_kernel, nuevo_config, argv[1]);
-    }
 
     if(!strcmp(tipo,"GENERICA")){
         iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
