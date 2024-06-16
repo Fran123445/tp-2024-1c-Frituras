@@ -31,8 +31,6 @@ typedef enum {
     ENVIO_PC,
     ENVIO_TAMANIO_PAGINA,
     ENVIO_RESIZE,
-    OUT_OF_MEMORY,
-    RESIZE_ACEPTADO,
     //Kernel - Memoria
     CREACION_PROCESO, //Acá Kernel me envia path
     FIN_PROCESO,
