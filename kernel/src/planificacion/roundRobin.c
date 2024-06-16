@@ -28,6 +28,7 @@ void esperarVuelta(PCB* proceso) {
     }
 
     pthread_cancel(esperaQuantum);
+    sem_post(&quantumFinalizado);
 }
 
 void cortarQuantum() {
