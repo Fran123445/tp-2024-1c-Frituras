@@ -21,7 +21,7 @@ t_log* log_memoria;
 
 
 void iniciar_servidores(t_config* config){
-    t_log* log_servidor = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
+    t_log* log_servidor = log_create("memoriaa.log", "Memoria",true, LOG_LEVEL_TRACE);
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_servidor);
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
@@ -60,8 +60,17 @@ void* escuchar_cpu(){
 
 void* escuchar_kernel(){
     while(1){
-        abrir_archivo_path(socket_kernel);
-        finalizar_proceso(socket_kernel);
+        op_code cod_op = recibir_operacion(socket_kernel);
+        switch (cod_op) {
+            case CREACION_PROCESO:
+                abrir_archivo_path(socket_kernel);
+                break;
+            case FINALIZAR_PROCESO:
+                finalizar_proceso(socket_kernel);
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -101,16 +110,16 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    t_log* log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
     iniciar_servidores(config);
-
-    memoria_contigua = iniciar_memoria(config);
-    int cant_marcos = calcular_marcos(config);
-    mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
+    log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
 
     tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
     tam_pagina = config_get_int_value(config, "TAM_PAGINA");
+
+    memoria_contigua = iniciar_memoria(config);
+    int cant_marcos = calcular_marcos(config);
+    mapa_de_marcos = iniciar_bitmap_marcos(cant_marcos);
 
     enviar_tamanio_pagina_a_cpu();
 
