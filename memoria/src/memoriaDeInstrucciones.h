@@ -1,3 +1,6 @@
+#ifndef MEM_INST_H
+#define MEM_INST_H
+
 #include <stdlib.h>
 #include <string.h>
 #include <commons/collections/list.h>
@@ -15,5 +18,6 @@ void destruir_proceso(t_proceso_memoria* proceso);
 void eliminar_proceso_de_lista_de_procesos(int PID);
 char* obtener_instruccion(int socket_kernel, int pc, int pid);
 
+#endif
 
 
