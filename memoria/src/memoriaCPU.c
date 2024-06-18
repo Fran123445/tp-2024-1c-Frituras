@@ -154,8 +154,8 @@ void* resize_proceso(int socket_cpu){
 
             exit(EXIT_FAILURE);
         }
-        int cant_paginas_viejas = ceil(proceso->tamanio_proceso/tam_pagina);
-        int cant_paginas_nuevas = ceil(tamanio_nuevo/tam_pagina);
+        int cant_paginas_viejas = ceil((float)proceso->tamanio_proceso/tam_pagina);
+        int cant_paginas_nuevas = ceil(((float)tamanio_nuevo/tam_pagina));
         int total_paginas_a_agregar = cant_paginas_nuevas - cant_paginas_viejas;
         chequear_espacio_memoria(total_paginas_a_agregar, socket_cpu);
 
@@ -164,7 +164,6 @@ void* resize_proceso(int socket_cpu){
         log_info(log_memoria, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
 
         proceso->tamanio_proceso = tamanio_nuevo;
-        proceso->tabla_del_proceso = agregar_n_entradas_vacias(total_paginas_a_agregar, proceso->tabla_del_proceso);
         asignar_frames_a_paginas(total_paginas_a_agregar,proceso);
 
     }else if (proceso->tamanio_proceso > tamanio_nuevo){
