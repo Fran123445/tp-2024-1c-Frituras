@@ -29,12 +29,8 @@ void* escribir_memoria(int socket){
         memcpy(memoria_contigua+direccion_fisica, valor_a_escribir, tamanio_a_escribir);
         pthread_mutex_unlock(&mutex_memoria_contigua);
 
-        t_paquete* paquete = crear_paquete(ESCRITURA_REALIZADA_OK);
-        enviar_paquete(paquete, socket);
-
         free(valor_a_escribir);
         liberar_buffer(buffer);
-        eliminar_paquete(paquete);
 }
 
 void* leer_memoria(int socket){
