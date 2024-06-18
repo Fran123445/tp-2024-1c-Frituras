@@ -15,6 +15,10 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
     enviar_paquete(paquete ,socket);
     eliminar_paquete(paquete);
 
+    // esto esta unicamente para que no quede memoria colgada
+    paquete = crear_paquete(CONEXION_IOGENERICA);
+    enviar_paquete(paquete, conexion_memoria);
+
     while (1) {
        ssize_t reciv = recibir_operacion(socket);
 
@@ -123,6 +127,15 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
 
     char* texto_completo = NULL;
 
+    t_paquete* paquete = crear_paquete(CONEXION_STDOUT);
+    agregar_string_a_paquete(paquete, nombre);
+    enviar_paquete(paquete ,socket);
+    eliminar_paquete(paquete);
+
+    paquete = crear_paquete(CONEXION_STDOUT);
+    enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
+
     ssize_t reciv = recibir_operacion(socket);
 
     if (reciv < 0) {
@@ -138,10 +151,9 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
     printf("STDOUT: %s\n", texto_completo);
     free(texto_completo);
     
-    t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
+    paquete = crear_paquete(OPERACION_FINALIZADA);
     enviar_paquete(paquete ,socket);
     eliminar_paquete(paquete);
-
 }
 
 
