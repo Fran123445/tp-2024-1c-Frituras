@@ -253,10 +253,16 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
 
     void *reg_datos = obtenerRegistro(registroDatos);
     void *reg_direccion = obtenerRegistro(registroDireccion);
+    uint32_t direccionLogicaInicial;
 
     size_t tamanio_a_escribir = tamanioRegistro(registroDatos);
 
-    uint32_t direccionLogicaInicial = *(uint32_t*)reg_direccion;
+    // Solucion (espero) provisional
+    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
+        direccionLogicaInicial = *(uint32_t*)reg_direccion;
+    } else {
+        direccionLogicaInicial = *(uint8_t*)reg_direccion;
+    }
 
     uint32_t pagina_inicial = obtener_numero_pagina(direccionLogicaInicial);
     uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_escribir-1); 
