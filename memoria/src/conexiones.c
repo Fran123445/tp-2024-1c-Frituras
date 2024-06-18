@@ -9,18 +9,35 @@
 #include "accesoEspacioUsuario.h"
 #include "conexiones.h"
 
-// Funciones auxiliares requeridas para pasarle como parámetro al hilo
-
-void* ejecutar_leer_memoria(void* arg) {
-    int socket = *(int*)arg;
-    free(arg);
-    return leer_memoria(socket);
+void manejoSTDOUT(int* socket_cliente) {
+    while(1) {
+        if (recibir_operacion(*socket_cliente) > 0) {
+            leer_memoria(*socket_cliente);
+        } else {
+            break;
+        }
+    }
 }
 
-void* ejecutar_escribir_memoria(void* arg) {
-    int socket = *(int*)arg;
-    free(arg);
-    return escribir_memoria(socket);
+void manejoSTDIN(int* socket_cliente) {
+    while(1) {
+        if (recibir_operacion(*socket_cliente) > 0) {
+            escribir_memoria(*socket_cliente);
+        } else {
+            break;
+        }
+    }
+}
+
+void manejoDIALFS(int* socket_cliente) {
+    while(1) {
+        op_code code_op = recibir_operacion(*socket_cliente);
+        if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
+            escribir_memoria(*socket_cliente);
+        }else {
+            leer_memoria(*socket_cliente);
+        }       
+    }
 }
 
 // Función para esperar los clientes
@@ -36,40 +53,25 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
             break;
         }
 
-        void* (*funcion)(void*); //puntero a funcion q toma arg void y devuelve void
-        op_code code_op;
+        void (*funcion)(int*);
 
         switch(recibir_operacion(*socket_cliente)){
             case CONEXION_STDIN:
-                while(1){
-                    code_op = recibir_operacion(*socket_cliente);
-                    if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
-                        funcion = ejecutar_escribir_memoria;
-                    }
+                funcion = manejoSTDIN;  
                 break;
-            }
             case CONEXION_STDOUT:
-                code_op = recibir_operacion(*socket_cliente);
-                if(code_op == ACCESO_ESPACIO_USUARIO_LECTURA){
-                    funcion = ejecutar_leer_memoria;
-                }
+                funcion = manejoSTDOUT;
                 break;
             case CONEXION_DIAL_FS:
-                code_op = recibir_operacion(*socket_cliente);
-                if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
-                    funcion = ejecutar_escribir_memoria;
-                }else if(code_op == ACCESO_ESPACIO_USUARIO_LECTURA){
-                    funcion = ejecutar_leer_memoria;
-                }            
+                funcion = manejoDIALFS;     
                 break;
-
             default:
                 log_error(log_memoria, "Conexión inválida de una interfaz");
-                break;
+                continue;
         }
 
-        pthread_create(&hilo, NULL, funcion, (void*)socket_cliente);
+        pthread_create(&hilo, NULL, (void *) funcion, (void*)socket_cliente);
         pthread_detach(hilo);
     }
 }
-       
+  
