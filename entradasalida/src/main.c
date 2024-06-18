@@ -49,7 +49,7 @@ void* recibir_contenido_memoria(){
     op_code cod_op = recibir_operacion(conexion_memoria);
     if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
         t_buffer* buffer = recibir_buffer(conexion_memoria);
-        void* data;
+        void* data = malloc(read_buffer_tamanio(buffer)+1);
         buffer_read(buffer, data);
         liberar_buffer(buffer);
         return data;
@@ -57,7 +57,7 @@ void* recibir_contenido_memoria(){
     return NULL;
 }
 
-void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam, uint32_t  pid){
+void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam, int  pid){
     pedir_contenido_memoria(direccion_fisica, tam, pid);
     void* contenido_leido = recibir_contenido_memoria();  //le pido a memoria el contenido de la pagina
     // void* puntero_al_dato_leido = &contenido_leido; Me parece que esto ya no hace falta, veremos si hay seg. fault o no
@@ -147,6 +147,7 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
     int pid = buffer_read_int(buffer);
 
     texto_completo = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam, pid);
+    texto_completo[tam+1] = '\0';
             
     printf("STDOUT: %s\n", texto_completo);
     free(texto_completo);
