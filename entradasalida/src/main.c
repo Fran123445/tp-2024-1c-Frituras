@@ -32,11 +32,11 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
     }
 }
 
-void pedir_contenido_memoria(uint32_t direccion_fisica, uint32_t tam, uint32_t  pid){
+void pedir_contenido_memoria(uint32_t direccion_fisica, uint32_t tam, int  pid){
     t_paquete* paquete = crear_paquete(ACCESO_ESPACIO_USUARIO_LECTURA);
     agregar_uint32_a_paquete(paquete, direccion_fisica);
     agregar_uint32_a_paquete(paquete, tam);
-    agregar_uint32_a_paquete(paquete, pid);
+    agregar_int_a_paquete(paquete, pid);
     enviar_paquete(paquete, conexion_memoria);
     eliminar_paquete(paquete);
 }
@@ -131,7 +131,7 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
     t_buffer* buffer = recibir_buffer(socket);
     uint32_t direccion_fisica = buffer_read_uint32(buffer);
     uint32_t tam = buffer_read_uint32(buffer);
-    uint32_t  pid = buffer_read_uint32(buffer);
+    int pid = buffer_read_int(buffer);
 
     texto_completo = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam, pid);
             

@@ -7,7 +7,7 @@ void* escribir_memoria(int socket){
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
         uint32_t tamanio_a_escribir = buffer_read_uint32(buffer);
-        uint32_t pid = buffer_read_int(buffer);
+        int pid = buffer_read_int(buffer);
 
         if(direccion_fisica + tamanio_a_escribir > tam_memoria){
             fprintf(stderr, "Direccion o tamanio a escribir invalido, sobrepasa la memoria");
@@ -38,7 +38,7 @@ void* leer_memoria(int socket){
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
         uint32_t tamanio_a_leer = buffer_read_uint32(buffer);
-        uint32_t pid = buffer_read_uint32(buffer);
+        int pid = buffer_read_int(buffer);
 
         if(direccion_fisica + tamanio_a_leer > tam_memoria){
             fprintf(stderr, "Direccion o tamanio a leer invalido, sobrepasa la memoria");
