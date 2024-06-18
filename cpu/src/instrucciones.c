@@ -16,7 +16,7 @@ void* obtenerRegistro(registrosCPU registro) {
     }
 }
 
-void enviar_tamanio_resize_a_memoria(int tamanio_en_bytes){
+void enviar_tamanio_resize_a_memoria(uint32_t tamanio_en_bytes){
     t_paquete* paquete = crear_paquete(ENVIO_RESIZE);
     agregar_int_a_paquete(paquete, pcb->PID);
     agregar_uint32_a_paquete(paquete, tamanio_en_bytes);
@@ -201,12 +201,8 @@ void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     pthread_mutex_unlock(&mutexInterrupt);
 }
 
-void RESIZE(int tamanio_en_bytes){
+void RESIZE(uint32_t tamanio_en_bytes){
     enviar_tamanio_resize_a_memoria(tamanio_en_bytes);
-    op_code cod_op = recibir_operacion(socket_memoria);
-    if(cod_op == OUT_OF_MEMORY){
-        enviar_pcb(cod_op);
-    }
 }
 
 void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){

@@ -138,6 +138,15 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg3 = 0;
             instruccion->interfaz = list_get(lista,1);
             break;
+        case iRESIZE:
+            valor = atoi(list_get(lista, 1));
+            *valor_ptr = valor;
+            instruccion->tipo = iRESIZE;
+            instruccion->arg1 = valor_ptr;
+            instruccion->sizeArg1 = sizeof(uint32_t);
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+            break;
         case iMOV_IN:
             instruccion->tipo = iMOV_IN;
             *argumento = string_a_registro(list_get(lista, 1));
@@ -297,6 +306,13 @@ void realizar_ciclo_de_instruccion(){
         
         execute(instruccion_a_ejecutar);
         // Verificar condiciones de salida 
+        if(instruccion_a_ejecutar->tipo == iRESIZE){
+            op_code cod_op = recibir_operacion(socket_memoria);
+            if(cod_op == OUT_OF_MEMORY){
+                enviar_pcb(cod_op);
+            break;
+            }
+        }
         if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
             break;
         }
