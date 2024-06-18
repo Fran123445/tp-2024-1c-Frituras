@@ -161,11 +161,11 @@ int main(int argc, char* argv[]) {
         iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
     }
 
-    if(!strcmp(tipo,"IO_STDIN_READ")){
+    if(!strcmp(tipo,"STDIN")){
         iniciarInterfazSTDIN(conexion_kernel, nuevo_config, argv[1]);
     }
 
-    if (!strcmp(tipo, "IO_STDOUT_WRITE")) {
+    if (!strcmp(tipo, "STDOUT")) {
         iniciarInterfazSTDOUT(conexion_kernel, nuevo_config, argv[1]);
     }
 
