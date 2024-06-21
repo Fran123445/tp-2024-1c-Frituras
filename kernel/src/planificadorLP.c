@@ -173,7 +173,7 @@ void iniciarProceso(char* path) {
     nuevoPCB->PID = siguientePID;
     nuevoPCB->estado = ESTADO_NEW;
     nuevoPCB->quantum = quantumInicial;
-    nuevoPCB->programCounter = 0;
+    nuevoPCB->registros.PC = 0;
     nuevoPCB->registros = inicializarRegistrosCPU();
     nuevoPCB->recursosAsignados = string_array_new();
 

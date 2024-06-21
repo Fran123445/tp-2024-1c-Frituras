@@ -24,7 +24,7 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
         
         t_buffer* buffer = recibir_buffer(socket);
         int unidades_trabajo = buffer_read_int(buffer);
-        sleep(tiempo_pausa * unidades_trabajo);
+        usleep(tiempo_pausa * unidades_trabajo);
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,socket);
