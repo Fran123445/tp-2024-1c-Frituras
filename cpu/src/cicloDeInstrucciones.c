@@ -53,12 +53,12 @@ char* obtener_instruccion_de_memoria(){
 char* fetch(){
     int pid = pcb->PID;
  
-    log_info(log_cpu, "PID: %u - FETCH - Program Counter: %u", pid, pcb->programCounter);
+    log_info(log_cpu, "PID: %u - FETCH - Program Counter: %u", pid, pcb->registros.PC);
 
-    enviar_PC_a_memoria(pcb->programCounter);
+    enviar_PC_a_memoria(pcb->registros.PC);
     char* instruccionEncontrada = obtener_instruccion_de_memoria();
 
-    pcb->programCounter++;
+    pcb->registros.PC++;
 
     return instruccionEncontrada;
 }
@@ -215,30 +215,32 @@ void execute(t_instruccion* instruccion){
         log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
         break;
     case iMOV_IN:
+        log_info(log_cpu, "PID: %u - Ejecutando: MOV_IN - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         MOV_IN(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iMOV_OUT:
+        log_info(log_cpu, "PID: %u - Ejecutando: MOV_OUT - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         MOV_OUT(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iSUM:
         SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: SUM - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         break;
     case iSUB:
         SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: SUB - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         break;
     case iJNZ:
         JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: JNZ - Parametro 1: %s, Parametro 2: %u", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), *(int*)instruccion->arg2);
         break;
     case iRESIZE:
         RESIZE(*(int *)instruccion->arg1);
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p", pcb->PID, instruccion->tipo, instruccion->arg1);
+        log_info(log_cpu, "PID: %u - Ejecutando: RESIZE - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
         break;
     case iCOPY_STRING:
+        log_info(log_cpu, "PID: %u - Ejecutando: COPY_STRING - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
         COPY_STRING(*(int *)instruccion->arg1);
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p", pcb->PID, instruccion->tipo, instruccion->arg1);
         break;
     /*
     case iWAIT:
@@ -249,14 +251,16 @@ void execute(t_instruccion* instruccion){
         break;
     */
     case iIO_GEN_SLEEP:
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_GEN_SLEEP - Parametro 1: %s, Parametro 2: %u", pcb->PID, (char*)instruccion->interfaz, *(int*)instruccion->arg1);
         IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);   
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->interfaz, instruccion->arg1);      
         break;
     case iIO_STDIN_READ:
-        IO_STDIN_READ(instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        IO_STDIN_READ((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);   
         break;
     case iIO_STDOUT_WRITE:
-        IO_STDOUT_WRITE(instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %p, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        IO_STDOUT_WRITE((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);    
         break;
     /*
     case iIO_FS_CREATE:
@@ -309,7 +313,7 @@ void realizar_ciclo_de_instruccion(){
         if(instruccion_a_ejecutar->tipo == iRESIZE){
             op_code cod_op = recibir_operacion(socket_memoria);
             if(cod_op == OUT_OF_MEMORY){
-                enviar_pcb(cod_op);
+            enviar_pcb(cod_op);
             break;
             }
         }
