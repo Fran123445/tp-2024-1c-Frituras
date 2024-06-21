@@ -55,6 +55,45 @@ t_IOConectada* IOConectado_create(int socket_cliente, tipoInterfaz tipo) {
     return interfaz;
 }
 
+void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
+    op_code op;
+
+    while (1) {
+        t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
+        sem_wait(&interfaz->semaforo);
+
+        pthread_mutex_lock(&interfaz->mutex);
+        t_solicitudIOSTDIN_OUT* solicitud = queue_pop(interfaz->procesosBloqueados);
+        pthread_mutex_unlock(&interfaz->mutex);
+
+        agregar_int_a_paquete(paquete, solicitud->proceso->PID);
+        while(list_size(solicitud->direcciones) > 0 ) {
+            t_direccionMemoria* dir = list_remove(solicitud->direcciones, 0);
+            agregar_uint32_a_paquete(paquete, dir->direccion);
+            agregar_uint32_a_paquete(paquete, dir->tamanio);
+            free(dir);
+        }
+
+        enviar_paquete(paquete, *socket_cliente);
+        eliminar_paquete(paquete);
+
+        op = recibir_operacion(*socket_cliente);
+        if (op <= 0) {
+            log_error(logger, "La operación de IO STDOUT no se pudo completar exitosamente");
+            enviarAExit(solicitud->proceso, INVALID_INTERFACE);
+            free(solicitud);
+            break;
+        }
+        
+        pthread_mutex_lock(&mutexPlanificador);
+        planificar(op, solicitud->proceso, NULL);
+        pthread_mutex_unlock(&mutexPlanificador);
+
+        list_destroy(solicitud->direcciones);
+        free(solicitud);
+    } 
+}
+
 void administrarInterfazGenerica(int* socket_cliente) {
 
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_GENERICA);
@@ -89,77 +128,16 @@ void administrarInterfazGenerica(int* socket_cliente) {
     } 
 }
 
-// repito exactamente el mismo codigo 3 veces :-)
 void administrarSTDIN(int* socket_cliente) {
-
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_STDIN);
 
-    op_code op;
-
-    while (1) {
-        t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
-        sem_wait(&interfaz->semaforo);
-
-        pthread_mutex_lock(&interfaz->mutex);
-        t_solicitudIOSTDIN_OUT* solicitud = queue_pop(interfaz->procesosBloqueados);
-        pthread_mutex_unlock(&interfaz->mutex);
-
-        agregar_uint32_a_paquete(paquete, solicitud->dirFisica);
-        agregar_int_a_paquete(paquete, solicitud->tamanio);
-        agregar_int_a_paquete(paquete, solicitud->proceso->PID);
-        enviar_paquete(paquete, *socket_cliente);
-        eliminar_paquete(paquete);
-
-        op = recibir_operacion(*socket_cliente);
-        if (op <= 0) {
-            log_error(logger, "La operación de IO STDIN no se pudo completar exitosamente");
-            enviarAExit(solicitud->proceso, INVALID_INTERFACE);
-            free(solicitud);
-            break;
-        }
-        
-        pthread_mutex_lock(&mutexPlanificador);
-        planificar(op, solicitud->proceso, NULL);
-        pthread_mutex_unlock(&mutexPlanificador);
-
-        free(solicitud);
-    } 
+    manejarSTDINOUT(socket_cliente, interfaz);
 }
 
 void administrarSTDOUT(int* socket_cliente) {
-
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_STDOUT);
 
-    op_code op;
-
-    while (1) {
-        t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
-        sem_wait(&interfaz->semaforo);
-
-        pthread_mutex_lock(&interfaz->mutex);
-        t_solicitudIOSTDIN_OUT* solicitud = queue_pop(interfaz->procesosBloqueados);
-        pthread_mutex_unlock(&interfaz->mutex);
-
-        agregar_uint32_a_paquete(paquete, solicitud->dirFisica);
-        agregar_int_a_paquete(paquete, solicitud->tamanio);
-        agregar_int_a_paquete(paquete, solicitud->proceso->PID);
-        enviar_paquete(paquete, *socket_cliente);
-        eliminar_paquete(paquete);
-
-        op = recibir_operacion(*socket_cliente);
-        if (op <= 0) {
-            log_error(logger, "La operación de IO STDOUT no se pudo completar exitosamente");
-            enviarAExit(solicitud->proceso, INVALID_INTERFACE);
-            free(solicitud);
-            break;
-        }
-        
-        pthread_mutex_lock(&mutexPlanificador);
-        planificar(op, solicitud->proceso, NULL);
-        pthread_mutex_unlock(&mutexPlanificador);
-
-        free(solicitud);
-    } 
+    manejarSTDINOUT(socket_cliente, interfaz);
 }
 
 t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer) {
@@ -173,8 +151,17 @@ t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer
 t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buffer) {
     t_solicitudIOSTDIN_OUT* solicitud = malloc(sizeof(t_solicitudIOSTDIN_OUT));
     solicitud->proceso = proceso;
-    solicitud->dirFisica = buffer_read_uint32(buffer);
-    solicitud->tamanio = buffer_read_int(buffer);
+    t_list* direcciones = list_create();
+    
+    while(buffer->size > 0) {
+        t_direccionMemoria* dir = malloc(sizeof(t_direccionMemoria));
+        dir->direccion = buffer_read_uint32(buffer);
+        dir->tamanio = buffer_read_uint32(buffer);
+
+        list_add(direcciones, dir);
+    }
+
+    solicitud->direcciones = direcciones;
 
     return solicitud;
 }

@@ -76,51 +76,53 @@ void enviar_a_memoria_para_escribir(uint32_t direccion_fisica, void* datos_a_esc
 
 void iniciarInterfazSTDIN(int socket, t_config* config, char* nombre) {
     
-    char* texto;
-    printf("Ingrese texto: ");
-    if (fgets(texto, sizeof(texto), stdin) == NULL) {
-        fprintf(stderr, "Error texto usuario\n");
-        exit(-1);
-    }
-
-    int texto_len = strlen(texto);
-
-    if (texto_len > 0 && texto[texto_len - 1] == '\n') {
-        texto[--texto_len] = '\0';  // Elimina el salto de linea final (si existe)
-    }
-
-    int enviado = 0;
-
-    while (enviado < texto_len) {
+    while(1) {
         ssize_t reciv = recibir_operacion(socket);
-        if (reciv < 0) {
+        
+        char* texto;
+        printf("Ingrese texto: ");
+        if (fgets(texto, sizeof(texto), stdin) == NULL) {
+            fprintf(stderr, "Error texto usuario\n");
             exit(-1);
         }
 
-        t_buffer* buffer = recibir_buffer(socket);
-        uint32_t direccion_fisica = buffer_read_uint32(buffer);
-        uint32_t tam = buffer_read_uint32(buffer);
-        int pid = buffer_read_int(buffer);
+        int texto_len = strlen(texto);
 
-        while (enviado < texto_len && tam > 0) {
-            int tam_envio = (texto_len - enviado > tam) ? tam : texto_len - enviado;
-            char* parte_texto = strndup(texto + enviado, tam_envio);
-        
-            enviar_a_memoria_para_escribir(direccion_fisica,parte_texto, tam_envio,pid);
-
-            free(parte_texto);
-            enviado += tam_envio;
-
-            direccion_fisica += tam_envio;
-
-            tam -= tam_envio;  // Reducimos el tamaño restante de la página
+        if (texto_len > 0 && texto[texto_len - 1] == '\n') {
+            texto[--texto_len] = '\0';  // Elimina el salto de linea final (si existe)
         }
 
-    }
-    t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
-    enviar_paquete(paquete ,socket);
-    eliminar_paquete(paquete);
+        int enviado = 0;
 
+        while (enviado < texto_len) {
+            if (reciv < 0) {
+                exit(-1);
+            }
+
+            t_buffer* buffer = recibir_buffer(socket);
+            uint32_t direccion_fisica = buffer_read_uint32(buffer);
+            uint32_t tam = buffer_read_uint32(buffer);
+            int pid = buffer_read_int(buffer);
+
+            while (enviado < texto_len && tam > 0) {
+                int tam_envio = (texto_len - enviado > tam) ? tam : texto_len - enviado;
+                char* parte_texto = strndup(texto + enviado, tam_envio);
+            
+                enviar_a_memoria_para_escribir(direccion_fisica,parte_texto, tam_envio,pid);
+
+                free(parte_texto);
+                enviado += tam_envio;
+
+                direccion_fisica += tam_envio;
+
+                tam -= tam_envio;  // Reducimos el tamaño restante de la página
+            }
+
+        }
+        t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
+        enviar_paquete(paquete ,socket);
+        eliminar_paquete(paquete);
+    }
 }
 
 void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
@@ -136,25 +138,32 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
     enviar_paquete(paquete, conexion_memoria);
     eliminar_paquete(paquete);
 
-    ssize_t reciv = recibir_operacion(socket);
+    while(1) {
+        ssize_t reciv = recibir_operacion(socket);
 
-    if (reciv < 0) {
-        exit(-1);
+        if (reciv < 0) {
+            exit(-1);
+        }
+        t_buffer* buffer = recibir_buffer(socket);
+        int pid = buffer_read_int(buffer);
+
+        while (buffer->size > 0) {
+            uint32_t direccion_fisica = buffer_read_uint32(buffer);
+            uint32_t tam = buffer_read_uint32(buffer);
+
+            texto_completo = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam, pid);
+            texto_completo[tam+1] = '\0';
+                    
+            printf("%s", texto_completo);
+        }
+
+        printf("\n");
+        free(texto_completo);
+        
+        paquete = crear_paquete(OPERACION_FINALIZADA);
+        enviar_paquete(paquete ,socket);
+        eliminar_paquete(paquete);
     }
-    t_buffer* buffer = recibir_buffer(socket);
-    uint32_t direccion_fisica = buffer_read_uint32(buffer);
-    uint32_t tam = buffer_read_uint32(buffer);
-    int pid = buffer_read_int(buffer);
-
-    texto_completo = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam, pid);
-    texto_completo[tam+1] = '\0';
-            
-    printf("STDOUT: %s\n", texto_completo);
-    free(texto_completo);
-    
-    paquete = crear_paquete(OPERACION_FINALIZADA);
-    enviar_paquete(paquete ,socket);
-    eliminar_paquete(paquete);
 }
 
 

@@ -36,9 +36,13 @@ typedef struct {
 } t_solicitudIOGenerica;
 
 typedef struct {
+    uint32_t direccion;
+    uint32_t tamanio;
+} t_direccionMemoria;
+
+typedef struct {
     PCB* proceso;
-    uint32_t dirFisica;
-    int tamanio;
+    t_list* direcciones;
 } t_solicitudIOSTDIN_OUT;
 
 void esperarClientesIO(t_conexion_escucha* params);
