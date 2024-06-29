@@ -6,41 +6,10 @@
 
 int conexion_memoria;
 
-int block_size;
+uint8_t* bitmap;
 int block_count;
-int delay_compactation;
-char* path_base_dialfs;
-t_bitarray* bitmap;
-
-
-typedef struct {
-    uint8_t operacion;
-    char nombre_archivo[256];
-    int registro_tamaño;
-    int registro_direccion;
-    int registro_puntero_archivo;
-} solicitud_dialfs_t;
-
-ssize_t recibir_solicitud(int socket, solicitud_dialfs_t* solicitud) {
-    ssize_t bytes_recibidos = recv(socket, solicitud, sizeof(solicitud_dialfs_t), 0);
-    if (bytes_recibidos < 0) {
-        perror("Error recibiendo solicitud");
-        return -1;
-    }
-    return bytes_recibidos;
-}
-
-void* obtener_datos_memoria(int direccion, int tamaño) {
-    void* datos = malloc(tamaño);
-    memset(datos, 0, tamaño);
-    return datos;
-}
-
-void enviar_datos_memoria(int direccion, void* datos, int tamaño) {
-    //armar
-}
-
-
+int block_size;
+int retraso_compactacion;
 
 void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
@@ -201,229 +170,323 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
         eliminar_paquete(paquete);
     }
 }
-
-void inicializar_bitmap() {
-    char* bitmap_path;
+ //BITMAP
+void cargar_bitmap(char* path_base_dialfs) {
+    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
     sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
 
-    int fd = open(bitmap_path, O_RDWR);
-    if (fd < 0) {
-        perror("No se pudo abrir el archivo de bitmap");
+    FILE* file = fopen(bitmap_path, "rb");
+    if (!file) {
+        file = fopen(bitmap_path, "wb");
+        if (!file) {
+            perror("Error creando bitmap.dat");
+            exit(EXIT_FAILURE);
+        }
+
+        int bitmap_size = (block_count + 7) / 8;
+        bitmap = malloc(bitmap_size);
+        if (!bitmap) {
+            perror("Error de memoria");
+            exit(EXIT_FAILURE);
+        }
+        memset(bitmap, 0, bitmap_size);
+        fwrite(bitmap, bitmap_size, 1, file);
+        fclose(file);
+    } else {
+        // Si el archivo existe lo cargo en memoria
+        fseek(file, 0, SEEK_END);
+        long size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+        bitmap = malloc(size);
+        if (!bitmap) {
+            perror("Error de memoria");
+            exit(EXIT_FAILURE);
+        }
+        fread(bitmap, size, 1, file);
+        fclose(file);
+    }
+
+    printf("Bitmap cargado exitosamente desde %s.\n", bitmap_path);
+}
+
+void guardar_bitmap(char* path_base_dialfs) {
+    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
+    sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
+
+    FILE* file = fopen(bitmap_path, "wb");
+    if (!file) {
+        perror("Error abriendo bitmap.dat");
         exit(EXIT_FAILURE);
     }
 
-    struct stat stat_buf;
-    fstat(fd, &stat_buf);
+    fwrite(bitmap, (block_count + 7) / 8, 1, file);
 
-    void* bitarray = mmap(NULL, stat_buf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    bitmap = bitarray_create_with_mode(bitarray, stat_buf.st_size, LSB_FIRST);
+    fclose(file);
 
-    close(fd);
+    printf("Bitmap guardado exitosamente en %s.\n", bitmap_path);
 }
-void compactar_filesystem() {
-    usleep(delay_compactation * 1000);
-}
-void crear_archivo(char* nombre_archivo) {
-    char* metadata_path;
-    sprintf(metadata_path, "%s/%s", path_base_dialfs, nombre_archivo);
 
-    FILE* metadata_file = fopen(metadata_path, "w");
-    if (!metadata_file) {
-        perror("No se pudo crear el archivo de metadata");
-        exit(EXIT_FAILURE);
-    }
-
-    int bloque_inicial = -1;
+int encontrar_bloque_libre() {
     for (int i = 0; i < block_count; i++) {
-        if (!bitarray_test_bit(bitmap, i)) {
-            bitarray_set_bit(bitmap, i);
-            bloque_inicial = i;
-            break;
+        if (!(bitmap[i / 8] & (1 << (i % 8)))) {
+            return i;
         }
     }
-
-    if (bloque_inicial == -1) {
-        perror("No hay bloques libres disponibles");
-        fclose(metadata_file);
-        exit(EXIT_FAILURE);
-    }
-
-    fprintf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=0\n", bloque_inicial);
-    fclose(metadata_file);
+    return -1;
 }
 
-void borrar_archivo(char* nombre_archivo) {
-    char* metadata_path;
-    sprintf(metadata_path, "%s/%s", path_base_dialfs, nombre_archivo);
-
-    FILE* metadata_file = fopen(metadata_path, "r");
-    if (!metadata_file) {
-        perror("No se pudo abrir el archivo de metadata para borrar");
-        exit(EXIT_FAILURE);
+void marcar_bloque(int bloque, int ocupado) {
+    if (ocupado) {
+        bitmap[bloque / 8] |= (1 << (bloque % 8));
+    } else {
+        bitmap[bloque / 8] &= ~(1 << (bloque % 8));
     }
+}
+ //BITMAP
 
-    int bloque_inicial, tam_archivo;
-    fscanf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", &bloque_inicial, &tam_archivo);
-    fclose(metadata_file);
-
-    for (int i = 0; i < (tam_archivo + block_size - 1) / block_size; i++) {
-        bitarray_clean_bit(bitmap, bloque_inicial + i);
+// METADATA
+void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo) {
+    FILE* file = fopen(nombre_archivo, "w");
+    if (!file) {
+        perror("Error creando archivo de metadata");
+        exit(1);
     }
-
-    remove(metadata_path);
+    fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
+    fclose(file);
 }
 
-void truncar_archivo(char* nombre_archivo, int nuevo_tamanio) {
-    char* metadata_path;
-    sprintf(metadata_path, "%s/%s", path_base_dialfs, nombre_archivo);
-
-    FILE* metadata_file = fopen(metadata_path, "r+");
-    if (!metadata_file) {
-        perror("No se pudo abrir el archivo de metadata para truncar");
-        exit(EXIT_FAILURE);
+void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo) {
+    FILE* file = fopen(nombre_archivo, "r");
+    if (!file) {
+        perror("Error leyendo archivo de metadata");
+        exit(1);
     }
+    fscanf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
+    fclose(file);
+}
 
-    int bloque_inicial, tam_archivo;
-    fscanf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", &bloque_inicial, &tam_archivo);
+// METADATA
+void compactar_fs() {
+    int bloque_libre_actual = 0;
+    for (int i = 0; i < block_count; i++) {
+        if (!(bitmap[i / 8] & (1 << (i % 8)))) {
+            int bloque_actual = i;
+            // Buscar la próxima secuencia de bloques libres
+            while (bloque_actual < block_count && !(bitmap[bloque_actual / 8] & (1 << (bloque_actual % 8)))) {
+                bloque_actual++;
+            }
 
-    int bloques_necesarios = (nuevo_tamanio + block_size - 1) / block_size;
-    int bloques_actuales = (tam_archivo + block_size - 1) / block_size;
+            if (bloque_actual < block_count) {
+                for (int j = bloque_libre_actual; j < bloque_actual; j++) {
+                    marcar_bloque(j, 0); // Marco bloques libres en el bitmap
 
-    if (bloques_necesarios > bloques_actuales) {
-        for (int i = bloques_actuales; i < bloques_necesarios; i++) {
-            if (bitarray_test_bit(bitmap, bloque_inicial + i)) {
-                compactar_filesystem();
-                break;
+                }
+                for (int j = i; j < bloque_actual; j++) {
+                    marcar_bloque(j, 1);  // Marco nuevos bloques como ocupados en el bitmap
+
+                }
+                bloque_libre_actual = bloque_actual;
             }
         }
+    }
+}
+//ARCHIVOS
+void crear_archivo_en_dialfs(char* nombre_archivo) {
+    int bloque_libre = encontrar_bloque_libre();
 
-        for (int i = bloques_actuales; i < bloques_necesarios; i++) {
-            bitarray_set_bit(bitmap, bloque_inicial + i);
+    if (bloque_libre != -1) {
+        marcar_bloque(bloque_libre, 1);
+        crear_metadata(nombre_archivo, bloque_libre, 0); // Archivo creado con tamaño 0
+        //VER
+        t_paquete* paquete = crear_paquete(PONERCODIGOOP);
+        agregar_string_a_paquete(paquete, nombre_archivo);
+        enviar_paquete(paquete, conexion_memoria);
+        eliminar_paquete(paquete);
+        //VER
+    } else {
+        printf("No hay bloques libres disponibles.\n");
+    }
+}
+
+void eliminar_archivo_en_dialfs(char* nombre_archivo) {
+
+    int bloque_inicial, tamano_archivo;
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
+    int bloques_necesarios = (tamano_archivo + block_size - 1) / block_size;
+
+    for (int i = 0; i < bloques_necesarios; i++) {
+        marcar_bloque(bloque_inicial + i, 0); // Libera los bloques
+    }
+
+    remove(nombre_archivo); // Elimina el archivo de metadata
+
+    //VER BORRAR ARCHIVO EN MEMORIA
+    
+    //VER
+}
+
+void truncar_archivo_en_dialfs(const char* nombre_archivo, uint32_t nuevo_tamano) {
+    int bloque_inicial, tamano_actual;
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamano_actual);
+    int bloques_actuales = (tamano_actual + block_size - 1) / block_size;
+    int bloques_nuevos = (nuevo_tamano + block_size - 1) / block_size;
+
+    if (bloques_nuevos > bloques_actuales) {
+        // Verificar si se necesita compactar
+        if (!hay_espacio_contiguo(bloques_nuevos - bloques_actuales)) {
+            compactar_fs();
+            sleep(retraso_compactacion);
         }
-    } else if (bloques_necesarios < bloques_actuales) {
-        for (int i = bloques_necesarios; i < bloques_actuales; i++) {
-            bitarray_clean_bit(bitmap, bloque_inicial + i);
+        // Asignar nuevos bloques
+        for (int i = bloques_actuales; i < bloques_nuevos; i++) {
+            marcar_bloque(bloque_inicial + i, 1);
+        }
+    } else if (bloques_nuevos < bloques_actuales) {
+        // Liberar bloques sobrantes
+        for (int i = bloques_nuevos; i < bloques_actuales; i++) {
+            marcar_bloque(bloque_inicial + i, 0);
         }
     }
 
-    fseek(metadata_file, 0, SEEK_SET);
-    fprintf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, nuevo_tamanio);
-    fclose(metadata_file);
+    actualizar_metadata(nombre_archivo, bloque_inicial, nuevo_tamano);
+}
+void escribir_en_archivo_dialfs(char* nombre_archivo, uint32_t direccion_logica, uint32_t tamano, uint32_t puntero_archivo) {
+    int bloque_inicial, tamano_archivo;
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
+
+    void* datos = contenido_obtenido_de_memoria(direccion_logica, tamano, 0);
+
+    FILE* archivo = fopen(nombre_archivo, "r+b");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        free(datos);
+        return;
+    }
+
+    fseek(archivo, puntero_archivo, SEEK_SET);
+    fwrite(datos, 1, tamano, archivo);
+    fclose(archivo);
+
+    free(datos);
+
+    if (puntero_archivo + tamano > tamano_archivo) {
+        actualizar_metadata(nombre_archivo, bloque_inicial, puntero_archivo + tamano);
+    }
 }
 
-void escribir_archivo(char* nombre_archivo, void* datos, int offset, int tam) {
-    char* metadata_path;
-    sprintf(metadata_path, "%s/%s", path_base_dialfs, nombre_archivo);
+void leer_desde_archivo_dialfs(char* nombre_archivo, uint32_t direccion_logica, uint32_t tamano, uint32_t puntero_archivo) {
+    FILE* archivo = fopen(nombre_archivo, "rb");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
 
-    FILE* metadata_file = fopen(metadata_path, "r+");
-    if (!metadata_file) {
-        perror("No se pudo abrir el archivo de metadata para escribir");
+    fseek(archivo, puntero_archivo, SEEK_SET);
+    void* datos = malloc(tamano);
+    fread(datos, 1, tamano, archivo);
+    fclose(archivo);
+
+    enviar_a_memoria_para_escribir(direccion_logica, datos, tamano, 0);
+
+    free(datos);
+}
+//ARCHIVOS
+void crear_archivo_de_bloques(char* path_base_dialfs) {
+    off_t file_size = (off_t)block_count * block_size;
+
+    char bloques_path[strlen(path_base_dialfs) + strlen("/bloques.dat") + 1];
+    sprintf(bloques_path, "%s/bloques.dat", path_base_dialfs);
+
+    // Abrir el archivo para escritura
+    FILE* file = fopen(bloques_path, "wb");
+    if (!file) {
+        perror("Error abriendo bloques.dat");
         exit(EXIT_FAILURE);
     }
 
-    int bloque_inicial, tam_archivo;
-    fscanf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", &bloque_inicial, &tam_archivo);
+    // Escribir datos de prueba (opcional)
+    char buffer[block_size]; // Buffer para escribir bloques
+    memset(buffer, 0, block_size); // Inicializar a 0
 
-    if (offset + tam > tam_archivo) {
-        truncar_archivo(nombre_archivo, offset + tam);
+    for (int i = 0; i < block_count; ++i) {
+        fwrite(buffer, block_size, 1, file);
     }
 
-    int bloque_actual = bloque_inicial + (offset / block_size);
-    int desplazamiento = offset % block_size;
+    // Cerrar el archivo
+    fclose(file);
 
-    while (tam > 0) {
-        int tam_a_escribir = (tam > block_size - desplazamiento) ? block_size - desplazamiento : tam;
-        enviar_a_memoria_para_escribir(bloque_actual * block_size + desplazamiento, datos, tam_a_escribir, -1);
-
-        datos += tam_a_escribir;
-        tam -= tam_a_escribir;
-        desplazamiento = 0;
-        bloque_actual++;
-    }
-
-    fseek(metadata_file, 0, SEEK_SET);
-    fprintf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, (offset + tam > tam_archivo) ? offset + tam : tam_archivo);
-    fclose(metadata_file);
-}
-
-void leer_archivo(char* nombre_archivo, void* buffer, int offset, int tam) {
-    char* metadata_path;
-    sprintf(metadata_path, "%s/%s", path_base_dialfs, nombre_archivo);
-
-    FILE* metadata_file = fopen(metadata_path, "r");
-    if (!metadata_file) {
-        perror("No se pudo abrir el archivo de metadata para leer");
-        exit(EXIT_FAILURE);
-    }
-
-    int bloque_inicial, tam_archivo;
-    fscanf(metadata_file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", &bloque_inicial, &tam_archivo);
-    fclose(metadata_file);
-
-    if (offset >= tam_archivo) {
-        return;  // No hay nada que leer
-    }
-
-    if (offset + tam > tam_archivo) {
-        tam = tam_archivo - offset;
-    }
+    printf("Archivo bloques.dat creado exitosamente en %s.\n", bloques_path);
 }
 
 void iniciarInterfazDialFS(int socket, t_config* config, char* nombre){
-    leer_configuracion(config);
-    inicializar_bitmap();
+    int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+    block_size = config_get_int_value(config, "BLOCK_SIZE");
+    block_count = config_get_int_value(config, "BLOCK_COUNT");
+    retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
+    char* path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
+    crear_archivo_de_bloques(path_base_dialfs);
+    cargar_bitmap(path_base_dialfs);
 
-    solicitud_dialfs_t solicitud;
+    t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
+    enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
 
     while (1) {
-        ssize_t recibidos = recibir_solicitud(socket, &solicitud);
+        ssize_t reciv = recibir_operacion(socket);
 
-        if (recibidos <= 0) {
-            if (recibidos < 0) perror("Error recibiendo solicitud");
-            break;
+        if (reciv < 0) {
+            exit(-1);
         }
 
-        switch (solicitud.operacion) {
+        switch (reciv) {
             case IO_FS_CREATE:
-                crear_archivo(solicitud.nombre_archivo);
+                char* nombre_archivo = recibir_string(socket);
+                crear_archivo_en_dialfs(nombre_archivo);
+                free(nombre_archivo);
                 break;
 
             case IO_FS_DELETE:
-                borrar_archivo(solicitud.nombre_archivo);
+                char* nombre_archivo = recibir_string(socket);
+                eliminar_archivo_en_dialfs(nombre_archivo);
+                free(nombre_archivo);
                 break;
 
             case IO_FS_TRUNCATE:
-                truncar_archivo(solicitud.nombre_archivo, solicitud.registro_tamaño);
+                char* nombre_archivo = recibir_string(socket);
+                uint32_t nuevo_tamano = recibir_tamano(socket); // Función para recibir el tamaño del registro
+                truncar_archivo_en_dialfs(nombre_archivo, nuevo_tamano);
+                free(nombre_archivo);
                 break;
 
             case IO_FS_WRITE:
-                {
-                    // Obtener datos desde memoria
-                    void* datos = obtener_datos_memoria(solicitud.registro_direccion, solicitud.registro_tamaño);
-                    escribir_archivo(solicitud.nombre_archivo, datos, solicitud.registro_puntero_archivo, solicitud.registro_tamaño);
-                    free(datos);
-                }
+                char* nombre_archivo = recibir_string(socket);
+                uint32_t direccion_logica = recibir_direccion(socket);
+                uint32_t tamano = recibir_tamano(socket);
+                uint32_t puntero_archivo = recibir_puntero(socket);
+                escribir_en_archivo_dialfs(nombre_archivo, direccion_logica, tamano, puntero_archivo);
+                free(nombre_archivo);
                 break;
 
             case IO_FS_READ:
-                {
-                    // Crear buffer para lectura
-                    void* buffer = malloc(solicitud.registro_tamaño);
-                    leer_archivo(solicitud.nombre_archivo, buffer, solicitud.registro_puntero_archivo, solicitud.registro_tamaño);
-                    enviar_datos_memoria(solicitud.registro_direccion, buffer, solicitud.registro_tamaño);
-                    free(buffer);
-                }
+                char* nombre_archivo = recibir_string(socket);
+                uint32_t direccion_logica = recibir_direccion(socket);
+                uint32_t tamano = recibir_tamano(socket);
+                uint32_t puntero_archivo = recibir_puntero(socket);
+                leer_desde_archivo_dialfs(nombre_archivo, direccion_logica, tamano, puntero_archivo);
+                free(nombre_archivo);
                 break;
 
             default:
-                fprintf(stderr, "Operación desconocida: %d\n", solicitud.operacion);
                 break;
         }
 
-        // Notificar al cliente que la operación ha sido completada (puedes implementar esta parte según tu protocolo)
-        send(socket, "Operación completada", 21, 0);
-    }
+        sleep(tiempo_pausa);
 
+        t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
+        enviar_paquete(paquete ,socket);
+        eliminar_paquete(paquete);
+    }
+    guardar_bitmap("bitmap.dat");
 }
 
 int main(int argc, char* argv[]) {
@@ -454,6 +517,6 @@ int main(int argc, char* argv[]) {
         iniciarInterfazDialFS(conexion_kernel, nuevo_config, argv[1]);
     }
 
-
+    free(bitmap);
     return 0;
 }
