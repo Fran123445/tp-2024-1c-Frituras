@@ -60,8 +60,17 @@ void* escuchar_cpu(){
 
 void* escuchar_kernel(){
     while(1){
-        abrir_archivo_path(socket_kernel);
-        finalizar_proceso(socket_kernel);
+        op_code cod_op = recibir_operacion(socket_kernel);
+        switch (cod_op) {
+            case CREACION_PROCESO:
+                abrir_archivo_path(socket_kernel);
+                break;
+            case FINALIZAR_PROCESO:
+                finalizar_proceso(socket_kernel);
+                break;
+            default:
+                break;
+        }
     }
 }
 

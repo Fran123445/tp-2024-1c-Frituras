@@ -7,7 +7,7 @@ void* escribir_memoria(int socket){
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
         uint32_t tamanio_a_escribir = buffer_read_uint32(buffer);
-        uint32_t pid = buffer_read_int(buffer);
+        int pid = buffer_read_int(buffer);
 
         if(direccion_fisica + tamanio_a_escribir > tam_memoria){
             fprintf(stderr, "Direccion o tamanio a escribir invalido, sobrepasa la memoria");
@@ -29,12 +29,8 @@ void* escribir_memoria(int socket){
         memcpy(memoria_contigua+direccion_fisica, valor_a_escribir, tamanio_a_escribir);
         pthread_mutex_unlock(&mutex_memoria_contigua);
 
-        t_paquete* paquete = crear_paquete(ESCRITURA_REALIZADA_OK);
-        enviar_paquete(paquete, socket);
-
         free(valor_a_escribir);
         liberar_buffer(buffer);
-        eliminar_paquete(paquete);
 }
 
 void* leer_memoria(int socket){
@@ -42,7 +38,7 @@ void* leer_memoria(int socket){
         t_buffer* buffer = recibir_buffer(socket);
         uint32_t direccion_fisica = buffer_read_uint32(buffer);
         uint32_t tamanio_a_leer = buffer_read_uint32(buffer);
-        uint32_t pid = buffer_read_uint32(buffer);
+        int pid = buffer_read_int(buffer);
 
         if(direccion_fisica + tamanio_a_leer > tam_memoria){
             fprintf(stderr, "Direccion o tamanio a leer invalido, sobrepasa la memoria");

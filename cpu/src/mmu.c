@@ -58,8 +58,6 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
         return entradaExistenteEnTLB->marco * tamanio_pagina + desplazamiento;
     }
         else{
-            free(entradaExistenteEnTLB);
-        
             log_info(log_cpu, "PID: %u - TLB MISS - Pagina: %u", pcb->PID, numero_pagina);
     
             pedir_marco(numero_pagina);

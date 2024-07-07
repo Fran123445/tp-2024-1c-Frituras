@@ -11,13 +11,6 @@
 
 pthread_mutex_t mutex_bitarray_marcos_libres = PTHREAD_MUTEX_INITIALIZER;
 
-t_list* agregar_n_entradas_vacias(int cant_pags_a_agregar, t_list* tabla_del_proceso) {
-    for (int i = 0; i < cant_pags_a_agregar; i++) {
-        list_add(tabla_del_proceso, NULL);
-    }
-    return tabla_del_proceso;
-}
-
 t_list* sacar_n_entradas_desde_final(int cant_pags_a_sacar, t_list* tabla_del_proceso){
     int tamanio_tabla;
     for(int i = 0; i < cant_pags_a_sacar; i++){
@@ -154,8 +147,8 @@ void* resize_proceso(int socket_cpu){
 
             exit(EXIT_FAILURE);
         }
-        int cant_paginas_viejas = ceil(proceso->tamanio_proceso/tam_pagina);
-        int cant_paginas_nuevas = ceil(tamanio_nuevo/tam_pagina);
+        int cant_paginas_viejas = ceil((float)proceso->tamanio_proceso/tam_pagina);
+        int cant_paginas_nuevas = ceil(((float)tamanio_nuevo/tam_pagina));
         int total_paginas_a_agregar = cant_paginas_nuevas - cant_paginas_viejas;
         chequear_espacio_memoria(total_paginas_a_agregar, socket_cpu);
 
@@ -164,7 +157,7 @@ void* resize_proceso(int socket_cpu){
         log_info(log_memoria, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
 
         proceso->tamanio_proceso = tamanio_nuevo;
-        proceso->tabla_del_proceso = agregar_n_entradas_vacias(total_paginas_a_agregar, proceso->tabla_del_proceso);
+
         asignar_frames_a_paginas(total_paginas_a_agregar,proceso);
 
     }else if (proceso->tamanio_proceso > tamanio_nuevo){
@@ -172,8 +165,8 @@ void* resize_proceso(int socket_cpu){
 
         usleep(tiempo_retardo * 1000);
 
-        int paginas_viejas = ceil(proceso->tamanio_proceso/tam_pagina);
-        int paginas_nuevas = ceil(tamanio_nuevo/tam_pagina);
+        int paginas_viejas = ceil((float)proceso->tamanio_proceso/tam_pagina);
+        int paginas_nuevas = ceil((float)tamanio_nuevo/tam_pagina);
         int total_paginas_a_sacar = paginas_viejas - paginas_nuevas;
         proceso->tamanio_proceso = tamanio_nuevo;
         marcar_frames_como_libres(total_paginas_a_sacar, proceso->tabla_del_proceso);

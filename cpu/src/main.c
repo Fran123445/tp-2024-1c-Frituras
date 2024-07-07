@@ -74,8 +74,6 @@ int main(int argc, char* argv[]) {
 
     log_cpu = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
 
-    // Todo lo relacionado con paginación
-    tamanio_pagina = recibir_tamanio_pagina();
 
     TLB = list_create();
     cant_entradas_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
@@ -96,11 +94,14 @@ int main(int argc, char* argv[]) {
     pthread_mutex_init(&mutexInterrupt, NULL);
    
     // Inicialización de los servidores 
-    iniciar_servidores(config);
+    iniciar_servidores(config);    
 
     int a;
     recv(socket_kernel_d, &a, sizeof(int), MSG_WAITALL);
     socket_memoria = crear_conexion(config_get_string_value(config, "IP_MEMORIA"), config_get_string_value(config, "PUERTO_MEMORIA"), CPU);
+    
+    // Todo lo relacionado con paginación
+    tamanio_pagina = recibir_tamanio_pagina();
 
     // Hilos encargados del ciclo de instrucciones
     pthread_t threadEscuchaDispatch;
