@@ -95,9 +95,11 @@ void vaciarExit() {
         list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
         pthread_mutex_unlock(&mutexListaProcesos);
 
+        liberarRecursos(procesoAFinalizar->pcb);
+
         t_paquete* paquete = crear_paquete(FIN_PROCESO);
         agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
-        //enviar_paquete(paquete, socketMemoria);
+        enviar_paquete(paquete, socketMemoria);
         eliminar_paquete(paquete);
 
         switch(procesoAFinalizar->motivo) {

@@ -61,3 +61,14 @@ void signalRecurso(t_recurso* recurso) {
         enviarAReady(queue_pop(recurso->procesosBloqueados));
     }
 }
+
+void liberarRecursos(PCB* proceso) {
+    char** recursos = proceso->recursosAsignados;
+
+    if (!recursos) return;
+
+    for(int i = 0; i < string_array_size(recursos); i++) {
+        t_recurso* recurso = hallarRecurso(recursos[i]);
+        signalRecurso(recurso);
+    }
+}
