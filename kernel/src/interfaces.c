@@ -153,26 +153,28 @@ void administrarDIALFS(int* socket_cliente) {
         t_solicitudDIALFS* solicitud = queue_pop(interfaz->procesosBloqueados);
         pthread_mutex_unlock(&interfaz->mutex);
 
+        paquete->codigo_operacion = solicitud->operacion;
+        agregar_string_a_paquete(paquete, solicitud->nombreArchivo);
+
         switch (solicitud->operacion) {
-            case iIO_FS_CREATE:
-                // algo
+            case ENVIAR_DIALFS_CREATE:
+            case ENVIAR_DIALFS_DELETE:
                 break;
-            case iIO_FS_DELETE:
-                // otro algo
+            case ENVIAR_DIALFS_TRUNCATE:
+                agregar_int_a_paquete(paquete, solicitud->tamanio);
                 break;
-            case iIO_FS_TRUNCATE:
-                // mas algoses
-                break;
-            case iIO_FS_READ:
-                // o sea digamos algo
-                break;
-            case iIO_FS_WRITE:
-                // pongamoslo en estos terminos: algo
+            case ENVIAR_DIALFS_READ:
+            case ENVIAR_DIALFS_WRITE:
+                agregar_int_a_paquete(paquete, solicitud->direccion);
+                agregar_int_a_paquete(paquete, solicitud->tamanio);
+                agregar_int_a_paquete(paquete, solicitud->ubicacionPuntero);
                 break;
             default:
-                log_error(logger, "Operación invalida"); // esto no deberia ser posible pero si no gcc se pone pesado con los casos no usados
                 break;
         }
+
+        enviar_paquete(paquete, *socket_cliente);
+        eliminar_paquete(paquete);
 
         op_code op = recibir_operacion(*socket_cliente);
         if (op <= 0) {
