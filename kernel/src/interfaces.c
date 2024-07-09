@@ -156,14 +156,22 @@ void administrarDIALFS(int* socket_cliente) {
         switch (solicitud->operacion) {
             case iIO_FS_CREATE:
                 // algo
+                break;
             case iIO_FS_DELETE:
                 // otro algo
+                break;
             case iIO_FS_TRUNCATE:
                 // mas algoses
+                break;
             case iIO_FS_READ:
                 // o sea digamos algo
+                break;
             case iIO_FS_WRITE:
                 // pongamoslo en estos terminos: algo
+                break;
+            default:
+                log_error(logger, "Operación invalida"); // esto no deberia ser posible pero si no gcc se pone pesado con los casos no usados
+                break;
         }
 
         op_code op = recibir_operacion(*socket_cliente);
@@ -205,6 +213,34 @@ t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buff
     }
 
     solicitud->direcciones = direcciones;
+
+    return solicitud;
+}
+
+t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buffer* buffer) {
+    t_solicitudDIALFS* solicitud = malloc(sizeof(t_solicitudDIALFS));
+    solicitud->proceso = proceso;
+    solicitud->operacion = operacion;
+
+    switch (operacion) {
+        case iIO_FS_CREATE:
+        case iIO_FS_DELETE:
+            solicitud->nombreArchivo = buffer_read_string(buffer);
+            break;
+        case iIO_FS_TRUNCATE:
+            solicitud->nombreArchivo = buffer_read_string(buffer);
+            solicitud->tamanio = buffer_read_int(buffer);
+            break;
+        case iIO_FS_READ:
+        case iIO_FS_WRITE:
+            solicitud->nombreArchivo = buffer_read_string(buffer);
+            solicitud->direccion = buffer_read_int(buffer);
+            solicitud->tamanio  = buffer_read_int(buffer);
+            solicitud->ubicacionPuntero = buffer_read_int(buffer);
+            break;
+        default:
+            break;
+    }
 
     return solicitud;
 }

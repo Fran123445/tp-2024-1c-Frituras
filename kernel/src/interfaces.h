@@ -59,9 +59,11 @@ void esperarClientesIO(t_conexion_escucha* params);
 void administrarInterfazGenerica(int* socket_cliente);
 void administrarSTDIN(int* socket_cliente);
 void administrarSTDOUT(int* socket_cliente);
+void administrarDIALFS(int* socket_cliente);
 t_IOConectada* hallarInterfazConectada(char* nombre);
 bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion);
 t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer);
 t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buffer);
+t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buffer* buffer);
 
 #endif /* CONN_H */
