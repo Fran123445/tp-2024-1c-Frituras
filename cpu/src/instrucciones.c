@@ -1,5 +1,7 @@
 #include "instrucciones.h"
 #include "interrupciones.h"
+#include "mmu.h"
+#include "cicloDeInstrucciones.h"
 
 void* obtenerRegistro(registrosCPU registro) {
     void* lista_de_registros[11] = {
@@ -330,10 +332,11 @@ void COPY_STRING(uint32_t tam){
 
 void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
 
-    void *reg_tam = *(uint32_t *)obtenerRegistro(registroTamaño);
+    void *reg_tam = obtenerRegistro(registroTamaño);
     uint32_t tam;
     void *reg_direccion = obtenerRegistro(registroDireccion);
     uint32_t direccion_logica;
+    
     
 
     // Solucion (espero) provisional
@@ -343,7 +346,7 @@ void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU 
         direccion_logica = *(uint8_t*)reg_direccion;
     }
 
-    if(tamanioRegistro(tam) == sizeof(uint32_t)){
+    if(tamanioRegistro(registroTamaño) == sizeof(uint32_t)){
         tam = *(uint32_t*)reg_tam;
     }
     else {
@@ -377,7 +380,7 @@ void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU 
 
 void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
 
-    void *reg_tam = *(uint32_t *)obtenerRegistro(registroTamaño);
+    void *reg_tam = obtenerRegistro(registroTamaño);
     uint32_t tam;
     void *reg_direccion = obtenerRegistro(registroDireccion);
     uint32_t direccion_logica;
@@ -390,7 +393,7 @@ void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCP
         direccion_logica = *(uint8_t*)reg_direccion;
     }
 
-    if(tamanioRegistro(tam) == sizeof(uint32_t)){
+    if(tamanioRegistro(registroTamaño) == sizeof(uint32_t)){
         tam = *(uint32_t*)reg_tam;
     }
     else {

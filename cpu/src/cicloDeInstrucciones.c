@@ -22,6 +22,44 @@ registrosCPU string_a_registro(const char* registro) {
     exit(1);
 }
 
+char* registro_a_string(registrosCPU registro) {
+    switch(registro){
+        case AX:
+            return "AX";
+            break;
+        case BX:
+            return "BX";
+            break;
+        case CX:
+            return "CX";
+            break;
+        case DX:
+            return "DX";
+            break;
+        case EAX:
+            return "EAX";
+            break;
+        case EBX:
+            return "EBX";
+            break;
+        case ECX:
+            return "ECX";
+            break;
+        case EDX:
+            return "EDX";
+            break;
+        case SI:
+            return "SI";
+            break;
+        case DI:
+            return "DI";
+            break;
+        case PC:
+            return "PC";
+            break;
+    }
+}
+
 t_tipoInstruccion string_a_tipo_instruccion (char* ins_char){
     if (strcmp(ins_char, "SET") == 0) return iSET;
     if (strcmp(ins_char, "MOV_IN") == 0) return iMOV_IN;
