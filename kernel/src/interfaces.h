@@ -19,7 +19,8 @@ extern pthread_mutex_t mutexPlanificador;
 typedef enum {
     INTERFAZ_GENERICA,
     INTERFAZ_STDIN,
-    INTERFAZ_STDOUT
+    INTERFAZ_STDOUT,
+    INTERFAZ_DIALFS
 } tipoInterfaz;
 
 typedef struct {
@@ -44,6 +45,15 @@ typedef struct {
     PCB* proceso;
     t_list* direcciones;
 } t_solicitudIOSTDIN_OUT;
+
+typedef struct {
+    PCB* proceso;
+    op_code operacion;
+    char* nombreArchivo;
+    int direccion;
+    int tamanio;
+    int ubicacionPuntero;
+} t_solicitudDIALFS;
 
 void esperarClientesIO(t_conexion_escucha* params);
 void administrarInterfazGenerica(int* socket_cliente);

@@ -24,6 +24,8 @@ void esperarClientesIO(t_conexion_escucha* params) {
             case CONEXION_STDOUT:
                 func = &administrarSTDOUT;
                 break;
+            case CONEXION_DIAL_FS:
+                func = &administrarDIALFS;
             default:
                 log_error(logger, "Conexión inválida de una interfaz");
                 break;
@@ -79,7 +81,7 @@ void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
 
         op = recibir_operacion(*socket_cliente);
         if (op <= 0) {
-            log_error(logger, "La operación de IO STDOUT no se pudo completar exitosamente");
+            log_error(logger, "La operación de IO STDIN/STDOUT no se pudo completar exitosamente");
             enviarAExit(solicitud->proceso, INVALID_INTERFACE);
             free(solicitud);
             break;
@@ -138,6 +140,47 @@ void administrarSTDOUT(int* socket_cliente) {
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_STDOUT);
 
     manejarSTDINOUT(socket_cliente, interfaz);
+}
+
+void administrarDIALFS(int* socket_cliente) {
+    t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_DIALFS);
+
+    while (1) {
+        t_paquete* paquete = crear_paquete(PAQUETE); // es posible que nunca lo cambie por algo que tenga mas sentido
+        sem_wait(&interfaz->semaforo);
+
+        pthread_mutex_lock(&interfaz->mutex);
+        t_solicitudDIALFS* solicitud = queue_pop(interfaz->procesosBloqueados);
+        pthread_mutex_unlock(&interfaz->mutex);
+
+        switch (solicitud->operacion) {
+            case iIO_FS_CREATE:
+                // algo
+            case iIO_FS_DELETE:
+                // otro algo
+            case iIO_FS_TRUNCATE:
+                // mas algoses
+            case iIO_FS_READ:
+                // o sea digamos algo
+            case iIO_FS_WRITE:
+                // pongamoslo en estos terminos: algo
+        }
+
+        op_code op = recibir_operacion(*socket_cliente);
+        if (op <= 0) {
+            log_error(logger, "La operación de File System no se pudo completar exitosamente");
+            enviarAExit(solicitud->proceso, INVALID_INTERFACE);
+            free(solicitud);
+            break;
+        }
+        
+        pthread_mutex_lock(&mutexPlanificador);
+        planificar(op, solicitud->proceso, NULL);
+        pthread_mutex_unlock(&mutexPlanificador);
+
+        free(solicitud);
+    } 
+
 }
 
 t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer) {
