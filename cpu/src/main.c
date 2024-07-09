@@ -61,7 +61,7 @@ int recibir_tamanio_pagina(){
         liberar_buffer(buffer);
         return data;
     }
-    return NULL;
+    return -1;
 }
 
 
