@@ -223,16 +223,16 @@ t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buf
     solicitud->operacion = operacion;
 
     switch (operacion) {
-        case iIO_FS_CREATE:
-        case iIO_FS_DELETE:
+        case ENVIAR_DIALFS_CREATE:
+        case ENVIAR_DIALFS_DELETE:
             solicitud->nombreArchivo = buffer_read_string(buffer);
             break;
-        case iIO_FS_TRUNCATE:
+        case ENVIAR_DIALFS_TRUNCATE:
             solicitud->nombreArchivo = buffer_read_string(buffer);
             solicitud->tamanio = buffer_read_int(buffer);
             break;
-        case iIO_FS_READ:
-        case iIO_FS_WRITE:
+        case ENVIAR_DIALFS_WRITE:
+        case ENVIAR_DIALFS_READ:
             solicitud->nombreArchivo = buffer_read_string(buffer);
             solicitud->direccion = buffer_read_int(buffer);
             solicitud->tamanio  = buffer_read_int(buffer);
@@ -259,7 +259,13 @@ bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion) {
         case INTERFAZ_STDOUT:
             opValida = operacion == ENVIAR_IO_STDOUT_WRITE;
             break;
-        // Falta todo lo de FS
+        case INTERFAZ_DIALFS:
+            opValida = (operacion == ENVIAR_DIALFS_CREATE   ||
+                        operacion == ENVIAR_DIALFS_DELETE   ||
+                        operacion == ENVIAR_DIALFS_TRUNCATE ||
+                        operacion == ENVIAR_DIALFS_READ     ||
+                        operacion == ENVIAR_DIALFS_WRITE    );
+            break;
         default:
             opValida = false;
             break;

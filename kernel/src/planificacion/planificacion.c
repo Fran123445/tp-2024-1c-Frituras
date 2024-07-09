@@ -106,11 +106,11 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
             case ENVIAR_IO_STDOUT_WRITE:
                 solicitud = solicitudIOSTDIN_OUT_create(proceso, buffer);
                 break;
-            case iIO_FS_CREATE:
-            case iIO_FS_DELETE:
-            case iIO_FS_TRUNCATE:
-            case iIO_FS_READ:
-            case iIO_FS_WRITE:
+            case ENVIAR_DIALFS_CREATE:
+            case ENVIAR_DIALFS_DELETE:
+            case ENVIAR_DIALFS_TRUNCATE:
+            case ENVIAR_DIALFS_WRITE:
+            case ENVIAR_DIALFS_READ:
                 solicitud = solicitudDIALFS_create(proceso, operacion, buffer);
                 break;
             default:
