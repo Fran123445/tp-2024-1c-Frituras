@@ -8,9 +8,9 @@
 #include <planificacion/FIFO.h>
 #include <planificacion/roundRobin.h>
 #include <planificacion/virtualRoundRobin.h>
+#include <interfaces/interfaces.h>
 #include "consola.h"
 #include "planificadorLP.h"
-#include "interfaces.h"
 #include "recursos.h"
 
 int socketCPUDispatch;

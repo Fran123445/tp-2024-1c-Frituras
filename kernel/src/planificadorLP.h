@@ -12,7 +12,7 @@
 #include <commons/string.h>
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
-#include <interfaces.h>
+#include <interfaces/interfaces.h>
 #include <recursos.h>
 typedef enum {
     SUCCESS,
