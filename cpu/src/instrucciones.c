@@ -4,7 +4,7 @@
 #include "cicloDeInstrucciones.h"
 
 void* obtenerRegistro(registrosCPU registro) {
-    void* lista_de_registros[11] = {
+   void* lista_de_registros[11] = {
         &pcb->registros.AX, &pcb->registros.BX, &pcb->registros.CX, &pcb->registros.DX,
         &pcb->registros.EAX, &pcb->registros.EBX, &pcb->registros.ECX, &pcb->registros.EDX,
         &pcb->registros.SI, &pcb->registros.DI, &pcb->registros.PC
@@ -62,16 +62,6 @@ void enviar_a_memoria_para_escritura(uint32_t direccion_fisica, void* datos_a_es
     agregar_int_a_paquete(paquete, pcb->PID);
     agregar_a_paquete(paquete, datos_a_escribir,tam);
     enviar_paquete(paquete, socket_memoria);
-    eliminar_paquete(paquete);
-}
-
-void enviar_a_kernel(op_code cod_op,char* interfaz,uint32_t direccion_fisica,uint32_t tamaño){
-    t_paquete* paquete = crear_paquete(cod_op);
-    agregar_PCB_a_paquete(paquete,pcb);
-    agregar_string_a_paquete(paquete, interfaz);
-    agregar_uint32_a_paquete(paquete, direccion_fisica);
-    agregar_uint32_a_paquete(paquete, tamaño);
-    enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
 }
 
@@ -299,7 +289,7 @@ void COPY_STRING(uint32_t tam){
     uint32_t direccion_logica_si = *(uint32_t *)obtenerRegistro(SI);
     uint32_t direccion_logica_di = *(uint32_t *)obtenerRegistro(DI);
 
-    if (tam > tamanio_pagina){ // CHEQUEA SI LOS DATOS ESTAN Y HAY QUE ESCRIBIRLOS EN MAS DE UNA PAGINA
+    if (tam > tamanio_pagina){
         
         uint32_t bytes_a_escribir = tam;
 
@@ -308,61 +298,59 @@ void COPY_STRING(uint32_t tam){
 
             uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
             void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam_a_escribir);
-            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, datos_de_si);
+            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, (char*)datos_de_si);
 
             uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
             enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam_a_escribir);
-            log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, datos_de_si);
+            log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, (char*)datos_de_si);
 
             bytes_a_escribir -= tam_a_escribir;
             direccion_logica_si += tam_a_escribir;
             direccion_logica_di += tam_a_escribir;
         }
     }
-    else{// Si entra todo en una sola pagina
+    else{
         uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
         void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam);
-        log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, datos_de_si);
+        log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, (char*)datos_de_si);
 
         uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
         enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam);
-        log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, datos_de_si);
+        log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, (char*)datos_de_si);
     }
 }
 
-void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
-
-    void *reg_tam = obtenerRegistro(registroTamaño);
+void enviarDireccionesFisicasAKernel(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño, op_code operacion){
+    void* reg_tam = obtenerRegistro(registroTamaño);
     uint32_t tam;
-    void *reg_direccion = obtenerRegistro(registroDireccion);
+    void* reg_dir = obtenerRegistro(registroDireccion);
     uint32_t direccion_logica;
-    
-    
 
-    // Solucion (espero) provisional
-    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
-        direccion_logica = *(uint32_t*)reg_direccion;
-    } else {
-        direccion_logica = *(uint8_t*)reg_direccion;
-    }
-
-    if(tamanioRegistro(registroTamaño) == sizeof(uint32_t)){
+    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
         tam = *(uint32_t*)reg_tam;
-    }
-    else {
+    } else {
         tam = *(uint8_t*)reg_tam;
     }
-    
+    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
+        direccion_logica = *(uint32_t*)reg_dir;
+    } else {
+        direccion_logica = *(uint8_t*)reg_dir;
+    }
+
+    t_paquete* paquete = crear_paquete(operacion);
+    agregar_PCB_a_paquete(paquete,pcb);
+    agregar_string_a_paquete(paquete, interfaz);
 
     if (tam > tamanio_pagina){
         uint32_t bytes_a_enviar = tam;
 
-        // Copiar los datos por partes a memoria
         while (bytes_a_enviar > 0){
             uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
 
             uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-            enviar_a_kernel(ENVIAR_IO_STDIN_READ, interfaz, direccion_fisica, cant_de_bytes_a_enviar);
+
+            agregar_uint32_a_paquete(paquete, direccion_fisica);
+            agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
 
             bytes_a_enviar -= cant_de_bytes_a_enviar;
             direccion_logica += cant_de_bytes_a_enviar;
@@ -370,8 +358,16 @@ void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU 
     }
     else{
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-        enviar_a_kernel(ENVIAR_IO_STDIN_READ, interfaz, direccion_fisica, tam);
+        agregar_uint32_a_paquete(paquete, direccion_fisica);
+        agregar_uint32_a_paquete(paquete, tam);
     }
+
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
+
+void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
+    enviarDireccionesFisicasAKernel(interfaz, registroDireccion, registroTamaño, ENVIAR_IO_STDIN_READ);
 
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
@@ -379,37 +375,120 @@ void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU 
 }
 
 void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
+    enviarDireccionesFisicasAKernel(interfaz, registroDireccion, registroTamaño, ENVIAR_IO_STDOUT_WRITE);
 
-    void *reg_tam = obtenerRegistro(registroTamaño);
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
+
+void enviar_a_kernel_recurso(char* recurso, op_code cod_op){
+    t_paquete* paquete = crear_paquete(cod_op);
+    agregar_PCB_a_paquete(paquete, pcb);
+    agregar_string_a_paquete(paquete, recurso);
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
+
+void WAIT(char* recurso){
+    enviar_a_kernel_recurso(recurso, INSTRUCCION_WAIT);
+    pcb = recibir_pcb();
+}
+
+void SIGNAL(char* recurso) {
+    enviar_a_kernel_recurso(recurso, INSTRUCCION_SIGNAL);
+    pcb = recibir_pcb();
+}
+
+void IO_FS_CREATE(char* interfaz, char* nombre_archivo){
+    t_paquete* paquete = crear_paquete(ENVIAR_DIALFS_CREATE);
+    agregar_PCB_a_paquete(paquete, pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+    agregar_string_a_paquete(paquete,nombre_archivo);
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
+
+void IO_FS_DELETE(char* interfaz, char* nombre_archivo){
+    t_paquete* paquete = crear_paquete(ENVIAR_DIALFS_DELETE);
+    agregar_PCB_a_paquete(paquete, pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+    agregar_string_a_paquete(paquete,nombre_archivo);
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
+
+void IO_FS_TRUNCATE(char* interfaz, char* nombre_archivo, registrosCPU registroTamaño){
+    void* reg_tam = obtenerRegistro(registroTamaño);
     uint32_t tam;
-    void *reg_direccion = obtenerRegistro(registroDireccion);
-    uint32_t direccion_logica;
-    
 
-    // Solucion (espero) provisional
-    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
-        direccion_logica = *(uint32_t*)reg_direccion;
-    } else {
-        direccion_logica = *(uint8_t*)reg_direccion;
-    }
-
-    if(tamanioRegistro(registroTamaño) == sizeof(uint32_t)){
+    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
         tam = *(uint32_t*)reg_tam;
-    }
-    else {
+    } else {
         tam = *(uint8_t*)reg_tam;
     }
+
+    t_paquete* paquete = crear_paquete(ENVIAR_DIALFS_TRUNCATE);
+    agregar_PCB_a_paquete(paquete, pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+    agregar_string_a_paquete(paquete,nombre_archivo);
+    agregar_uint32_a_paquete(paquete,tam);
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
+
+void enviar_Direcciones_Fisicas_FS(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño, registrosCPU registroPunteroArchivo, op_code operacion){
+    void* reg_tam = obtenerRegistro(registroTamaño);
+    uint32_t tam;
+    void* reg_dir = obtenerRegistro(registroDireccion);
+    uint32_t direccion_logica;
+    void* reg_arc = obtenerRegistro(registroPunteroArchivo);
+    uint32_t posicion_inicial;
+
+    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
+        tam = *(uint32_t*)reg_tam;
+    } else {
+        tam = *(uint8_t*)reg_tam;
+    }
+    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
+        direccion_logica = *(uint32_t*)reg_dir;
+    } else {
+        direccion_logica = *(uint8_t*)reg_dir;
+    }
+    if (tamanioRegistro(registroPunteroArchivo) == sizeof(uint32_t)) {
+        posicion_inicial = *(uint32_t*)reg_arc;
+    } else {
+        posicion_inicial = *(uint8_t*)reg_arc;
+    }
+
+    t_paquete* paquete = crear_paquete(operacion);
+    agregar_PCB_a_paquete(paquete,pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+    agregar_string_a_paquete(paquete,nombre_archivo);
+    agregar_uint32_a_paquete(paquete,posicion_inicial);
 
     if (tam > tamanio_pagina){
         uint32_t bytes_a_enviar = tam;
 
-        // Copiar los datos por partes a memoria
         while (bytes_a_enviar > 0){
-            // Calcular la cantidad de bytes a copiar en esta parte
             uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
 
             uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-            enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE, interfaz, direccion_fisica, cant_de_bytes_a_enviar);
+
+            agregar_uint32_a_paquete(paquete, direccion_fisica);
+            agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
 
             bytes_a_enviar -= cant_de_bytes_a_enviar;
             direccion_logica += cant_de_bytes_a_enviar;
@@ -417,16 +496,33 @@ void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCP
     }
     else{
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-        enviar_a_kernel(ENVIAR_IO_STDOUT_WRITE, interfaz, direccion_fisica, tam);
+        agregar_uint32_a_paquete(paquete, direccion_fisica);
+        agregar_uint32_a_paquete(paquete, tam);
     }
 
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
+
+void IO_FS_WRITE(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño , registrosCPU registroPunteroArchivo){
+    enviar_Direcciones_Fisicas_FS(interfaz, nombre_archivo, registroDireccion, registroTamaño, registroPunteroArchivo, ENVIAR_DIALFS_WRITE);
+    
+    pthread_mutex_lock(&mutexInterrupt);
+    hay_interrupcion = 0;
+    pthread_mutex_unlock(&mutexInterrupt);
+}
+void IO_FS_READ(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño , registrosCPU registroPunteroArchivo){
+    enviar_Direcciones_Fisicas_FS(interfaz, nombre_archivo, registroDireccion, registroTamaño, registroPunteroArchivo, ENVIAR_DIALFS_READ);
+    
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
 }
 
+
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);
+    
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);

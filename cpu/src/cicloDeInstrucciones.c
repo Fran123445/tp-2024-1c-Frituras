@@ -57,6 +57,9 @@ char* registro_a_string(registrosCPU registro) {
         case PC:
             return "PC";
             break;
+        default:
+            return "error";
+            break;
     }
 }
 
@@ -97,6 +100,14 @@ t_list* dividir_cadena_en_tokens(const char* linea){
     return lista;
 }
 
+void liberar_instruccion(t_instruccion* instruccion){
+    free(instruccion->arg1);
+    free(instruccion->arg2);
+    free(instruccion->arg3);
+    free(instruccion->interfaz);
+    free(instruccion->archivo);
+    free(instruccion);
+}
 
 // Funciones necesarias para el ciclo de instrucciones
 
@@ -202,10 +213,6 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iJNZ:
             valor = atoi(list_get(lista,2));
-            if(valor_ptr == NULL){
-                perror("error de memoria");
-                exit(EXIT_FAILURE);
-            }
             *valor_ptr = valor;
             instruccion->tipo = iJNZ;
             *argumento = string_a_registro(list_get(lista,1));
@@ -217,10 +224,6 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iIO_GEN_SLEEP:
             valor = atoi(list_get(lista,2));
-            if(valor_ptr == NULL){
-                perror("error de memoria");
-                exit(EXIT_FAILURE);
-            }
             *valor_ptr = valor;
             instruccion->tipo = iIO_GEN_SLEEP;
             instruccion->arg1 = valor_ptr;
@@ -230,7 +233,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->interfaz = list_get(lista,1);
             break;
         case iRESIZE:
-            valor = atoi(list_get(lista, 1));
+            valor = atoi(list_get(lista,1));
             *valor_ptr = valor;
             instruccion->tipo = iRESIZE;
             instruccion->arg1 = valor_ptr;
@@ -240,26 +243,26 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iMOV_IN:
             instruccion->tipo = iMOV_IN;
-            *argumento = string_a_registro(list_get(lista, 1));
-            *argumento2 = string_a_registro(list_get(lista, 2));
+            *argumento = string_a_registro(list_get(lista,1));
+            *argumento2 = string_a_registro(list_get(lista,2));
             instruccion->arg1 = argumento;
-            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 1)));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->arg2 = argumento2;
-            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
             break;
         case iMOV_OUT:
             instruccion->tipo = iMOV_OUT;
-            *argumento = string_a_registro(list_get(lista, 1));
-            *argumento2 = string_a_registro(list_get(lista, 2));
+            *argumento = string_a_registro(list_get(lista,1));
+            *argumento2 = string_a_registro(list_get(lista,2));
             instruccion->arg1 = argumento;
-            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 1)));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->arg2 = argumento2;
-            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
             break;
         case iCOPY_STRING:
-            valor = atoi(list_get(lista, 1));
+            valor = atoi(list_get(lista,1));
             *valor_ptr = valor;
             instruccion->tipo = iCOPY_STRING;
             instruccion->arg1 = valor_ptr;
@@ -273,22 +276,90 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             *argumento = string_a_registro(list_get(lista, 2));
             *argumento2 = string_a_registro(list_get(lista, 3));
             instruccion->arg1 = argumento;
-            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->arg2 = argumento2;
-            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,3)));
             instruccion->sizeArg3 = 0;
             break;
         case iIO_STDOUT_WRITE:
             instruccion->tipo = iIO_STDOUT_WRITE;
-            instruccion->interfaz = list_get(lista, 1);
-            *argumento = string_a_registro(list_get(lista, 2));
-            *argumento2 = string_a_registro(list_get(lista, 3));
+            instruccion->interfaz = list_get(lista,1);
+            *argumento = string_a_registro(list_get(lista,2));
+            *argumento2 = string_a_registro(list_get(lista,3));
             instruccion->arg1 = argumento;
-            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 2)));
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->arg2 = argumento2;
-            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,3)));
             instruccion->sizeArg3 = 0;
             break;
+        case iWAIT:
+            instruccion->tipo = iWAIT;
+            instruccion->arg1 = list_get(lista,1);
+            instruccion->sizeArg1 = strlen(list_get(lista,1))+1;
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+            break;
+        case iSIGNAL:
+            instruccion->tipo = iSIGNAL;
+            instruccion->arg1 = list_get(lista,1);
+            instruccion->sizeArg1 = strlen(list_get(lista,1))+1;
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+            break;
+        case iIO_FS_CREATE:
+            instruccion->tipo = iIO_FS_CREATE;
+            instruccion->interfaz = strdup(list_get(lista,1));
+            instruccion->archivo = strdup(list_get(lista,2));
+            instruccion->sizeArg1 = 0;
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+        break;
+        case iIO_FS_DELETE:
+            instruccion->tipo = iIO_FS_DELETE;
+            instruccion->interfaz = strdup(list_get(lista,1));
+            instruccion->archivo = strdup(list_get(lista,2));
+            instruccion->sizeArg1 = 0;
+            instruccion->sizeArg2 = 0;
+            instruccion->sizeArg3 = 0;
+        break;
+        case iIO_FS_TRUNCATE:
+            instruccion->tipo = iIO_FS_TRUNCATE;
+            instruccion->interfaz = strdup(list_get(lista,1));
+            instruccion->archivo = strdup(list_get(lista,2));
+            *argumento = string_a_registro(list_get(lista,3));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
+            instruccion->sizeArg3 = 0;
+            instruccion->sizeArg2 = 0;
+        break;
+        case iIO_FS_WRITE:
+            instruccion->tipo = iIO_FS_WRITE;
+            instruccion->interfaz = strdup(list_get(lista,1));
+            instruccion->archivo = strdup(list_get(lista,2));
+            *argumento = string_a_registro(list_get(lista, 3));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,3)));
+            *argumento2 = string_a_registro(list_get(lista,4));
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,4)));
+            *argumento3 = string_a_registro(list_get(lista,5));
+            instruccion->arg3 = argumento3;
+            instruccion->sizeArg3 = tamanioRegistro(string_a_registro(list_get(lista,5)));
+        break;
+        case iIO_FS_READ:
+            instruccion->tipo = iIO_FS_READ;
+            instruccion->interfaz = strdup(list_get(lista, 1));
+            instruccion->archivo = strdup(list_get(lista, 2));
+            *argumento = string_a_registro(list_get(lista, 3));
+            instruccion->arg1 = argumento;
+            instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,3)));
+            *argumento2 = string_a_registro(list_get(lista,4));
+            instruccion->arg2 = argumento2;
+            instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,4)));
+            *argumento3 = string_a_registro(list_get(lista,5));
+            instruccion->arg3 = argumento3;
+            instruccion->sizeArg3 = tamanioRegistro(string_a_registro(list_get(lista,5)));
+        break;
         case iEXIT:
             instruccion->tipo = iEXIT;
             break;
@@ -333,14 +404,14 @@ void execute(t_instruccion* instruccion){
         log_info(log_cpu, "PID: %u - Ejecutando: COPY_STRING - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
         COPY_STRING(*(int *)instruccion->arg1);
         break;
-    /*
     case iWAIT:
-        WAIT(instruccion.interfaz);
+        WAIT((char*)instruccion->arg1);
+        log_info(log_cpu, "PID: %u - Ejecutando: WAIT - Parametro 1: %s", pcb->PID, (char*)instruccion->arg1);
         break;
     case iSIGNAL:
-        SIGNAL(instruccion.interfaz);
+        SIGNAL((char*)instruccion->arg1);
+        log_info(log_cpu, "PID: %u - Ejecutando: SIGNAL - Parametro 1: %s", pcb->PID, (char*)instruccion->arg1);
         break;
-    */
     case iIO_GEN_SLEEP:
         log_info(log_cpu, "PID: %u - Ejecutando: IO_GEN_SLEEP - Parametro 1: %s, Parametro 2: %u", pcb->PID, (char*)instruccion->interfaz, *(int*)instruccion->arg1);
         IO_GEN_SLEEP((char*)instruccion->interfaz, *(int *)instruccion->arg1);   
@@ -353,24 +424,26 @@ void execute(t_instruccion* instruccion){
         log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %p, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         IO_STDOUT_WRITE((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);    
         break;
-    /*
     case iIO_FS_CREATE:
-        IO_FS_CREATE(instruccion.interfaz, instruccion.archivo);
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_FS_CREATE - Parametro 1: %s, Parametro 2: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo);
+        IO_FS_CREATE((char*)instruccion->interfaz, (char*)instruccion->archivo);
         break;
-    
     case iIO_FS_DELETE:
-        IO_FS_DELETE(instruccion.interfaz, instruccion.archivo);
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_FS_DELETE - Parametro 1: %s, Parametro 2: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo);
+        IO_FS_DELETE((char*)instruccion->interfaz, (char*)instruccion->archivo);
         break;
     case iIO_FS_TRUNCATE:
-        IO_FS_TRUNCATE(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1);
+        log_info(log_cpu, "PID: %u - Ejecutando: iIO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1));
+        IO_FS_TRUNCATE((char*)instruccion->interfaz, (char*)instruccion->archivo, *(registrosCPU *)instruccion->arg1);
         break;
     case iIO_FS_WRITE:
-        IO_FS_WRITE(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2, *(registrosCPU *)instruccion.arg3);
+        log_info(log_cpu, "PID: %u - Ejecutando: iIO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s, Parametro 4: %s, Parametro 5: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1), registro_a_string(*(registrosCPU *)instruccion->arg2), registro_a_string(*(registrosCPU *)instruccion->arg3));
+        IO_FS_WRITE((char*)instruccion->interfaz,( char*)instruccion->archivo, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2, *(registrosCPU *)instruccion->arg3);
         break;
-    case IO_FS_READ:
-        iIO_FS_READ(instruccion.interfaz, instruccion.archivo, *(registrosCPU *)instruccion.arg1, *(registrosCPU *)instruccion.arg2, *(registrosCPU *)instruccion.arg3);
+    case iIO_FS_READ:
+        log_info(log_cpu, "PID: %u - Ejecutando: iIO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s, Parametro 4: %s, Parametro 5: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1), registro_a_string(*(registrosCPU *)instruccion->arg2), registro_a_string(*(registrosCPU *)instruccion->arg3));
+        IO_FS_READ((char*)instruccion->interfaz, (char*)instruccion->archivo, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2, *(registrosCPU *)instruccion->arg3);
         break;
-    */
     case iEXIT:
         EXIT();
         log_info(log_cpu, "PID: %u - Ejecutando: %u - No tiene parámetros", pcb->PID, instruccion->tipo);
@@ -400,29 +473,44 @@ void realizar_ciclo_de_instruccion(){
         t_instruccion* instruccion_a_ejecutar = decode(instruccion_a_decodificar);
         
         execute(instruccion_a_ejecutar);
-        // Verificar condiciones de salida 
-        if(instruccion_a_ejecutar->tipo == iRESIZE){
+
+        t_tipoInstruccion tipo_de_instr = instruccion_a_ejecutar->tipo;
+
+        liberar_instruccion(instruccion_a_ejecutar);
+
+        switch (tipo_de_instr)
+        {
+        case iRESIZE:
             op_code cod_op = recibir_operacion(socket_memoria);
             if(cod_op == OUT_OF_MEMORY){
             enviar_pcb(cod_op);
-            break;
             }
-        }
-        if(instruccion_a_ejecutar->tipo == iIO_GEN_SLEEP){
+            break;
+        case iIO_GEN_SLEEP:
+            break;
+        case iIO_STDIN_READ:
+            break;
+        case iIO_STDOUT_WRITE:
+            break;
+        case iIO_FS_CREATE:
+            break;
+        case iIO_FS_DELETE:
+            break;
+        case iIO_FS_TRUNCATE:
+            break;
+        case iIO_FS_READ:
+            break;
+        case iIO_FS_WRITE:
+            break;
+        case iEXIT:
+            break;
+        default:
+            log_error(log_cpu, "El tipo de instruccion es invalido");
             break;
         }
-        if(instruccion_a_ejecutar->tipo == iIO_STDIN_READ){
-            break;
-        }
-        if(instruccion_a_ejecutar->tipo == iIO_STDOUT_WRITE){
-            break;
-        }
-        if (instruccion_a_ejecutar->tipo == iEXIT){
-            break;
-        }
+
         if (check_interrupt()) {
             enviar_pcb(cod_op_int);
-            break;
         }
     }
 }
