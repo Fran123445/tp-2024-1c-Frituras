@@ -10,7 +10,10 @@
 #include <commons/string.h>
 #include <utils/serializacion.h>
 #include <planificadorLP.h>
-#include <interfaces.h>
+#include <interfaces/interfaces.h>
+#include <interfaces/dialFS.h>
+#include <interfaces/generica.h>
+#include <interfaces/STDIN_OUT.h>
 #include <recursos.h>
 
 extern pthread_t pth_colaExit;

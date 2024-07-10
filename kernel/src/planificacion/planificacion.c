@@ -97,7 +97,7 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
 
     void* solicitud;
 
-    if (comprobarOperacionValida(interfaz, operacion)) {
+    if (interfaz && comprobarOperacionValida(interfaz, operacion)) {
         switch(operacion) {
             case ENVIAR_IO_GEN_SLEEP:
                 solicitud = solicitudIOGenerica_create(proceso, buffer);
@@ -105,6 +105,13 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
             case ENVIAR_IO_STDIN_READ:
             case ENVIAR_IO_STDOUT_WRITE:
                 solicitud = solicitudIOSTDIN_OUT_create(proceso, buffer);
+                break;
+            case ENVIAR_DIALFS_CREATE:
+            case ENVIAR_DIALFS_DELETE:
+            case ENVIAR_DIALFS_TRUNCATE:
+            case ENVIAR_DIALFS_WRITE:
+            case ENVIAR_DIALFS_READ:
+                solicitud = solicitudDIALFS_create(proceso, operacion, buffer);
                 break;
             default:
                 break; 
