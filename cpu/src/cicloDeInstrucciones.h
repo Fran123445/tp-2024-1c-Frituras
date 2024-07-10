@@ -3,6 +3,11 @@
 
 #include "main.h"
 
+char* registro_a_string(registrosCPU registro);
+t_tipoInstruccion string_a_tipo_instruccion (char* ins_char);
+t_list* dividir_cadena_en_tokens(const char* linea);
+registrosCPU string_a_registro(const char* registro);
+void liberar_instruccion(t_instruccion* instruccion);
 PCB* recibir_pcb();
 void enviar_pcb(op_code motivo);
 char* fetch();

@@ -11,8 +11,9 @@ void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola) {
         string_append_with_format(&string, "%d, ", proceso->PID);
     };
 
-    void _agregarPIDBloqueadoALista(t_solicitudIOGenerica* solicitud) {
-        string_append_with_format(&string, "%d, ", solicitud->proceso->PID);
+    void _agregarPIDBloqueadoALista(void* elemento) {
+        PCB* proceso = *(PCB**) elemento;
+        string_append_with_format(&string, "%d, ", proceso->PID);
     };
 
     if (estado == ESTADO_BLOCKED) func = _agregarPIDBloqueadoALista;
@@ -95,9 +96,11 @@ void vaciarExit() {
         list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
         pthread_mutex_unlock(&mutexListaProcesos);
 
+        liberarRecursos(procesoAFinalizar->pcb);
+
         t_paquete* paquete = crear_paquete(FIN_PROCESO);
         agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
-        //enviar_paquete(paquete, socketMemoria);
+        enviar_paquete(paquete, socketMemoria);
         eliminar_paquete(paquete);
 
         switch(procesoAFinalizar->motivo) {
@@ -173,8 +176,8 @@ void iniciarProceso(char* path) {
     nuevoPCB->PID = siguientePID;
     nuevoPCB->estado = ESTADO_NEW;
     nuevoPCB->quantum = quantumInicial;
-    nuevoPCB->programCounter = 0;
     nuevoPCB->registros = inicializarRegistrosCPU();
+    nuevoPCB->registros.PC = 0;
     nuevoPCB->recursosAsignados = string_array_new();
 
     pthread_mutex_lock(&mutexListaProcesos);
