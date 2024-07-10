@@ -38,7 +38,6 @@ typedef enum {
 
 typedef struct {
     int PID;
-    uint32_t programCounter;
     int quantum;
     estado_proceso estado;
     registros_cpu registros;
