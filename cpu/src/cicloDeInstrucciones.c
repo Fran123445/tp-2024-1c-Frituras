@@ -173,22 +173,17 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
     registrosCPU* argumento = malloc(sizeof(registrosCPU));
     registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
     registrosCPU* argumento3 = malloc(sizeof(registrosCPU));
-    int valor;
-    int*valor_ptr = malloc(sizeof(int));
+    instruccion->archivo = malloc(sizeof(char)*256);
+    instruccion->interfaz = malloc(sizeof(char)*256);
     switch(tipo_de_instruccion){
         case iSET:
-            valor = atoi(list_get(lista,2));
-            if(valor_ptr == NULL){
-                perror("error de memoria");
-                exit(EXIT_FAILURE);
-            }
-            *valor_ptr = valor;
             instruccion->tipo = iSET;
             *argumento = string_a_registro(list_get(lista,1));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->sizeArg2 = sizeof(int);
-            instruccion->arg2 = valor_ptr;
+            *argumento2 = atoi(list_get(lista,2));
+            instruccion->arg2 = argumento2;
             instruccion->sizeArg3 = 0;
             break;
         case iSUM:
@@ -212,31 +207,28 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg3 = 0;
             break;
         case iJNZ:
-            valor = atoi(list_get(lista,2));
-            *valor_ptr = valor;
             instruccion->tipo = iJNZ;
             *argumento = string_a_registro(list_get(lista,1));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista,1)));
             instruccion->sizeArg2 = sizeof(int);
-            instruccion->arg2 = valor_ptr;
+            *argumento2 = atoi(list_get(lista,2));
+            instruccion->arg2 = argumento2;
             instruccion->sizeArg3 = 0;
             break;
         case iIO_GEN_SLEEP:
-            valor = atoi(list_get(lista,2));
-            *valor_ptr = valor;
             instruccion->tipo = iIO_GEN_SLEEP;
-            instruccion->arg1 = valor_ptr;
+            *argumento = atoi(list_get(lista,2));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = sizeof(int);
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
             instruccion->interfaz = list_get(lista,1);
             break;
         case iRESIZE:
-            valor = atoi(list_get(lista,1));
-            *valor_ptr = valor;
             instruccion->tipo = iRESIZE;
-            instruccion->arg1 = valor_ptr;
+            *argumento = atoi(list_get(lista,2));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = sizeof(uint32_t);
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
@@ -262,10 +254,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg3 = 0;
             break;
         case iCOPY_STRING:
-            valor = atoi(list_get(lista,1));
-            *valor_ptr = valor;
             instruccion->tipo = iCOPY_STRING;
-            instruccion->arg1 = valor_ptr;
+            argumento = atoi(list_get(lista,1));
+            instruccion->arg1 = argumento;
             instruccion->sizeArg1 = sizeof(uint32_t);
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
@@ -366,6 +357,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
         default:
             break;
     }
+
+    list_destroy(lista);
+
     return instruccion;
 }
 
