@@ -30,7 +30,7 @@ int waitRecurso(t_recurso* recurso, PCB* proceso);
 
 // Suma 1 a la cantidad de instancias de un recurso y, en caso de haber
 // un proceso bloqueado, envia ese proceso a Ready
-void signalRecurso(t_recurso* recurso);
+void signalRecurso(t_recurso* recurso, PCB* proceso);
 
 // Libera todos los recursos utilizados por un proceso
 void liberarRecursos(PCB* proceso);

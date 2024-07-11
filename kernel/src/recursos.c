@@ -50,6 +50,7 @@ int waitRecurso(t_recurso* recurso, PCB* proceso) {
         logProcesosEnCola(str, recurso->procesosBloqueados, false);
         free(str);
 
+        string_array_push(&proceso->recursosAsignados, strdup(recurso->nombre));
         recursoTomado = 0;
     } else {
         string_array_push(&proceso->recursosAsignados, strdup(recurso->nombre));
@@ -61,8 +62,26 @@ int waitRecurso(t_recurso* recurso, PCB* proceso) {
     return recursoTomado;
 }
 
-void signalRecurso(t_recurso* recurso) {
+void sacarRecursoTomado(PCB* proceso, char* nombreRecurso) {
+    char** recursos = string_array_new();
+    char** recursosAsignadosActualmente = proceso->recursosAsignados;
+    char* recurso;
+
+    for(int i = 0; i < string_array_size(proceso->recursosAsignados); i++) {
+        recurso = recursosAsignadosActualmente[i];
+        if(strcmp(recurso, nombreRecurso)) {
+            string_array_push(&recursos, recurso);
+        }
+    }
+
+    free(recursosAsignadosActualmente);
+    proceso->recursosAsignados = recursos;
+}
+
+void signalRecurso(t_recurso* recurso, PCB* proceso) {
     recurso->instancias += 1;
+
+    sacarRecursoTomado(proceso, recurso->nombre);
 
     if(!queue_is_empty(recurso->procesosBloqueados)) {
         enviarAReady(queue_pop(recurso->procesosBloqueados));
@@ -72,10 +91,10 @@ void signalRecurso(t_recurso* recurso) {
 void liberarRecursos(PCB* proceso) {
     char** recursos = proceso->recursosAsignados;
 
-    if (!recursos) return;
+    if (!*recursos) return;
 
-    for(int i = 0; i < string_array_size(recursos); i++) {
-        t_recurso* recurso = hallarRecurso(recursos[i]);
-        signalRecurso(recurso);
+    for(int i = string_array_size(recursos); i > 0; i--) {
+        t_recurso* recurso = hallarRecurso(proceso->recursosAsignados[0]);
+        signalRecurso(recurso, proceso);
     }
 }
