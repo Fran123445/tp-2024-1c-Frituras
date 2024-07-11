@@ -32,12 +32,14 @@ void ejecutarScript(char* path) {
     FILE* archivoScript = fopen(path, "r");
     char* instruccion = malloc(sizeof(char)*64);
 
+    pthread_mutex_lock(&mutexPlanificador);
     while(fgets(instruccion, 63, archivoScript)) {
         if (instruccion[strlen(instruccion)-1] == '\n') { //fgets lee hasta, incluido, el \n
             instruccion[strlen(instruccion)-1] = '\0';
         }
         interpretarInput(instruccion);
     }
+    pthread_mutex_unlock(&mutexPlanificador);
 
     free(instruccion);
     fclose(archivoScript);
