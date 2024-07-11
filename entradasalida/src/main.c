@@ -6,6 +6,11 @@
 
 int conexion_memoria;
 
+uint8_t* bitmap;
+int block_count;
+int block_size;
+int retraso_compactacion;
+
 void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
 
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
@@ -165,7 +170,363 @@ void iniciarInterfazSTDOUT(int socket, t_config* config, char* nombre) {
         eliminar_paquete(paquete);
     }
 }
+ //BITMAP
+void cargar_bitmap(char* path_base_dialfs) {
+    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
+    sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
 
+    FILE* file = fopen(bitmap_path, "rb");
+    if (!file) {
+        file = fopen(bitmap_path, "wb");
+        if (!file) {
+            perror("Error creando bitmap.dat");
+            exit(EXIT_FAILURE);
+        }
+
+        int bitmap_size = (block_count + 7) / 8;
+        bitmap = malloc(bitmap_size);
+        if (!bitmap) {
+            perror("Error de memoria");
+            exit(EXIT_FAILURE);
+        }
+        memset(bitmap, 0, bitmap_size);
+        fwrite(bitmap, bitmap_size, 1, file);
+        fclose(file);
+    } else {
+        // Si el archivo existe lo cargo en memoria
+        fseek(file, 0, SEEK_END);
+        long size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+        bitmap = malloc(size);
+        if (!bitmap) {
+            perror("Error de memoria");
+            exit(EXIT_FAILURE);
+        }
+        fread(bitmap, size, 1, file);
+        fclose(file);
+    }
+
+    printf("Bitmap cargado exitosamente desde %s.\n", bitmap_path);
+}
+
+void guardar_bitmap(char* path_base_dialfs) {
+    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
+    sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
+
+    FILE* file = fopen(bitmap_path, "wb");
+    if (!file) {
+        perror("Error abriendo bitmap.dat");
+        exit(EXIT_FAILURE);
+    }
+
+    fwrite(bitmap, (block_count + 7) / 8, 1, file);
+
+    fclose(file);
+
+    printf("Bitmap guardado exitosamente en %s.\n", bitmap_path);
+}
+
+int encontrar_bloque_libre() {
+    for (int i = 0; i < block_count; i++) {
+        if (!(bitmap[i / 8] & (1 << (i % 8)))) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void marcar_bloque(int bloque, int ocupado) {
+    if (ocupado) {
+        bitmap[bloque / 8] |= (1 << (bloque % 8));
+    } else {
+        bitmap[bloque / 8] &= ~(1 << (bloque % 8));
+    }
+}
+ //BITMAP
+
+// METADATA
+void crear_metadata(char* path, char* nombre_archivo, int bloque_inicial, int tamano_archivo) {
+    size_t len = strlen(path) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
+    char* ruta_completa = (char*)malloc(len);
+
+    if (!ruta_completa) {
+        perror("Error al asignar memoria para la ruta completa");
+        exit(1);
+    }
+
+    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+
+    FILE* file = fopen(ruta_completa, "w");
+    if (!file) {
+        perror("Error creando archivo de metadata");
+        free(ruta_completa);
+        exit(1);
+    }
+    fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
+    fclose(file);
+
+    free(ruta_completa);
+}
+
+void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo) {
+   size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+    char* ruta_completa = (char*)malloc(len);
+
+    if (!ruta_completa) {
+        perror("Error al asignar memoria para la ruta completa");
+        exit(1);
+    }
+
+    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+
+    FILE* file = fopen(ruta_completa, "r");
+    if (!file) {
+        perror("Error leyendo archivo de metadata");
+        free(ruta_completa);
+        exit(1);
+    }
+
+    fscanf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
+    fclose(file);
+    free(ruta_completa);
+}
+
+// METADATA
+void compactar_fs() {
+    int bloque_libre_actual = 0;
+    for (int i = 0; i < block_count; i++) {
+        if (!(bitmap[i / 8] & (1 << (i % 8)))) {
+            int bloque_actual = i;
+            // Buscar la próxima secuencia de bloques libres
+            while (bloque_actual < block_count && !(bitmap[bloque_actual / 8] & (1 << (bloque_actual % 8)))) {
+                bloque_actual++;
+            }
+
+            if (bloque_actual < block_count) {
+                for (int j = bloque_libre_actual; j < bloque_actual; j++) {
+                    marcar_bloque(j, 0); // Marco bloques libres en el bitmap
+
+                }
+                for (int j = i; j < bloque_actual; j++) {
+                    marcar_bloque(j, 1);  // Marco nuevos bloques como ocupados en el bitmap
+
+                }
+                bloque_libre_actual = bloque_actual;
+            }
+        }
+    }
+}
+//ARCHIVOS
+void crear_archivo_en_dialfs(char* path, char* nombre_archivo, int tam) {
+    int bloque_libre = encontrar_bloque_libre();
+
+    if (bloque_libre != -1) {
+        marcar_bloque(bloque_libre, 1);
+        crear_metadata(path,nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
+    } else {
+        printf("No hay bloques libres disponibles.\n");
+    }
+}
+
+void eliminar_archivo_en_dialfs(char* path,char* nombre_archivo) {
+
+    size_t len = strlen(path) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
+    char* ruta_completa = (char*)malloc(len);
+
+    if (!ruta_completa) {
+        perror("Error al asignar memoria para la ruta completa");
+        exit(1);
+    }
+    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+    int bloque_inicial, tamano_archivo;
+    leer_metadata(ruta_completa, &bloque_inicial, &tamano_archivo);
+    int bloques_necesarios = (tamano_archivo + block_size - 1) / block_size;
+
+    for (int i = 0; i < bloques_necesarios; i++) {
+        marcar_bloque(bloque_inicial + i, 0); // Libera los bloques
+    }
+
+    if (remove(ruta_completa) != 0) {
+        perror("Error eliminando archivo de metadata");
+    }
+
+    free(ruta_completa);
+}
+
+void truncar_archivo_en_dialfs(char*path ,char* nombre_archivo, int nuevo_tamano, int retraso_compactacion) {
+    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+    char* ruta_completa = (char*)malloc(len);
+
+    if (!ruta_completa) {
+        perror("Error al asignar memoria para la ruta completa");
+        exit(1);
+    }
+
+    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+
+    int bloque_inicial, tamano_archivo;
+    leer_metadata(ruta_completa, &bloque_inicial, &tamano_archivo);
+    int bloques_necesarios_nuevo = (nuevo_tamano + block_size - 1) / block_size;
+    int bloques_necesarios_actual = (tamano_archivo + block_size - 1) / block_size;
+
+    if (nuevo_tamano < tamano_archivo) {
+        for (int i = bloques_necesarios_nuevo; i < bloques_necesarios_actual; i++) {
+            marcar_bloque(bloque_inicial + i, 0);
+        }
+    } else if (nuevo_tamano > tamano_archivo) {
+        int espacio_contiguo = 1;
+        for (int i = bloque_inicial + bloques_necesarios_actual; i < bloque_inicial + bloques_necesarios_nuevo; i++) {
+            if (i >= block_count || (bitmap[i / 8] & (1 << (i % 8)))) {
+                espacio_contiguo = 0;
+                break;
+            }
+        }
+        if (!espacio_contiguo) {
+            compactar_fs();
+            sleep(retraso_compactacion);
+        }
+        for (int i = bloques_necesarios_actual; i < bloques_necesarios_nuevo; i++) {
+            marcar_bloque(bloque_inicial + i, 1);
+        }
+    }
+
+    FILE* file = fopen(ruta_completa, "w");
+    if (!file) {
+        perror("Error actualizando archivo de metadata");
+        free(ruta_completa);
+        exit(1);
+    }
+    fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, nuevo_tamano);
+    fclose(file);
+    free(ruta_completa);
+}
+void escribir_en_archivo_dialfs(char* path, char* nombre_archivo, char* texto) {
+    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+    char* ruta_completa = (char*)malloc(len);
+
+    if (!ruta_completa) {
+        perror("Error al asignar memoria para la ruta completa");
+        exit(1);
+    }
+
+    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+
+    FILE* file = fopen(ruta_completa, "a");
+    if (!file) {
+        perror("Error abriendo archivo para escribir");
+        free(ruta_completa);
+        exit(1);
+    }
+
+    fprintf(file, "%s", texto);
+
+    fclose(file);
+    free(ruta_completa);
+}
+
+void leer_desde_archivo_dialfs(char* path, char* nombre_archivo) {
+    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+    char* ruta_completa = (char*)malloc(len);
+
+    if (!ruta_completa) {
+        perror("Error al asignar memoria para la ruta completa");
+        exit(1);
+    }
+
+    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+
+    FILE* file = fopen(ruta_completa, "r");
+    if (!file) {
+        perror("Error abriendo archivo para lectura");
+        free(ruta_completa);
+        exit(1);
+    }
+
+    char* buffer;//dinamico?
+    while (fgets(buffer, sizeof(buffer), file)) {
+        printf("%s", buffer);
+    }
+
+    fclose(file);
+    free(ruta_completa);
+}
+//ARCHIVOS
+void crear_archivo_de_bloques(char* path_base_dialfs,char* nombre, int tam) {
+    crear_archivo_en_dialfs(path_base_dialfs, nombre, tam);
+    printf("Archivo bloques.dat creado exitosamente en %s.\n", bloques_path);
+}
+
+void iniciarInterfazDialFS(int socket, t_config* config, char* nombre){
+    int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+    block_size = config_get_int_value(config, "BLOCK_SIZE");
+    block_count = config_get_int_value(config, "BLOCK_COUNT");
+    retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
+    char* path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
+    int tam_bloq_dat = block_size*block_count;
+
+    cargar_bitmap(path_base_dialfs);
+
+    crear_archivo_de_bloques(path_base_dialfs,"bloques.dat",tam_bloq_dat);
+
+    t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
+    enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
+
+    while (1) {
+        op_code reciv = recibir_operacion(socket);
+
+        if (reciv < 0) {
+            exit(-1);
+        }
+        t_buffer* buffer = recibir_buffer(socket);
+        switch (reciv) {
+
+            case IO_FS_CREATE:
+                char* nombre_archivo = buffer_read_string(buffer);
+                int tam = buffer_read_int(buffer);
+                crear_archivo_en_dialfs(path_base_dialfs,nombre_archivo,tam);
+                free(nombre_archivo);
+                break;
+
+            case IO_FS_DELETE:
+                char* nombre_archivo = buffer_read_string(buffer);
+                eliminar_archivo_en_dialfs(path_base_dialfs,nombre_archivo);
+                free(nombre_archivo);
+                break;
+
+            case IO_FS_TRUNCATE:
+                char* nombre_archivo = buffer_read_string(buffer);
+                int nuevo_tamano = buffer_read_int(buffer);
+                truncar_archivo_en_dialfs(path_base_dialfs,nombre_archivo, nuevo_tamano, retraso_compactacion);
+                free(nombre_archivo);
+                break;
+
+            case IO_FS_WRITE:
+                char* nombre_archivo = buffer_read_string(buffer);
+                char* texto = buffer_read_string(buffer); //
+                escribir_en_archivo_dialfs(path_base_dialfs, nombre_archivo, texto);
+                free(nombre_archivo);
+                free(texto);
+                break;
+
+            case IO_FS_READ:
+                char* nombre_archivo = buffer_read_string(buffer);
+                leer_desde_archivo_dialfs(path_base_dialfs, nombre_archivo);
+                free(nombre_archivo);
+                break;
+
+            default:
+                break;
+        }
+        free(buffer);
+        sleep(tiempo_pausa);
+
+        t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
+        enviar_paquete(paquete ,socket);
+        eliminar_paquete(paquete);
+    }
+    guardar_bitmap("bitmap.dat");
+}
 
 int main(int argc, char* argv[]) {
 
@@ -199,5 +560,10 @@ int main(int argc, char* argv[]) {
         iniciarInterfazSTDOUT(conexion_kernel, nuevo_config, argv[1]);
     }
 
+    if (!strcmp(tipo, "DIALFS")) {
+        iniciarInterfazDialFS(conexion_kernel, nuevo_config, argv[1]);
+    }
+
+    free(bitmap);
     return 0;
 }
