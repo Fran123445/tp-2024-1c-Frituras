@@ -1,5 +1,10 @@
 #include "generica.h"
 
+void liberarSolicitudGenerica(t_solicitudIOGenerica* solicitud) {
+    enviarAExit(solicitud->proceso, INVALID_INTERFACE);
+    free(solicitud);
+}
+
 void administrarInterfazGenerica(int* socket_cliente) {
 
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_GENERICA);
@@ -31,7 +36,10 @@ void administrarInterfazGenerica(int* socket_cliente) {
         pthread_mutex_unlock(&mutexPlanificador);
 
         free(solicitud);
-    } 
+    }
+
+    queue_destroy_and_destroy_elements(interfaz->procesosBloqueados, (void *) liberarSolicitudGenerica);
+    liberarInterfazConectada(interfaz);
 }
 
 t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer) {

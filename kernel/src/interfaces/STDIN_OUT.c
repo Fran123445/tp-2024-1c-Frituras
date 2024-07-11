@@ -18,6 +18,11 @@ t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buff
     return solicitud;
 }
 
+void liberarSolicitudSTDIN_OUT(t_solicitudIOSTDIN_OUT* solicitud) {
+    free(solicitud->direcciones);
+    enviarAExit(solicitud->proceso, INVALID_INTERFACE);
+}
+
 void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
     op_code op;
 
@@ -54,7 +59,10 @@ void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
 
         list_destroy(solicitud->direcciones);
         free(solicitud);
-    } 
+    }
+
+    queue_destroy_and_destroy_elements(interfaz->procesosBloqueados, (void *) liberarSolicitudSTDIN_OUT);
+    liberarInterfazConectada(interfaz);
 }
 
 void administrarSTDIN(int* socket_cliente) {

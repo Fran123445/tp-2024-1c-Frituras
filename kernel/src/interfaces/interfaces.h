@@ -40,5 +40,6 @@ void esperarClientesIO(t_conexion_escucha* params);
 t_IOConectada* IOConectado_create(int socket_cliente, tipoInterfaz tipo);
 t_IOConectada* hallarInterfazConectada(char* nombre);
 bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion);
+void liberarInterfazConectada(t_IOConectada* interfaz);
 
 #endif /* CONN_H */

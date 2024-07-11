@@ -98,3 +98,8 @@ t_IOConectada* hallarInterfazConectada(char* nombre) {
 
     return interfaz;
 }
+
+void liberarInterfazConectada(t_IOConectada* interfaz) {
+    free(interfaz->nombreInterfaz);
+    free(interfaz);
+}

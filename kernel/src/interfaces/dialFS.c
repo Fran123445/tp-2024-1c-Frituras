@@ -1,5 +1,11 @@
 #include "dialFS.h"
 
+void liberarSolicitudDialFS(t_solicitudDIALFS* solicitud) {
+    enviarAExit(solicitud->proceso, INVALID_INTERFACE);
+    free(solicitud->nombreArchivo);
+    free(solicitud);
+}
+
 void administrarDIALFS(int* socket_cliente) {
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_DIALFS);
 
@@ -49,6 +55,8 @@ void administrarDIALFS(int* socket_cliente) {
         free(solicitud);
     } 
 
+    queue_destroy_and_destroy_elements(interfaz->procesosBloqueados, (void *) liberarSolicitudDialFS);
+    liberarInterfazConectada(interfaz);
 }
 
 t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buffer* buffer) {
