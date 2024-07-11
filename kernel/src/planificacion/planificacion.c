@@ -124,7 +124,7 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
 
         char* str = string_new();
         string_append_with_format(&str, "BLOCKED %s", interfaz->nombreInterfaz);
-        logProcesosEnCola(ESTADO_BLOCKED, str, interfaz->procesosBloqueados);
+        logProcesosEnCola(str, interfaz->procesosBloqueados, true);
         free(str);
 
         pthread_mutex_unlock(&interfaz->mutex);
