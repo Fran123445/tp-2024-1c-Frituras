@@ -366,8 +366,8 @@ void execute(t_instruccion* instruccion){
     switch (instruccion->tipo)
     {
     case iSET:
-        SET(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
+        SET(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
     case iMOV_IN:
         log_info(log_cpu, "PID: %u - Ejecutando: MOV_IN - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
@@ -378,32 +378,32 @@ void execute(t_instruccion* instruccion){
         MOV_OUT(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iSUM:
-        SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         log_info(log_cpu, "PID: %u - Ejecutando: SUM - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iSUB:
-        SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         log_info(log_cpu, "PID: %u - Ejecutando: SUB - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iJNZ:
-        JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         log_info(log_cpu, "PID: %u - Ejecutando: JNZ - Parametro 1: %s, Parametro 2: %u", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), *(int*)instruccion->arg2);
+        JNZ(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
     case iRESIZE:
-        RESIZE(*(int *)instruccion->arg1);
         log_info(log_cpu, "PID: %u - Ejecutando: RESIZE - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
+        RESIZE(*(int *)instruccion->arg1);
         break;
     case iCOPY_STRING:
         log_info(log_cpu, "PID: %u - Ejecutando: COPY_STRING - Parametro 1: %u", pcb->PID, *(int*)instruccion->arg1);
         COPY_STRING(*(int *)instruccion->arg1);
         break;
     case iWAIT:
-        WAIT((char*)instruccion->arg1);
         log_info(log_cpu, "PID: %u - Ejecutando: WAIT - Parametro 1: %s", pcb->PID, (char*)instruccion->arg1);
+        WAIT((char*)instruccion->arg1);
         break;
     case iSIGNAL:
-        SIGNAL((char*)instruccion->arg1);
         log_info(log_cpu, "PID: %u - Ejecutando: SIGNAL - Parametro 1: %s", pcb->PID, (char*)instruccion->arg1);
+        SIGNAL((char*)instruccion->arg1);
         break;
     case iIO_GEN_SLEEP:
         log_info(log_cpu, "PID: %u - Ejecutando: IO_GEN_SLEEP - Parametro 1: %s, Parametro 2: %u", pcb->PID, (char*)instruccion->interfaz, *(int*)instruccion->arg1);
@@ -426,20 +426,20 @@ void execute(t_instruccion* instruccion){
         IO_FS_DELETE((char*)instruccion->interfaz, (char*)instruccion->archivo);
         break;
     case iIO_FS_TRUNCATE:
-        log_info(log_cpu, "PID: %u - Ejecutando: iIO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1));
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1));
         IO_FS_TRUNCATE((char*)instruccion->interfaz, (char*)instruccion->archivo, *(registrosCPU *)instruccion->arg1);
         break;
     case iIO_FS_WRITE:
-        log_info(log_cpu, "PID: %u - Ejecutando: iIO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s, Parametro 4: %s, Parametro 5: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1), registro_a_string(*(registrosCPU *)instruccion->arg2), registro_a_string(*(registrosCPU *)instruccion->arg3));
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_FS_WRITE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s, Parametro 4: %s, Parametro 5: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1), registro_a_string(*(registrosCPU *)instruccion->arg2), registro_a_string(*(registrosCPU *)instruccion->arg3));
         IO_FS_WRITE((char*)instruccion->interfaz,( char*)instruccion->archivo, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2, *(registrosCPU *)instruccion->arg3);
         break;
     case iIO_FS_READ:
-        log_info(log_cpu, "PID: %u - Ejecutando: iIO_FS_TRUNCATE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s, Parametro 4: %s, Parametro 5: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1), registro_a_string(*(registrosCPU *)instruccion->arg2), registro_a_string(*(registrosCPU *)instruccion->arg3));
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_FS_READ - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s, Parametro 4: %s, Parametro 5: %s", pcb->PID, (char*)instruccion->interfaz, (char*)instruccion->archivo, registro_a_string(*(registrosCPU *)instruccion->arg1), registro_a_string(*(registrosCPU *)instruccion->arg2), registro_a_string(*(registrosCPU *)instruccion->arg3));
         IO_FS_READ((char*)instruccion->interfaz, (char*)instruccion->archivo, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2, *(registrosCPU *)instruccion->arg3);
         break;
     case iEXIT:
+        log_info(log_cpu, "PID: %u - Ejecutando: EXIT - No tiene parámetros", pcb->PID);
         EXIT();
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - No tiene parámetros", pcb->PID, instruccion->tipo);
         break;
     default:
         log_error(log_cpu, "La instruccion es inválida");
