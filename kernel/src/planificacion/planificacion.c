@@ -181,6 +181,10 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             enviarAReady(nuevoProceso);
             pthread_mutex_unlock(&mutexNew);
             break;
+        case FINALIZAR_PROCESO:
+            enviarAExit(proceso, INTERRUPTED_BY_USER);
+            cpuLibre = 1;
+            break;
         case ENVIAR_IO_GEN_SLEEP:
         case ENVIAR_IO_STDIN_READ:
         case ENVIAR_IO_STDOUT_WRITE:
