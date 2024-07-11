@@ -16,7 +16,7 @@ extern void (*criterioEnvio)();
 
 extern int cpuLibre;
 
-void enviarAIOGenericaFIFO(PCB* proceso, op_code operacion, t_buffer* buffer);
+void enviarAIOFIFO(PCB* proceso, op_code operacion, t_buffer* buffer);
 
 void operacionFinalizadaFIFO(PCB* proceso);
 

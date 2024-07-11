@@ -1,6 +1,6 @@
 #include <planificacion/FIFO.h>
 
-void enviarAIOGenericaFIFO(PCB* proceso, op_code operacion, t_buffer* buffer) {
+void enviarAIOFIFO(PCB* proceso, op_code operacion, t_buffer* buffer) {
     enviarAIO(proceso, operacion, buffer);
     cpuLibre = 1;
 }
@@ -30,7 +30,7 @@ void criterioEnvioFIFO() {
 }
 
 void setFIFO() {
-    instIO = enviarAIOGenericaFIFO;
+    instIO = enviarAIOFIFO;
     IOFinalizada = operacionFinalizadaFIFO;
     instWait = waitFIFO;
     instSignal = signalFIFO;

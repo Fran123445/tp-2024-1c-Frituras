@@ -167,7 +167,7 @@ int instruccionSignal(PCB* proceso, t_buffer* buffer) {
         return 1;
     }
 
-    signalRecurso(recurso);
+    signalRecurso(recurso, proceso);
 
     enviarProcesoACPU(proceso);
     return 0;

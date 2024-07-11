@@ -22,7 +22,7 @@ void esperarVuelta(PCB* proceso);
 // Envia el proceso a CPU e inicia el conteo del quantum
 void enviarProcesoACPU_RR(PCB*);
 
-void enviarAIOGenericaRR(PCB* proceso, op_code operacion, t_buffer* buffer);
+void enviarAIORR(PCB* proceso, op_code operacion, t_buffer* buffer);
 
 void waitRR(PCB* proceso, t_buffer* buffer);
 

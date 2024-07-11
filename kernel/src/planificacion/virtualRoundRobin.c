@@ -56,7 +56,7 @@ void asignarQuantum(PCB* proceso) {
     }
 }
 
-void enviarAIOGenericaVRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
+void enviarAIOVRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
     asignarQuantum(proceso);
     enviarAIO(proceso, operacion, buffer);
     cpuLibre = 1;
@@ -84,7 +84,7 @@ void criterioEnvioVRR() {
 }
 
 void setVRR() {
-    instIO = enviarAIOGenericaVRR;
+    instIO = enviarAIOVRR;
     IOFinalizada = operacionFinalizadaVRR;
     instWait = waitRR;
     instSignal = signalRR;
