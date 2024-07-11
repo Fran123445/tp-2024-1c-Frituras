@@ -62,6 +62,8 @@ void enviarAExit(PCB* pcb, motivo_exit motivo) {
     aExit->pcb = pcb;
     aExit->motivo = motivo;
 
+    liberarRecursos(pcb);
+
     pthread_mutex_lock(&mutexExit);
     cambiarEstado(pcb, ESTADO_EXIT);
     queue_push(colaExit, aExit);
@@ -96,9 +98,7 @@ void vaciarExit() {
         list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
         pthread_mutex_unlock(&mutexListaProcesos);
 
-        liberarRecursos(procesoAFinalizar->pcb);
-
-        t_paquete* paquete = crear_paquete(FIN_PROCESO);
+        t_paquete* paquete = crear_paquete(FINALIZAR_PROCESO);
         agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
         enviar_paquete(paquete, socketMemoria);
         eliminar_paquete(paquete);
