@@ -173,8 +173,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
     registrosCPU* argumento = malloc(sizeof(registrosCPU));
     registrosCPU* argumento2 = malloc(sizeof(registrosCPU));
     registrosCPU* argumento3 = malloc(sizeof(registrosCPU));
-    instruccion->archivo = malloc(sizeof(char)*256);
-    instruccion->interfaz = malloc(sizeof(char)*256);
+
     switch(tipo_de_instruccion){
         case iSET:
             instruccion->tipo = iSET;
@@ -461,8 +460,9 @@ int check_interrupt() {
 }
 
 void realizar_ciclo_de_instruccion(){
-    while (1) {
-        char* instruccion_a_decodificar = fetch(pcb, socket_memoria);
+    int terminar = 0;
+    while (!terminar) {
+        char* instruccion_a_decodificar = fetch();
 
         t_instruccion* instruccion_a_ejecutar = decode(instruccion_a_decodificar);
         
@@ -470,36 +470,28 @@ void realizar_ciclo_de_instruccion(){
 
         t_tipoInstruccion tipo_de_instr = instruccion_a_ejecutar->tipo;
 
-        liberar_instruccion(instruccion_a_ejecutar);
+        //liberar_instruccion(instruccion_a_ejecutar);
 
-        switch (tipo_de_instr)
-        {
+        switch (tipo_de_instr) {
         case iRESIZE:
             op_code cod_op = recibir_operacion(socket_memoria);
             if(cod_op == OUT_OF_MEMORY){
-            enviar_pcb(cod_op);
+                enviar_pcb(cod_op);
+                terminar = 1;
             }
             break;
         case iIO_GEN_SLEEP:
-            break;
         case iIO_STDIN_READ:
-            break;
         case iIO_STDOUT_WRITE:
-            break;
         case iIO_FS_CREATE:
-            break;
         case iIO_FS_DELETE:
-            break;
         case iIO_FS_TRUNCATE:
-            break;
         case iIO_FS_READ:
-            break;
         case iIO_FS_WRITE:
-            break;
         case iEXIT:
+            terminar = 1;
             break;
         default:
-            log_error(log_cpu, "El tipo de instruccion es invalido");
             break;
         }
 
