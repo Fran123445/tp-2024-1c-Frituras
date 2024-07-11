@@ -1,4 +1,5 @@
 #include "mmu.h"
+#include "algoritmosSustitucion.h"
 
 t_list* TLB;
 
@@ -21,7 +22,7 @@ uint32_t recibir_marco(){
         liberar_buffer(buffer);
         return marco;
     }
-    return NULL;
+    return -1;
 }
 
 void pedir_marco(uint32_t numero_pagina){

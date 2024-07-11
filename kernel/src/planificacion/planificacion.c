@@ -97,7 +97,7 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
 
     void* solicitud;
 
-    if (comprobarOperacionValida(interfaz, operacion)) {
+    if (interfaz && comprobarOperacionValida(interfaz, operacion)) {
         switch(operacion) {
             case ENVIAR_IO_GEN_SLEEP:
                 solicitud = solicitudIOGenerica_create(proceso, buffer);
@@ -105,6 +105,13 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
             case ENVIAR_IO_STDIN_READ:
             case ENVIAR_IO_STDOUT_WRITE:
                 solicitud = solicitudIOSTDIN_OUT_create(proceso, buffer);
+                break;
+            case ENVIAR_DIALFS_CREATE:
+            case ENVIAR_DIALFS_DELETE:
+            case ENVIAR_DIALFS_TRUNCATE:
+            case ENVIAR_DIALFS_WRITE:
+            case ENVIAR_DIALFS_READ:
+                solicitud = solicitudDIALFS_create(proceso, operacion, buffer);
                 break;
             default:
                 break; 
@@ -117,7 +124,7 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
 
         char* str = string_new();
         string_append_with_format(&str, "BLOCKED %s", interfaz->nombreInterfaz);
-        logProcesosEnCola(ESTADO_BLOCKED, str, interfaz->procesosBloqueados);
+        logProcesosEnCola(str, interfaz->procesosBloqueados, true);
         free(str);
 
         pthread_mutex_unlock(&interfaz->mutex);
@@ -173,6 +180,10 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             PCB* nuevoProceso = queue_pop(colaNew);
             enviarAReady(nuevoProceso);
             pthread_mutex_unlock(&mutexNew);
+            break;
+        case FINALIZAR_PROCESO:
+            enviarAExit(proceso, INTERRUPTED_BY_USER);
+            cpuLibre = 1;
             break;
         case ENVIAR_IO_GEN_SLEEP:
         case ENVIAR_IO_STDIN_READ:

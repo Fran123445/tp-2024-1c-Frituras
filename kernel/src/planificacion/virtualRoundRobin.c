@@ -13,7 +13,7 @@ void enviarAColaPrioritaria(PCB* proceso) {
     pthread_mutex_lock(&mutexColaPrioritaria);
     cambiarEstado(proceso, ESTADO_READY);
     queue_push(colaPrioritaria, proceso);
-    logProcesosEnCola(ESTADO_READY, "READY+", colaPrioritaria);
+    logProcesosEnCola("READY+", colaPrioritaria, false);
     pthread_mutex_unlock(&mutexColaPrioritaria);
 
     if (!ultimoPrioritario) {
@@ -48,18 +48,19 @@ void asignarQuantum(PCB* proceso) {
     cortarQuantum();
     temporal_stop(tiempoTranscurrido);
 
-    if (!procesoInterrumpido) {
+    if (procesoInterrumpido) {
         proceso->quantum = quantumInicial;
     } else {
         proceso->quantum -= temporal_gettime(tiempoTranscurrido);
+        if(proceso->quantum <= 0) proceso->quantum = quantumInicial;
     }
 }
 
 void enviarAIOGenericaVRR(PCB* proceso, op_code operacion, t_buffer* buffer) {
-    temporal_destroy(tiempoTranscurrido);
     asignarQuantum(proceso);
     enviarAIO(proceso, operacion, buffer);
     cpuLibre = 1;
+    temporal_destroy(tiempoTranscurrido);
 }
 
 void operacionFinalizadaVRR(PCB* proceso) {

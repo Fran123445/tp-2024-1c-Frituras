@@ -33,7 +33,7 @@ void iniciarInterfazGenerica(int socket, t_config* config, char* nombre){
         
         t_buffer* buffer = recibir_buffer(socket);
         int unidades_trabajo = buffer_read_int(buffer);
-        sleep(tiempo_pausa * unidades_trabajo);
+        usleep(tiempo_pausa * unidades_trabajo);
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,socket);
@@ -548,7 +548,15 @@ int main(int argc, char* argv[]) {
         iniciarInterfazSTDIN(conexion_kernel, nuevo_config, argv[1]);
     }
 
-    if (!strcmp(tipo, "STDOUT")) {
+    if(!strcmp(tipo,"GENERICA")){
+        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
+    }
+
+    if(!strcmp(tipo,"IO_STDIN_READ")){
+        iniciarInterfazSTDIN(conexion_kernel, nuevo_config, argv[1]);
+    }
+
+    if (!strcmp(tipo, "IO_STDOUT_WRITE")) {
         iniciarInterfazSTDOUT(conexion_kernel, nuevo_config, argv[1]);
     }
 

@@ -16,10 +16,16 @@ extern t_log* logger;
 
 extern pthread_mutex_t mutexPlanificador;
 
+extern void administrarDIALFS(int*);
+extern void administrarInterfazGenerica(int*);
+extern void administrarSTDIN(int*);
+extern void administrarSTDOUT(int*);
+
 typedef enum {
     INTERFAZ_GENERICA,
     INTERFAZ_STDIN,
-    INTERFAZ_STDOUT
+    INTERFAZ_STDOUT,
+    INTERFAZ_DIALFS
 } tipoInterfaz;
 
 typedef struct {
@@ -30,28 +36,10 @@ typedef struct {
     sem_t semaforo;
 } t_IOConectada;
 
-typedef struct {
-    PCB* proceso;
-    int unidadesTrabajo;
-} t_solicitudIOGenerica;
-
-typedef struct {
-    uint32_t direccion;
-    uint32_t tamanio;
-} t_direccionMemoria;
-
-typedef struct {
-    PCB* proceso;
-    t_list* direcciones;
-} t_solicitudIOSTDIN_OUT;
-
 void esperarClientesIO(t_conexion_escucha* params);
-void administrarInterfazGenerica(int* socket_cliente);
-void administrarSTDIN(int* socket_cliente);
-void administrarSTDOUT(int* socket_cliente);
+t_IOConectada* IOConectado_create(int socket_cliente, tipoInterfaz tipo);
 t_IOConectada* hallarInterfazConectada(char* nombre);
 bool comprobarOperacionValida(t_IOConectada* interfaz, op_code operacion);
-t_solicitudIOGenerica* solicitudIOGenerica_create(PCB* proceso, t_buffer* buffer);
-t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buffer);
+void liberarInterfazConectada(t_IOConectada* interfaz);
 
 #endif /* CONN_H */

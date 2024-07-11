@@ -41,8 +41,15 @@ int waitRecurso(t_recurso* recurso, PCB* proceso) {
     // en vez de menor o igual a 0, ya que entonces un proceso podria tomar un
     // recurso que tiene 0 instancias ¿?
     int recursoTomado;
-    if (recurso->instancias < 0) {
+    if (recurso->instancias <= 0) {
         queue_push(recurso->procesosBloqueados, proceso);
+        cambiarEstado(proceso, ESTADO_BLOCKED);
+
+        char* str = string_new();
+        string_append_with_format(&str, "BLOCKED %s", recurso->nombre);
+        logProcesosEnCola(str, recurso->procesosBloqueados, false);
+        free(str);
+
         recursoTomado = 0;
     } else {
         string_array_push(&proceso->recursosAsignados, strdup(recurso->nombre));
@@ -59,5 +66,16 @@ void signalRecurso(t_recurso* recurso) {
 
     if(!queue_is_empty(recurso->procesosBloqueados)) {
         enviarAReady(queue_pop(recurso->procesosBloqueados));
+    }
+}
+
+void liberarRecursos(PCB* proceso) {
+    char** recursos = proceso->recursosAsignados;
+
+    if (!recursos) return;
+
+    for(int i = 0; i < string_array_size(recursos); i++) {
+        t_recurso* recurso = hallarRecurso(recursos[i]);
+        signalRecurso(recurso);
     }
 }

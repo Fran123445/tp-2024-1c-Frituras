@@ -12,7 +12,7 @@
 #include <commons/string.h>
 #include <utils/serializacion.h>
 #include <utils/pcb.h>
-#include <interfaces.h>
+#include <interfaces/interfaces.h>
 #include <recursos.h>
 typedef enum {
     SUCCESS,
@@ -51,7 +51,7 @@ extern t_list* listaRecursos;
 
 extern int siguientePID;
 
-void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola);
+void logProcesosEnCola(char* nombreCola, t_queue* cola, bool IO);
 
 // Envia una interrupcion a CPU
 void enviarInterrupcion(int PID, op_code motivo);

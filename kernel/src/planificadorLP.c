@@ -1,6 +1,6 @@
 #include <planificadorLP.h>
 
-void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola) {
+void logProcesosEnCola(char* nombreCola, t_queue* cola, bool IO) {
     // rompe la abstraccion pero bue, a esta altura es lo que hay
 
     char* string = string_new();
@@ -11,11 +11,12 @@ void logProcesosEnCola(estado_proceso estado, char* nombreCola, t_queue* cola) {
         string_append_with_format(&string, "%d, ", proceso->PID);
     };
 
-    void _agregarPIDBloqueadoALista(t_solicitudIOGenerica* solicitud) {
-        string_append_with_format(&string, "%d, ", solicitud->proceso->PID);
+    void _agregarPIDBloqueadoPorIOALista(void* elemento) {
+        PCB* proceso = *(PCB**) elemento;
+        string_append_with_format(&string, "%d, ", proceso->PID);
     };
 
-    if (estado == ESTADO_BLOCKED) func = _agregarPIDBloqueadoALista;
+    if (IO) func = _agregarPIDBloqueadoPorIOALista;
     else func = _agregarPIDALista;
 
     list_iterate(cola->elements, (void *) func);
@@ -76,7 +77,7 @@ void enviarAReady(PCB* pcb) {
     queue_push(colaReady, pcb);
 
     // No se si dejar esto adentro del mutex de ready
-    logProcesosEnCola(ESTADO_READY, "READY", colaReady);
+    logProcesosEnCola("READY", colaReady, false);
 
     pthread_mutex_unlock(&mutexReady);
 }
@@ -95,9 +96,11 @@ void vaciarExit() {
         list_remove_element(listadoProcesos, procesoAFinalizar->pcb);
         pthread_mutex_unlock(&mutexListaProcesos);
 
+        liberarRecursos(procesoAFinalizar->pcb);
+
         t_paquete* paquete = crear_paquete(FIN_PROCESO);
         agregar_int_a_paquete(paquete, procesoAFinalizar->pcb->PID);
-        //enviar_paquete(paquete, socketMemoria);
+        enviar_paquete(paquete, socketMemoria);
         eliminar_paquete(paquete);
 
         switch(procesoAFinalizar->motivo) {
@@ -173,7 +176,6 @@ void iniciarProceso(char* path) {
     nuevoPCB->PID = siguientePID;
     nuevoPCB->estado = ESTADO_NEW;
     nuevoPCB->quantum = quantumInicial;
-    nuevoPCB->programCounter = 0;
     nuevoPCB->registros = inicializarRegistrosCPU();
     nuevoPCB->recursosAsignados = string_array_new();
 
@@ -199,7 +201,7 @@ void iniciarProceso(char* path) {
 
     siguientePID += 1;
 
-    logProcesosEnCola(ESTADO_NEW, "NEW", colaNew);
+    logProcesosEnCola("NEW", colaNew, false);
 
     sem_post(&procesosEnNew);
 }
@@ -257,6 +259,6 @@ void finalizarProceso(int PID) {
             break;
     }
 
-    enviarAExit(proceso, INTERRUPTED_BY_USER);
+    planificar(FINALIZAR_PROCESO, proceso, NULL);
     pthread_mutex_unlock(&mutexPlanificador);
 }

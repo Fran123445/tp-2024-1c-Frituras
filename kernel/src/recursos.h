@@ -32,4 +32,7 @@ int waitRecurso(t_recurso* recurso, PCB* proceso);
 // un proceso bloqueado, envia ese proceso a Ready
 void signalRecurso(t_recurso* recurso);
 
+// Libera todos los recursos utilizados por un proceso
+void liberarRecursos(PCB* proceso);
+
 #endif /* RECS_H */
