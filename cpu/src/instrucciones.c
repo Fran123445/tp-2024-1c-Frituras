@@ -39,7 +39,7 @@ void* recibir_contenido_memoria(){
     op_code cod_op = recibir_operacion(socket_memoria);
     if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
         t_buffer* buffer = recibir_buffer(socket_memoria);
-        void* data = NULL;
+        void* data = malloc(read_buffer_tamanio(buffer));
         buffer_read(buffer, data);
         liberar_buffer(buffer);
         return data;
@@ -219,8 +219,18 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
         if(pagina_inicial == pagina_final){ // Está en la misma página
             uint32_t direccionFisica = traducir_direccion_logica_a_fisica(direccionLogicaInicial);
             void* dato_leido = contenido_obtenido_de_memoria(direccionFisica, tamanio_a_leer);
-            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %d", direccionFisica, *(uint32_t*)dato_leido);
+
+            uint32_t dato_a_leer;
+
+            if (sizeof(dato_leido) == sizeof(uint32_t)) {
+                dato_a_leer = *(uint32_t*)dato_leido;
+                } else {
+                dato_a_leer = *(uint8_t*)dato_leido;
+            }
+
+            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %u", direccionFisica, dato_a_leer);
             memcpy(reg_datos, dato_leido, tamanio_a_leer);
+            free(dato_leido);
         }
         else{ // El contenido está en más de 1 página
             uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + tamanio_a_leer; 
@@ -231,12 +241,22 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
                 uint32_t direccion_fisica_actual = traducir_direccion_logica_a_fisica(direccion_logica_actual);
 
                 int cant_bytes_a_leer_pagina = tamanio_pagina - (direccion_logica_actual % tamanio_pagina); // En realidad calcula la cantidad de bytes restantes en la página desde la posición actual hasta el final de la página.
+                
                 if (cant_bytes_a_leer_pagina > (tamanio_a_leer - bytes_leidos)) { // Ajustar la cantidad de bytes a leer si es mayor que la cantidad restante (esto es para la última página, debido a lo que calcula en realidad la cuenta anterior)
                     cant_bytes_a_leer_pagina = tamanio_a_leer - bytes_leidos;
-                }
+                }   
 
                 void* dato_leido = contenido_obtenido_de_memoria(direccion_fisica_actual, cant_bytes_a_leer_pagina);
-                log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %d", direccion_fisica_actual, *(uint32_t*)dato_leido);
+
+                uint32_t dato_a_leer_parcial;
+
+                if (sizeof(dato_leido) == sizeof(uint32_t)) {
+                    dato_a_leer_parcial = *(uint32_t*)dato_leido;
+                } else {
+                    dato_a_leer_parcial = *(uint8_t*)dato_leido;
+                 }
+
+                log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %u", direccion_fisica_actual, dato_a_leer_parcial);
                 memcpy(reg_datos + bytes_leidos, dato_leido, cant_bytes_a_leer_pagina);
                 bytes_leidos += cant_bytes_a_leer_pagina;
             }
@@ -248,7 +268,9 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
 
     void *reg_datos = obtenerRegistro(registroDatos);
     void *reg_direccion = obtenerRegistro(registroDireccion);
+
     uint32_t direccionLogicaInicial;
+    uint32_t dato_a_leer;
 
     size_t tamanio_a_escribir = tamanioRegistro(registroDatos);
 
@@ -259,12 +281,18 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
         direccionLogicaInicial = *(uint8_t*)reg_direccion;
     }
 
+    if (tamanioRegistro(registroDatos) == sizeof(uint32_t)) {
+        dato_a_leer = *(uint32_t*)reg_direccion;
+    } else {
+        dato_a_leer = *(uint8_t*)reg_direccion;
+    }
+
     uint32_t pagina_inicial = obtener_numero_pagina(direccionLogicaInicial);
     uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_escribir-1); 
 
     if(pagina_inicial == pagina_final){ 
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccionLogicaInicial);
-        log_info(log_cpu, "Acción: ESCRITURA - Dirección física = %d - Valor: %d", direccion_fisica, *(uint32_t*)reg_datos);
+        log_info(log_cpu, "Acción: ESCRITURA - Dirección física = %d - Valor: %u", direccion_fisica, dato_a_leer);
         enviar_a_memoria_para_escritura(direccion_fisica, reg_datos, tamanio_a_escribir);
     }
     else{ 
@@ -278,7 +306,13 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
             if (cant_bytes_a_escribir_pagina > (tamanio_a_escribir - bytes_escritos)) { 
                 cant_bytes_a_escribir_pagina = tamanio_a_escribir - bytes_escritos;
             }
-            log_info(log_cpu, "Acción: ESCRITURA - Dirección física = %d - Valor: %d", direccion_fisica_actual, *(uint32_t*)(reg_datos + bytes_escritos));
+            uint32_t dato_a_leer_parcial;
+            if (tamanioRegistro(registroDatos) == sizeof(uint32_t)) {
+                dato_a_leer_parcial = *(uint32_t*)(reg_direccion+bytes_escritos);
+            } else {
+                dato_a_leer_parcial = *(uint8_t*)(reg_direccion+bytes_escritos);
+            }
+            log_info(log_cpu, "Acción: ESCRITURA - Dirección física = %d - Valor: %u", direccion_fisica_actual, dato_a_leer_parcial);
             enviar_a_memoria_para_escritura(direccion_fisica_actual, reg_datos + bytes_escritos, cant_bytes_a_escribir_pagina);
             bytes_escritos += cant_bytes_a_escribir_pagina;
         }

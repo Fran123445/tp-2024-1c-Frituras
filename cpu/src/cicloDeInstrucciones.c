@@ -65,6 +65,7 @@ char* registro_a_string(registrosCPU registro) {
 
 t_tipoInstruccion string_a_tipo_instruccion (char* ins_char){
     if (strcmp(ins_char, "SET") == 0) return iSET;
+    if (strcmp(ins_char, "SUB") == 0) return iSUB;
     if (strcmp(ins_char, "MOV_IN") == 0) return iMOV_IN;
     if (strcmp(ins_char, "MOV_OUT") == 0) return iMOV_OUT;
     if (strcmp(ins_char, "SUM") == 0) return iSUM;
@@ -226,7 +227,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iRESIZE:
             instruccion->tipo = iRESIZE;
-            *argumento = atoi(list_get(lista,2));
+            *argumento = atoi(list_get(lista,1));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = sizeof(uint32_t);
             instruccion->sizeArg2 = 0;
@@ -254,7 +255,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             break;
         case iCOPY_STRING:
             instruccion->tipo = iCOPY_STRING;
-            argumento = atoi(list_get(lista,1));
+            *argumento = atoi(list_get(lista,1));
             instruccion->arg1 = argumento;
             instruccion->sizeArg1 = sizeof(uint32_t);
             instruccion->sizeArg2 = 0;
@@ -366,7 +367,7 @@ void execute(t_instruccion* instruccion){
     switch (instruccion->tipo)
     {
     case iSET:
-        log_info(log_cpu, "PID: %u - Ejecutando: %u - Parametro 1: %p, Parametro 2: %p", pcb->PID, instruccion->tipo, instruccion->arg1, instruccion->arg2);
+        log_info(log_cpu, "PID: %u - Ejecutando: SET - Parametro 1: %s, Parametro 2: %u", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), *(int*)instruccion->arg2);
         SET(*(registrosCPU *)instruccion->arg1, *(int *)instruccion->arg2);
         break;
     case iMOV_IN:

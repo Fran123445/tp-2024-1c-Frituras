@@ -3,7 +3,7 @@
 
 t_list* TLB;
 
-uint32_t numPagAux; // No soy muy fan de esto, pero no sé cómo hacer para implementar esta_en_la_TLB sino.
+uint32_t numPagAux;
 
 
 uint32_t obtener_numero_pagina(uint32_t direccion_logica){
@@ -45,7 +45,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
     uint32_t numero_pagina = obtener_numero_pagina(direccion_logica);
     uint32_t desplazamiento = obtener_desplazamineto_pagina(direccion_logica);
 
-    numPagAux = numero_pagina; //Acá hay que checkear lo que puse arriba.
+    numPagAux = numero_pagina; 
     entrada_TLB* entradaExistenteEnTLB = (entrada_TLB*) list_find(TLB, esta_en_la_TLB);
 
     if (entradaExistenteEnTLB != NULL) {
