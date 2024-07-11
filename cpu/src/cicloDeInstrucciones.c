@@ -497,6 +497,7 @@ void realizar_ciclo_de_instruccion(){
 
         if (check_interrupt()) {
             enviar_pcb(cod_op_int);
+            terminar = 1;
         }
     }
 }
