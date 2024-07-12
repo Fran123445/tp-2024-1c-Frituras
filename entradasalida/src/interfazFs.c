@@ -4,6 +4,7 @@ t_bitarray* bitmap;
 int block_count;
 int block_size;
 int retraso_compactacion;
+char* path_base_dialfs;
 
  //BITMAP
 t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
@@ -21,7 +22,7 @@ t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
     return mapa_de_bloques;
 }
 
-void cargar_bitmap(char* path_base_dialfs) {
+void cargar_bitmap() {
     char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
     sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
 
@@ -60,7 +61,7 @@ void cargar_bitmap(char* path_base_dialfs) {
     printf("Bitmap cargado exitosamente desde %s.\n", bitmap_path);
 }
 
-void guardar_bitmap(char* path_base_dialfs) {
+void guardar_bitmap() {
     char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
     sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
 
@@ -96,8 +97,8 @@ void marcar_bloque(int bloque, int ocupado){
  //BITMAP
 
 // METADATA
-void crear_metadata(char* path, char* nombre_archivo, int bloque_inicial, int tamano_archivo){
-    size_t len = strlen(path) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
+void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo){
+    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
     char* ruta_completa = (char*)malloc(len);
 
     if (!ruta_completa) {
@@ -105,7 +106,7 @@ void crear_metadata(char* path, char* nombre_archivo, int bloque_inicial, int ta
         exit(1);
     }
 
-    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "wb+");
     if (!file) {
@@ -119,8 +120,8 @@ void crear_metadata(char* path, char* nombre_archivo, int bloque_inicial, int ta
     free(ruta_completa);
 }
 
-void leer_metadata(char* path, char* nombre_archivo, int* bloque_inicial, int* tamano_archivo){
-   size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo){
+   size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
     char* ruta_completa = (char*)malloc(len);
 
     if (!ruta_completa) {
@@ -128,7 +129,7 @@ void leer_metadata(char* path, char* nombre_archivo, int* bloque_inicial, int* t
         exit(1);
     }
 
-    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "rb+");
     if (!file) {
@@ -168,29 +169,20 @@ void compactar_fs(){
     }
 }
 //ARCHIVOS
-void crear_archivo_en_dialfs(char* path, char* nombre_archivo, int tam){
+void crear_archivo_en_dialfs(char* nombre_archivo, int tam){
     int bloque_libre = encontrar_bloque_libre();
 
     if (bloque_libre != -1) {
         marcar_bloque(bloque_libre, 1);
-        crear_metadata(path,nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
+        crear_metadata(nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
     } else {
         printf("No hay bloques libres disponibles.\n");
     }
 }
 
-void eliminar_archivo_en_dialfs(char* path,char* nombre_archivo){
-
-    size_t len = strlen(path) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
-    char* ruta_completa = (char*)malloc(len);
-
-    if (!ruta_completa) {
-        perror("Error al asignar memoria para la ruta completa");
-        exit(1);
-    }
-    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+void eliminar_archivo_en_dialfs(char* nombre_archivo){
     int bloque_inicial, tamano_archivo;
-    leer_metadata(path, ruta_completa, &bloque_inicial, &tamano_archivo);
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo); //VER
     int bloques_necesarios = (tamano_archivo + block_size - 1) / block_size;
 
     for (int i = 0; i < bloques_necesarios; i++) {
@@ -204,19 +196,9 @@ void eliminar_archivo_en_dialfs(char* path,char* nombre_archivo){
     free(ruta_completa);
 }
 
-void truncar_archivo_en_dialfs(char*path ,char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
-    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
-    char* ruta_completa = (char*)malloc(len);
-
-    if (!ruta_completa) {
-        perror("Error al asignar memoria para la ruta completa");
-        exit(1);
-    }
-
-    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
-
+void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
     int bloque_inicial, tamano_archivo;
-    leer_metadata(path, nombre_archivo, &bloque_inicial, &tamano_archivo);
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios_nuevo = (nuevo_tamano + block_size - 1) / block_size;
     int bloques_necesarios_actual = (tamano_archivo + block_size - 1) / block_size;
 
@@ -251,8 +233,8 @@ void truncar_archivo_en_dialfs(char*path ,char* nombre_archivo, int nuevo_tamano
     fclose(file);
     free(ruta_completa);
 }
-void escribir_en_archivo_dialfs(char* path, char* nombre_archivo, char* texto){
-    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+void escribir_en_archivo_dialfs(char* nombre_archivo, char* texto){
+    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
     char* ruta_completa = (char*)malloc(len);
 
     if (!ruta_completa) {
@@ -260,7 +242,7 @@ void escribir_en_archivo_dialfs(char* path, char* nombre_archivo, char* texto){
         exit(1);
     }
 
-    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "a+");
     if (!file) {
@@ -275,8 +257,8 @@ void escribir_en_archivo_dialfs(char* path, char* nombre_archivo, char* texto){
     free(ruta_completa);
 }
 
-void leer_desde_archivo_dialfs(char* path, char* nombre_archivo){
-    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
+void leer_desde_archivo_dialfs(char* nombre_archivo){
+    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
     char* ruta_completa = (char*)malloc(len);
 
     if (!ruta_completa) {
@@ -284,7 +266,7 @@ void leer_desde_archivo_dialfs(char* path, char* nombre_archivo){
         exit(1);
     }
 
-    snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
+    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "rb+");
     if (!file) {
@@ -322,7 +304,7 @@ void leer_desde_archivo_dialfs(char* path, char* nombre_archivo){
     free(ruta_completa);
 }
 //ARCHIVOS
-void crear_archivo_de_bloques(char* path_base_dialfs,char* nombre, int tam){
+void crear_archivo_de_bloques(char* nombre, int tam){
     crear_archivo_en_dialfs(path_base_dialfs, nombre, tam);
     printf("Archivo bloques.dat creado exitosamente en %s/%s.dat.\n", path_base_dialfs, nombre);
 }
@@ -332,7 +314,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     block_size = config_get_int_value(config, "BLOCK_SIZE");
     block_count = config_get_int_value(config, "BLOCK_COUNT");
     retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
-    char* path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
+    path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     int tam_bloq_dat = block_size*block_count;
 
     cargar_bitmap(path_base_dialfs);
@@ -356,30 +338,30 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         switch (reciv) {
             case ENVIAR_DIALFS_CREATE:
                 int tam = buffer_read_int(buffer);
-                crear_archivo_en_dialfs(path_base_dialfs,nombre_archivo,tam);
+                crear_archivo_en_dialfs(nombre_archivo,tam);
                 free(nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_DELETE:
-                eliminar_archivo_en_dialfs(path_base_dialfs,nombre_archivo);
+                eliminar_archivo_en_dialfs(nombre_archivo);
                 free(nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_TRUNCATE:
                 int nuevo_tamano = buffer_read_int(buffer);
-                truncar_archivo_en_dialfs(path_base_dialfs,nombre_archivo, nuevo_tamano, retraso_compactacion);
+                truncar_archivo_en_dialfs(nombre_archivo, nuevo_tamano, retraso_compactacion);
                 free(nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_WRITE:
                 char* texto = buffer_read_string(buffer); //
-                escribir_en_archivo_dialfs(path_base_dialfs, nombre_archivo, texto);
+                escribir_en_archivo_dialfs(nombre_archivo, texto);
                 free(nombre_archivo);
                 free(texto);
                 break;
 
             case ENVIAR_DIALFS_READ:
-                leer_desde_archivo_dialfs(path_base_dialfs, nombre_archivo);
+                leer_desde_archivo_dialfs(nombre_archivo);
                 free(nombre_archivo);
                 break;
             default:

@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    log_cpu = log_create("Cpu.log", "CPU", false, LOG_LEVEL_INFO);
+    log_cpu = log_create("Cpu.log", "CPU", true, LOG_LEVEL_INFO);
 
 
     TLB = list_create();
