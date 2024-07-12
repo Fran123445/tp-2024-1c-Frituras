@@ -3,12 +3,12 @@
 
 #include "main.h"
 
-extern uint8_t* bitmap;
+extern t_bitarray* bitmap;
 extern int block_count;
 extern int block_size;
 extern int retraso_compactacion;
 
-void* cargar_bitmap(char* path_base_dialfs);
+void cargar_bitmap(char* path_base_dialfs);
 void guardar_bitmap(char* path_base_dialfs);
 int encontrar_bloque_libre();
 void marcar_bloque(int bloque, int ocupado);

@@ -1,71 +1,70 @@
 #include "interfazFs.h"
 
-uint8_t bitmap;
+t_bitarray* bitmap;
 int block_count;
 int block_size;
 int retraso_compactacion;
 
-
-
-
  //BITMAP
-t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
-    char* bitarray_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
+t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
+    char* bitarray_memoria_usuario = calloc(cant_bloques/8, sizeof(char));
     if (!bitarray_memoria_usuario){
         fprintf(stderr, "Error al crear puntero al bitarray");
         exit(EXIT_FAILURE);
     }
-    t_bitarray* mapa_de_marcos = bitarray_create_with_mode(bitarray_memoria_usuario, cant_marcos, LSB_FIRST); // se lee el bit - significativo primero
-    if(mapa_de_marcos == NULL){
+    t_bitarray* mapa_de_bloques = bitarray_create_with_mode(bitarray_memoria_usuario, cant_bloques, LSB_FIRST); // se lee el bit - significativo primero
+    if(mapa_de_bloques == NULL){
         free(bitarray_memoria_usuario);
         fprintf(stderr, "Error al crear el bitarray");
         exit(EXIT_FAILURE);
     }
-    return mapa_de_marcos;
+    return mapa_de_bloques;
 }
 
-void* cargar_bitmap(char* path_base_dialfs){
-    char bitmap_path[256];
+void cargar_bitmap(char* path_base_dialfs) {
+    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
+    sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
 
-    strcpy(path_base_dialfs, "bitmap.dat");
-
-    printf("El path completo es: %s\n", bitmap_path);
-
-    FILE* file = fopen(bitmap_path, "rw+");
+    FILE* file = fopen(bitmap_path, "rb+");
     if (!file) {
+        file = fopen(bitmap_path, "wb+");
+        if (!file) {
             perror("Error creando bitmap.dat");
             exit(EXIT_FAILURE);
-    }
+        }
 
-    int bitmap_size = block_count / 8;
+        bitmap = iniciar_bitmap_bloques(block_count);
+        if (!bitmap) {
+            perror("Error de memoria");
+            exit(EXIT_FAILURE);
+        }
+        bitarray_set_bit(bitmap, 0);
+        fclose(file);
+    } else {
+        // Si el archivo existe lo cargo en memoria
+        fseek(file, 0, SEEK_END);
+        long size = ftell(file);
+        fseek(file, 0, SEEK_SET);
 
-    char data = malloc(bitmap_size);
-    
-    memset(bitmap, 0, bitmap_size);
-    bitmap = bitarray_create_with_mode(data, sizeof(data), LSB_FIRST);
-    fwrite(bitmap, bitmap_size, 1, file);
-    fclose(file);
-    
-    // Si el archivo existe lo cargo en memoria
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    bitmap = malloc(size);
-    if (!bitmap) {
-        perror("Error de memoria");
-        exit(EXIT_FAILURE);
+        bitmap = iniciar_bitmap_bloques(block_count);
+
+        if (!bitmap) {
+            perror("Error de memoria");
+            exit(EXIT_FAILURE);
+        }
+
+        fread(bitmap, size, 1, file);
+        fclose(file);
     }
-    fread(bitmap, size, 1, file);
-    fclose(file);
 
     printf("Bitmap cargado exitosamente desde %s.\n", bitmap_path);
 }
 
-void guardar_bitmap(char* path_base_dialfs){
+void guardar_bitmap(char* path_base_dialfs) {
     char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
     sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
 
-    FILE* file = fopen(bitmap_path, "wb+");
+    FILE* file = fopen(bitmap_path, "wb");
     if (!file) {
         perror("Error abriendo bitmap.dat");
         exit(EXIT_FAILURE);
@@ -80,7 +79,7 @@ void guardar_bitmap(char* path_base_dialfs){
 
 int encontrar_bloque_libre() {
     for (int i = 0; i < block_count; i++) {
-        if (!(bitmap[i / 8] & (1 << (i % 8)))) {
+        if (!bitarray_test_bit(bitmap, i)) {
             return i;
         }
     }
@@ -89,9 +88,9 @@ int encontrar_bloque_libre() {
 
 void marcar_bloque(int bloque, int ocupado){
     if (ocupado) {
-        bitmap[bloque / 8] |= (1 << (bloque % 8));
+        bitarray_clean_bit(bitmap, bloque);
     } else {
-        bitmap[bloque / 8] &= ~(1 << (bloque % 8));
+        bitarray_set_bit(bitmap, bloque);
     }
 }
  //BITMAP
