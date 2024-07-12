@@ -161,8 +161,6 @@ char* fetch(){
     enviar_PC_a_memoria(pcb->registros.PC);
     char* instruccionEncontrada = obtener_instruccion_de_memoria();
 
-    pcb->registros.PC++;
-
     return instruccionEncontrada;
 }
 
@@ -468,6 +466,7 @@ void realizar_ciclo_de_instruccion(){
         t_instruccion* instruccion_a_ejecutar = decode(instruccion_a_decodificar);
         
         execute(instruccion_a_ejecutar);
+        pcb->registros.PC++;
 
         t_tipoInstruccion tipo_de_instr = instruccion_a_ejecutar->tipo;
 
@@ -477,6 +476,7 @@ void realizar_ciclo_de_instruccion(){
         case iRESIZE:
             op_code cod_op = recibir_operacion(socket_memoria);
             if(cod_op == OUT_OF_MEMORY){
+                pcb->registros.PC--;
                 enviar_pcb(cod_op);
                 terminar = 1;
             }
@@ -490,7 +490,7 @@ void realizar_ciclo_de_instruccion(){
         case iIO_FS_READ:
         case iIO_FS_WRITE:
         case iEXIT:
-            terminar = 1;
+            terminar = 1;  
             break;
         default:
             break;

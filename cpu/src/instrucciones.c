@@ -150,7 +150,7 @@ void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){
                 case sizeof(uint32_t):
                     *(uint32_t *)reg_destino -= *(uint32_t *)reg_origen; break;
             }
-             log_info(log_cpu, "El contenido que quedó en el registro %s después de la resta  es: %u", registro_a_string(registroDestino), *(uint32_t *)reg_destino);
+            log_info(log_cpu, "El contenido que quedó en el registro %s después de la resta  es: %u", registro_a_string(registroDestino), *(uint32_t *)reg_destino);
             break;
     }
 }
