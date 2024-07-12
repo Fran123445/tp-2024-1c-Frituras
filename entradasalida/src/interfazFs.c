@@ -5,6 +5,8 @@ int block_count;
 int block_size;
 int retraso_compactacion;
 char* path_base_dialfs;
+FILE* bloques_dat;
+
 
  //BITMAP
 t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
@@ -20,6 +22,18 @@ t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
         exit(EXIT_FAILURE);
     }
     return mapa_de_bloques;
+}
+
+void abrir_bloques_dat(){
+    char path[strlen(path_base_dialfs) + strlen("/bloques.dat") + 1];
+    sprintf(path, "%s/bitmap.dat", path_base_dialfs);
+
+    bloques_dat = fopen(path, "rb+");
+    if (!file) {
+        perror("Error abriendo bloques.dat");
+        return;
+    }
+
 }
 
 void cargar_bitmap() {
@@ -61,6 +75,13 @@ void cargar_bitmap() {
     printf("Bitmap cargado exitosamente desde %s.\n", bitmap_path);
 }
 
+char* rutacompleta(char* nombre_archivo){
+    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
+    char* ruta_completa = (char*)malloc(len);
+    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
+    return ruta_completa;
+}
+
 void guardar_bitmap() {
     char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
     sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
@@ -98,15 +119,11 @@ void marcar_bloque(int bloque, int ocupado){
 
 // METADATA
 void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo){
-    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
-    char* ruta_completa = (char*)malloc(len);
-
+    char* ruta_completa = rutacompleta(nombre_archivo);
     if (!ruta_completa) {
         perror("Error al asignar memoria para la ruta completa");
         exit(1);
     }
-
-    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "wb+");
     if (!file) {
@@ -121,15 +138,12 @@ void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo
 }
 
 void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo){
-   size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
-    char* ruta_completa = (char*)malloc(len);
+    char* ruta_completa = rutacompleta(nombre_archivo);
 
     if (!ruta_completa) {
         perror("Error al asignar memoria para la ruta completa");
         exit(1);
     }
-
-    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "rb+");
     if (!file) {
@@ -142,31 +156,84 @@ void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archiv
     fclose(file);
     free(ruta_completa);
 }
+/*
+void mover_bloque(int bloque_origen, int bloque_destino) {
+    char buffer[block_size];
+    
+    // Leer datos del bloque de origen
+    if (fseek(file, bloque_origen * block_size, SEEK_SET) != 0) {
+        perror("Error posicionando el puntero de archivo en el bloque de origen");
+        fclose(file);
+        return;
+    }
+    if (fread(buffer, block_size, 1, file) != 1) {
+        perror("Error leyendo datos del bloque de origen");
+        fclose(file);
+        return;
+    }
 
+    // Escribir datos en el bloque de destino
+    if (fseek(file, bloque_destino * block_size, SEEK_SET) != 0) {
+        perror("Error posicionando el puntero de archivo en el bloque de destino");
+        fclose(file);
+        return;
+    }
+    if (fwrite(buffer, block_size, 1, file) != 1) {
+        perror("Error escribiendo datos en el bloque de destino");
+        fclose(file);
+        return;
+    }
+
+    fclose(file);
+}
+*/
 // METADATA
 void compactar_fs(){
     int bloque_libre_actual = 0;
-    for (int i = 0; i < block_count; i++) {
-        if (!(bitmap[i / 8] & (1 << (i % 8)))) {
-            int bloque_actual = i;
-            // Buscar la próxima secuencia de bloques libres
-            while (bloque_actual < block_count && !(bitmap[bloque_actual / 8] & (1 << (bloque_actual % 8)))) {
-                bloque_actual++;
+    
+    while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
+        bloque_libre_actual++;
+    }
+
+    if (bloque_libre_actual >= block_count) {
+        printf("No hay bloques libres para compactar.\n");
+        return;
+    }
+
+    for (int i = bloque_libre_actual + 1; i < block_count; i++) {
+        if (bitarray_test_bit(bitmap, i)) {
+            char* nombre_archivo = encontrar_archivo_por_bloque(i);
+            if (!nombre_archivo) {
+                fprintf(stderr, "Error: no se encontró el archivo para el bloque %d\n", i);
+                continue;
             }
 
-            if (bloque_actual < block_count) {
-                for (int j = bloque_libre_actual; j < bloque_actual; j++) {
-                    marcar_bloque(j, 0); // Marco bloques libres en el bitmap
+            int bloque_inicial, tamano_archivo;
+            leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
 
-                }
-                for (int j = i; j < bloque_actual; j++) {
-                    marcar_bloque(j, 1);  // Marco nuevos bloques como ocupados en el bitmap
+            // Calcular el desplazamiento del bloque dentro del archivo
+            int desplazamiento_bloque = i - bloque_inicial;
 
-                }
-                bloque_libre_actual = bloque_actual;
+            // Mover el contenido del bloque i al bloque bloque_libre_actual
+            mover_bloque(i, bloque_libre_actual);
+
+            // Marcar el bloque i como libre y el bloque bloque_libre_actual como ocupado
+            marcar_bloque(i, 0);
+            marcar_bloque(bloque_libre_actual, 1);
+
+            // Actualizar la metadata del archivo
+            crear_metadata(nombre_archivo, bloque_inicial + (bloque_libre_actual - i), tamano_archivo);
+
+            free(nombre_archivo);
+
+            // Encontrar el siguiente bloque libre
+            while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
+                bloque_libre_actual++;
             }
         }
     }
+
+    printf("Compactación de FS completada.\n");
 }
 //ARCHIVOS
 void crear_archivo_en_dialfs(char* nombre_archivo, int tam){
@@ -180,6 +247,8 @@ void crear_archivo_en_dialfs(char* nombre_archivo, int tam){
     }
 }
 
+
+
 void eliminar_archivo_en_dialfs(char* nombre_archivo){
     int bloque_inicial, tamano_archivo;
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo); //VER
@@ -189,14 +258,10 @@ void eliminar_archivo_en_dialfs(char* nombre_archivo){
         marcar_bloque(bloque_inicial + i, 0); // Libera los bloques
     }
 
-    if (remove(ruta_completa) != 0) {
-        perror("Error eliminando archivo de metadata");
-    }
-
-    free(ruta_completa);
 }
 
 void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
+    char* ruta_completa = rutacompleta(nombre_archivo);
     int bloque_inicial, tamano_archivo;
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios_nuevo = (nuevo_tamano + block_size - 1) / block_size;
@@ -226,23 +291,18 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
     FILE* file = fopen(ruta_completa, "wb+");
     if (!file) {
         perror("Error actualizando archivo de metadata");
-        free(ruta_completa);
         exit(1);
     }
     fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, nuevo_tamano);
     fclose(file);
-    free(ruta_completa);
 }
 void escribir_en_archivo_dialfs(char* nombre_archivo, char* texto){
-    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
-    char* ruta_completa = (char*)malloc(len);
+    char* ruta_completa = rutacompleta(nombre_archivo);
 
     if (!ruta_completa) {
         perror("Error al asignar memoria para la ruta completa");
         exit(1);
     }
-
-    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "a+");
     if (!file) {
@@ -258,15 +318,12 @@ void escribir_en_archivo_dialfs(char* nombre_archivo, char* texto){
 }
 
 void leer_desde_archivo_dialfs(char* nombre_archivo){
-    size_t len = strlen(path_base_dialfs) + strlen(nombre_archivo) + 2;
-    char* ruta_completa = (char*)malloc(len);
+    char* ruta_completa = rutacompleta(nombre_archivo);
 
     if (!ruta_completa) {
         perror("Error al asignar memoria para la ruta completa");
         exit(1);
     }
-
-    snprintf(ruta_completa, len, "%s/%s", path_base_dialfs, nombre_archivo);
 
     FILE* file = fopen(ruta_completa, "rb+");
     if (!file) {

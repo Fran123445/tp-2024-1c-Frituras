@@ -25,5 +25,10 @@ void iniciarInterfazDialFS(t_config* config, char* nombre);
 
 void iniciarInterfazDialFS(t_config* config, char* nombre);
 
+typedef struct {
+    char nombre_archivo[256];
+    int bloque_inicial;
+    int tamano_archivo;
+} MetadataArchivo;
 
 #endif /* FS_H_ */
