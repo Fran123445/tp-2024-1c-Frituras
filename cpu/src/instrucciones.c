@@ -141,7 +141,7 @@ void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){
                 case sizeof(uint32_t):
                     *(uint8_t *)reg_destino -= *(uint32_t *)reg_origen; break; // Se puede hacer esto?
             }
-            log_info(log_cpu, "El contenido que quedó en el registro después de la resta  es: %u", *(uint8_t *)reg_destino);
+            log_info(log_cpu, "El contenido que quedó en el registro %s después de la resta  es: %u",registro_a_string(registroDestino), *(uint8_t *)reg_destino);
             break;
         case sizeof(uint32_t):
             switch(tam_origen){
@@ -150,7 +150,7 @@ void SUB(registrosCPU registroDestino, registrosCPU registroOrigen){
                 case sizeof(uint32_t):
                     *(uint32_t *)reg_destino -= *(uint32_t *)reg_origen; break;
             }
-            log_info(log_cpu, "El contenido que quedó en el registro después de la resta  es: %u", *(uint32_t *)reg_destino);
+             log_info(log_cpu, "El contenido que quedó en el registro %s después de la resta  es: %u", registro_a_string(registroDestino), *(uint32_t *)reg_destino);
             break;
     }
 }
@@ -236,7 +236,7 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
             free(dato_leido);
         }
         else{ // El contenido está en más de 1 página
-            uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + tamanio_a_leer; 
+            uint32_t cant_paginas_a_leer = pagina_final - pagina_inicial + 1; 
             int bytes_leidos = 0;
             
             for(int i=0; i<cant_paginas_a_leer; i++){
