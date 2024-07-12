@@ -13,15 +13,18 @@ pthread_mutex_t mutex_bitarray_marcos_libres = PTHREAD_MUTEX_INITIALIZER;
 
 t_list* sacar_n_entradas_desde_final(int cant_pags_a_sacar, t_list* tabla_del_proceso){
     int tamanio_tabla;
+    
+    if(cant_pags_a_sacar > tamanio_tabla){
+        fprintf(stderr, "Se quiere sacar mas paginas que las que hay actualmente");
+        exit(EXIT_FAILURE);
+    }
+
     for(int i = 0; i < cant_pags_a_sacar; i++){
         tamanio_tabla = list_size(tabla_del_proceso);
-        if(cant_pags_a_sacar > tamanio_tabla){
-            fprintf(stderr, "Se quiere sacar mas paginas que las que hay actualmente");
-            exit(EXIT_FAILURE);
-        }
         informacion_de_tabla* entrada = list_remove(tabla_del_proceso,tamanio_tabla - 1); 
         free(entrada);
     }
+
     return tabla_del_proceso;
 }
 
@@ -54,6 +57,7 @@ void chequear_espacio_memoria (int cant_pags, int socket_cpu){
     }
     if (contador_marcos_libres < cant_pags){
         fprintf(stderr, "No hay suficientes marcos disponibles");
+        //log_info(log_memoria, "OUT OF MEMORY, SE FINALIZARÁ LA EJECUCIÓN DEL PROCESO.");
         t_paquete* paquete = crear_paquete(OUT_OF_MEMORY);
         enviar_paquete(paquete, socket_cpu);
         eliminar_paquete(paquete);
@@ -137,6 +141,7 @@ void* resize_proceso(int socket_cpu){
     if(proceso->tamanio_proceso < tamanio_nuevo){
         if(tamanio_nuevo > tam_memoria){
             fprintf(stderr, "Error: se pide mas memoria que la que hay");
+            log_info(log_memoria, "OUT OF MEMORY, SE FINALIZARÁ EL PROCESO.");
             paquete = crear_paquete(OUT_OF_MEMORY);
             enviar_paquete(paquete, socket_cpu);
 
@@ -152,23 +157,23 @@ void* resize_proceso(int socket_cpu){
 
         usleep(tiempo_retardo * 1000);
 
-        log_info(log_memoria, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
+        log_info(log_memoria, "Ampliacion Proceso - PID: %d - Tamanio Actual: %d - Tamaño a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
 
         proceso->tamanio_proceso = tamanio_nuevo;
 
         asignar_frames_a_paginas(total_paginas_a_agregar,proceso);
 
     }else if (proceso->tamanio_proceso > tamanio_nuevo){
-        log_info(log_memoria, "Reduccion Proceso - PID: %d - Tamanio Actual: %d - Tamanio a Ampliar: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
+        log_info(log_memoria, "Reduccion Proceso - PID: %d - Tamanio Actual: %d - Tamaño a Reducir: %d", pid, proceso->tamanio_proceso , tamanio_nuevo);
 
         usleep(tiempo_retardo * 1000);
 
         int paginas_viejas = ceil((float)proceso->tamanio_proceso/tam_pagina);
         int paginas_nuevas = ceil((float)tamanio_nuevo/tam_pagina);
         int total_paginas_a_sacar = paginas_viejas - paginas_nuevas;
-        proceso->tamanio_proceso = tamanio_nuevo;
         marcar_frames_como_libres(total_paginas_a_sacar, proceso->tabla_del_proceso);
         proceso->tabla_del_proceso = sacar_n_entradas_desde_final(total_paginas_a_sacar, proceso->tabla_del_proceso);          
+        proceso->tamanio_proceso = tamanio_nuevo;
 
     }else{
         log_info(log_memoria, "Resize pedido es el tamanio que ya tiene el proceso");

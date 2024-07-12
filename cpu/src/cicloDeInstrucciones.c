@@ -383,7 +383,7 @@ void execute(t_instruccion* instruccion){
         SUM(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iSUB:
-        log_info(log_cpu, "PID: %u - Ejecutando: SUB - Parametro 1: %p, Parametro 2: %p", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        log_info(log_cpu, "PID: %u - Ejecutando: SUB - Parametro 1: %s, Parametro 2: %s", pcb->PID, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         SUB(*(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);
         break;
     case iJNZ:
@@ -501,6 +501,7 @@ void realizar_ciclo_de_instruccion(){
             terminar = 1;
         }
     }
+    log_info(log_cpu, "FINALIZÓ EL PROCESO %u.", pcb->PID);
 }
 
 
