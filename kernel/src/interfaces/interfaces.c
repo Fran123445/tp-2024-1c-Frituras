@@ -54,6 +54,8 @@ t_IOConectada* IOConectado_create(int socket_cliente, tipoInterfaz tipo) {
     list_add(interfacesConectadas, interfaz);
     pthread_mutex_unlock(&mutexListaInterfaces);
 
+    liberar_buffer(buffer);
+
     return interfaz;
 }
 
@@ -100,6 +102,7 @@ t_IOConectada* hallarInterfazConectada(char* nombre) {
 }
 
 void liberarInterfazConectada(t_IOConectada* interfaz) {
+    list_remove_element(interfacesConectadas, interfaz);
     free(interfaz->nombreInterfaz);
     free(interfaz);
 }
