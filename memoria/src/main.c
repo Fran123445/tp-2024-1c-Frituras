@@ -140,6 +140,7 @@ int main(int argc, char *argv[]){
     config_destroy(config);
     free(escucha_cpu);
     free(escucha_kernel);
+    free(escucha_io);
     free(memoria_contigua);
 
     log_destroy(log_memoria);

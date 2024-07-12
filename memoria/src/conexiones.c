@@ -17,6 +17,8 @@ void manejoSTDOUT(int* socket_cliente) {
             break;
         }
     }
+    free(socket_cliente);
+    pthread_exit(NULL);
 }
 
 void manejoSTDIN(int* socket_cliente) {
@@ -27,6 +29,8 @@ void manejoSTDIN(int* socket_cliente) {
             break;
         }
     }
+    free(socket_cliente);
+    pthread_exit(NULL);
 }
 
 void manejoDIALFS(int* socket_cliente) {
@@ -38,6 +42,8 @@ void manejoDIALFS(int* socket_cliente) {
             leer_memoria(*socket_cliente);
         }       
     }
+    free(socket_cliente);
+    pthread_exit(NULL);
 }
 
 // Función para esperar los clientes
@@ -67,6 +73,7 @@ void esperar_clientes_IO(t_conexion_escucha* nueva_conexion){
                 break;
             default:
                 log_error(log_memoria, "Conexión inválida de una interfaz");
+                free(socket_cliente);
                 continue;
         }
 
