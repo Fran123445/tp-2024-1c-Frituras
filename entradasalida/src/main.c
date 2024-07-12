@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <readline/readline.h>
 #include <utils/client.h>
 #include <utils/server.h>
 #include <utils/serializacion.h>
@@ -81,49 +82,43 @@ void enviar_a_memoria_para_escribir(uint32_t direccion_fisica, void* datos_a_esc
 
 void iniciarInterfazSTDIN(int socket, t_config* config, char* nombre) {
     
+    t_paquete* paquete = crear_paquete(CONEXION_STDIN);
+    agregar_string_a_paquete(paquete, nombre);
+    enviar_paquete(paquete ,socket);
+    eliminar_paquete(paquete);
+
+    paquete = crear_paquete(CONEXION_STDIN);
+    enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
+
     while(1) {
         ssize_t reciv = recibir_operacion(socket);
         
-        char* texto;
-        printf("Ingrese texto: ");
-        if (fgets(texto, sizeof(texto), stdin) == NULL) {
-            fprintf(stderr, "Error texto usuario\n");
+        if (reciv < 0) {
             exit(-1);
         }
 
-        int texto_len = strlen(texto);
-
-        if (texto_len > 0 && texto[texto_len - 1] == '\n') {
-            texto[--texto_len] = '\0';  // Elimina el salto de linea final (si existe)
-        }
+        char* texto = readline(">");
 
         int enviado = 0;
+        t_buffer* buffer = recibir_buffer(socket);
+        int pid = buffer_read_int(buffer);
 
-        while (enviado < texto_len) {
-            if (reciv < 0) {
-                exit(-1);
-            }
 
-            t_buffer* buffer = recibir_buffer(socket);
+        while (buffer->size > 0) {
             uint32_t direccion_fisica = buffer_read_uint32(buffer);
             uint32_t tam = buffer_read_uint32(buffer);
-            int pid = buffer_read_int(buffer);
 
-            while (enviado < texto_len && tam > 0) {
-                int tam_envio = (texto_len - enviado > tam) ? tam : texto_len - enviado;
-                char* parte_texto = strndup(texto + enviado, tam_envio);
-            
-                enviar_a_memoria_para_escribir(direccion_fisica,parte_texto, tam_envio,pid);
+            char* parte_texto = strndup(texto + enviado, tam);
+        
+            enviar_a_memoria_para_escribir(direccion_fisica,parte_texto, tam, pid);
 
-                free(parte_texto);
-                enviado += tam_envio;
-
-                direccion_fisica += tam_envio;
-
-                tam -= tam_envio;  // Reducimos el tamaño restante de la página
-            }
-
+            free(parte_texto);
+            enviado += tam;
         }
+
+        liberar_buffer(buffer);
+
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,socket);
         eliminar_paquete(paquete);
@@ -268,7 +263,7 @@ void crear_metadata(char* path, char* nombre_archivo, int bloque_inicial, int ta
     free(ruta_completa);
 }
 
-void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo) {
+void leer_metadata(char* path, char* nombre_archivo, int* bloque_inicial, int* tamano_archivo) {
    size_t len = strlen(path) + strlen(nombre_archivo) + 2;
     char* ruta_completa = (char*)malloc(len);
 
@@ -339,7 +334,7 @@ void eliminar_archivo_en_dialfs(char* path,char* nombre_archivo) {
     }
     snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
     int bloque_inicial, tamano_archivo;
-    leer_metadata(ruta_completa, &bloque_inicial, &tamano_archivo);
+    leer_metadata(path, ruta_completa, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios = (tamano_archivo + block_size - 1) / block_size;
 
     for (int i = 0; i < bloques_necesarios; i++) {
@@ -365,7 +360,7 @@ void truncar_archivo_en_dialfs(char*path ,char* nombre_archivo, int nuevo_tamano
     snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
 
     int bloque_inicial, tamano_archivo;
-    leer_metadata(ruta_completa, &bloque_inicial, &tamano_archivo);
+    leer_metadata(path, nombre_archivo, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios_nuevo = (nuevo_tamano + block_size - 1) / block_size;
     int bloques_necesarios_actual = (tamano_archivo + block_size - 1) / block_size;
 
@@ -453,7 +448,7 @@ void leer_desde_archivo_dialfs(char* path, char* nombre_archivo) {
 //ARCHIVOS
 void crear_archivo_de_bloques(char* path_base_dialfs,char* nombre, int tam) {
     crear_archivo_en_dialfs(path_base_dialfs, nombre, tam);
-    printf("Archivo bloques.dat creado exitosamente en %s.\n", bloques_path);
+    printf("Archivo bloques.dat creado exitosamente en %s/%s.dat.\n", path_base_dialfs, nombre);
 }
 
 void iniciarInterfazDialFS(int socket, t_config* config, char* nombre){
@@ -479,42 +474,38 @@ void iniciarInterfazDialFS(int socket, t_config* config, char* nombre){
             exit(-1);
         }
         t_buffer* buffer = recibir_buffer(socket);
-        switch (reciv) {
 
-            case IO_FS_CREATE:
                 char* nombre_archivo = buffer_read_string(buffer);
+
+        switch (reciv) {
+            case ENVIAR_DIALFS_CREATE:
                 int tam = buffer_read_int(buffer);
                 crear_archivo_en_dialfs(path_base_dialfs,nombre_archivo,tam);
                 free(nombre_archivo);
                 break;
 
-            case IO_FS_DELETE:
-                char* nombre_archivo = buffer_read_string(buffer);
+            case ENVIAR_DIALFS_DELETE:
                 eliminar_archivo_en_dialfs(path_base_dialfs,nombre_archivo);
                 free(nombre_archivo);
                 break;
 
-            case IO_FS_TRUNCATE:
-                char* nombre_archivo = buffer_read_string(buffer);
+            case ENVIAR_DIALFS_TRUNCATE:
                 int nuevo_tamano = buffer_read_int(buffer);
                 truncar_archivo_en_dialfs(path_base_dialfs,nombre_archivo, nuevo_tamano, retraso_compactacion);
                 free(nombre_archivo);
                 break;
 
-            case IO_FS_WRITE:
-                char* nombre_archivo = buffer_read_string(buffer);
+            case ENVIAR_DIALFS_WRITE:
                 char* texto = buffer_read_string(buffer); //
                 escribir_en_archivo_dialfs(path_base_dialfs, nombre_archivo, texto);
                 free(nombre_archivo);
                 free(texto);
                 break;
 
-            case IO_FS_READ:
-                char* nombre_archivo = buffer_read_string(buffer);
+            case ENVIAR_DIALFS_READ:
                 leer_desde_archivo_dialfs(path_base_dialfs, nombre_archivo);
                 free(nombre_archivo);
                 break;
-
             default:
                 break;
         }
@@ -545,18 +536,10 @@ int main(int argc, char* argv[]) {
     }
 
     if(!strcmp(tipo,"STDIN")){
-        iniciarInterfazSTDIN(conexion_kernel, nuevo_config, argv[1]);
+        iniciarInterfazSTDIN(conexion_kernel, nuevo_config, "TECLADO");
     }
 
-    if(!strcmp(tipo,"GENERICA")){
-        iniciarInterfazGenerica(conexion_kernel, nuevo_config, argv[1]);
-    }
-
-    if(!strcmp(tipo,"IO_STDIN_READ")){
-        iniciarInterfazSTDIN(conexion_kernel, nuevo_config, argv[1]);
-    }
-
-    if (!strcmp(tipo, "IO_STDOUT_WRITE")) {
+    if (!strcmp(tipo, "STDOUT")) {
         iniciarInterfazSTDOUT(conexion_kernel, nuevo_config, argv[1]);
     }
 
