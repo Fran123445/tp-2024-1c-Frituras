@@ -57,6 +57,7 @@ void abrir_archivo_path(int socket_kernel){
     
     t_paquete* paquete = crear_paquete(PAQUETE); // NO BORRAR! esto es para que conecten bien los módulos 
     enviar_paquete(paquete, socket_kernel);
+    eliminar_paquete(paquete);
 
     free(linea);
     fclose(file);

@@ -128,6 +128,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu){
     enviar_paquete(paquete, socket_cpu);
 
     eliminar_paquete(paquete);
+    free(proceso);
 }
 
 void* resize_proceso(int socket_cpu){
@@ -141,7 +142,7 @@ void* resize_proceso(int socket_cpu){
     if(proceso->tamanio_proceso < tamanio_nuevo){
         if(tamanio_nuevo > tam_memoria){
             fprintf(stderr, "Error: se pide mas memoria que la que hay");
-            log_info(log_memoria, "OUT OF MEMORY, SE FINALIZARÁ EL PROCESO %u.", pid);
+            log_info(log_memoria, "OUT OF MEMORY, SE FINALIZARÁ EL PROCESO.");
             paquete = crear_paquete(OUT_OF_MEMORY);
             enviar_paquete(paquete, socket_cpu);
 

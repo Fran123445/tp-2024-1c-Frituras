@@ -52,6 +52,7 @@ void* escuchar_cpu(){
             escribir_memoria(socket_cpu);
             break;
         default:
+            exit(-1);
             fprintf(stderr, "COD_OP inválido");
             break;
         }
