@@ -241,7 +241,7 @@ void marcar_bloque(int bloque, int ocupado) {
 
 // METADATA
 void crear_metadata(char* path, char* nombre_archivo, int bloque_inicial, int tamano_archivo) {
-    size_t len = strlen(path) + strlen(nombre_archivo) + 2; // 1 para '/' y 1 para '\0'
+    size_t len = strlen(path) + strlen(nombre_archivo) + 2; //+2= 1 para '/' y 1 para '\0'
     char* ruta_completa = (char*)malloc(len);
 
     if (!ruta_completa) {
@@ -406,7 +406,7 @@ void escribir_en_archivo_dialfs(char* path, char* nombre_archivo, char* texto) {
 
     snprintf(ruta_completa, len, "%s/%s", path, nombre_archivo);
 
-    FILE* file = fopen(ruta_completa, "a");
+    FILE* file = fopen(ruta_completa, "wb");
     if (!file) {
         perror("Error abriendo archivo para escribir");
         free(ruta_completa);
@@ -437,11 +437,31 @@ void leer_desde_archivo_dialfs(char* path, char* nombre_archivo) {
         exit(1);
     }
 
-    char* buffer;//dinamico?
-    while (fgets(buffer, sizeof(buffer), file)) {
-        printf("%s", buffer);
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* buffer = (char*)malloc(file_size + 1);
+    if (!buffer) {
+        perror("Error al asignar memoria para el buffer");
+        fclose(file);
+        free(ruta_completa);
+        exit(1);
     }
 
+    size_t read_size = fread(buffer, 1, file_size, file);
+    if (read_size != file_size) {
+        perror("Error leyendo el archivo");
+        free(buffer);
+        fclose(file);
+        free(ruta_completa);
+        exit(1);
+    }
+    buffer[file_size] = '\0'; // Asegura que el buffer es null para imprimirlo como una cadena
+
+    printf("%s", buffer);
+
+    free(buffer);
     fclose(file);
     free(ruta_completa);
 }
