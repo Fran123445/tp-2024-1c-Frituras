@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-void iniciarInterfazGenerica(int socket, t_config* config, char* nombre);
+void iniciarInterfazGenerica(t_config* config, char* nombre);
 
 #endif /* GEN_H_ */

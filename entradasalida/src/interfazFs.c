@@ -25,20 +25,19 @@ t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
 }
 
 void abrir_bloques_dat(){
-    char path[strlen(path_base_dialfs) + strlen("/bloques.dat") + 1];
-    sprintf(path, "%s/bitmap.dat", path_base_dialfs);
+    char* path = rutacompleta("bloques.dat");
 
     bloques_dat = fopen(path, "rb+");
-    if (!file) {
-        perror("Error abriendo bloques.dat");
+    if (!bloques_dat) {
+        bloques_dat = fopen(path, "wb+");
+        ftruncate(fileno(bloques_dat), block_count*block_size);
         return;
     }
 
 }
 
 void cargar_bitmap() {
-    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
-    sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
+    char* bitmap_path = rutacompleta("bitmap.dat");
 
     FILE* file = fopen(bitmap_path, "rb+");
     if (!file) {
@@ -53,7 +52,7 @@ void cargar_bitmap() {
             perror("Error de memoria");
             exit(EXIT_FAILURE);
         }
-        bitarray_set_bit(bitmap, 0);
+        //bitarray_set_bit(bitmap, 0);
         fclose(file);
     } else {
         // Si el archivo existe lo cargo en memoria
@@ -186,7 +185,6 @@ void mover_bloque(int bloque_origen, int bloque_destino) {
 
     fclose(file);
 }
-*/
 // METADATA
 void compactar_fs(){
     int bloque_libre_actual = 0;
@@ -235,16 +233,47 @@ void compactar_fs(){
 
     printf("Compactación de FS completada.\n");
 }
+*/
 //ARCHIVOS
+
+bool chequearBloquesContiguosDisponibles(int tam, int bloque_inicial) {
+    for(int i = bloque_inicial+1; i < bloque_inicial+tam; i++) {
+        if (bitarray_test_bit(bitmap, i)) return false;
+    }
+}
+
+bool verificarBloquesContiguos(int tam, int bloque_inicial) {
+    bool bloques_disp = chequearBloquesContiguosDisponibles(tam, bloque_inicial);
+
+    if (!bloques_disp) {
+        //compactar()
+    }
+
+    return chequearBloquesContiguosDisponibles(tam, bloque_inicial);   
+}
+
+bool asignar_bloques(int tam, int bloque_inicial) {
+
+    if (!verificarBloquesContiguos(tam, bloque_inicial)) {
+        //log_error(log, "No hay bloques libres disponibles");
+        return false;
+    }
+
+    for(int i = bloque_inicial; i < bloque_inicial + tam; i++) {
+        marcar_bloque(i, 1);
+    }
+
+    return true;
+}
+
 void crear_archivo_en_dialfs(char* nombre_archivo, int tam){
     int bloque_libre = encontrar_bloque_libre();
 
-    if (bloque_libre != -1) {
-        marcar_bloque(bloque_libre, 1);
-        crear_metadata(nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
-    } else {
-        printf("No hay bloques libres disponibles.\n");
+    if (!asignar_bloques(tam, bloque_libre)) {
+        return;
     }
+
+    crear_metadata(nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
 }
 
 
@@ -260,6 +289,7 @@ void eliminar_archivo_en_dialfs(char* nombre_archivo){
 
 }
 
+/*
 void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
     char* ruta_completa = rutacompleta(nombre_archivo);
     int bloque_inicial, tamano_archivo;
@@ -296,6 +326,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
     fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, nuevo_tamano);
     fclose(file);
 }
+*/
 void escribir_en_archivo_dialfs(char* nombre_archivo, char* texto){
     char* ruta_completa = rutacompleta(nombre_archivo);
 
@@ -361,10 +392,6 @@ void leer_desde_archivo_dialfs(char* nombre_archivo){
     free(ruta_completa);
 }
 //ARCHIVOS
-void crear_archivo_de_bloques(char* nombre, int tam){
-    crear_archivo_en_dialfs(path_base_dialfs, nombre, tam);
-    printf("Archivo bloques.dat creado exitosamente en %s/%s.dat.\n", path_base_dialfs, nombre);
-}
 
 void iniciarInterfazDialFS(t_config* config, char* nombre){
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
@@ -374,9 +401,15 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     int tam_bloq_dat = block_size*block_count;
 
-    cargar_bitmap(path_base_dialfs);
+    abrir_bloques_dat();
 
-    crear_archivo_de_bloques(path_base_dialfs,"bloques.dat",tam_bloq_dat);
+    cargar_bitmap();
+
+    //guardar_bitmap();
+
+    crear_archivo_en_dialfs("goku", 128);
+
+    return;
 
     t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
     enviar_paquete(paquete, conexion_memoria);
@@ -390,7 +423,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         }
         t_buffer* buffer = recibir_buffer(conexion_kernel);
 
-                char* nombre_archivo = buffer_read_string(buffer);
+        char* nombre_archivo = buffer_read_string(buffer);
 
         switch (reciv) {
             case ENVIAR_DIALFS_CREATE:
