@@ -18,6 +18,7 @@ void administrarDIALFS(int* socket_cliente) {
         pthread_mutex_unlock(&interfaz->mutex);
 
         paquete->codigo_operacion = solicitud->operacion;
+        agregar_int_a_paquete(paquete, solicitud->proceso->PID);
         agregar_string_a_paquete(paquete, solicitud->nombreArchivo);
 
         switch (solicitud->operacion) {

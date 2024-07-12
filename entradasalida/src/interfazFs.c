@@ -10,12 +10,14 @@ FILE* bloques_dat;
 
  //BITMAP
 t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
-    char* bitarray_memoria_usuario = calloc(cant_bloques/8, sizeof(char));
+    int tamanioBitmap = cant_bloques / 8;
+    char* bitarray_memoria_usuario = calloc(tamanioBitmap, sizeof(char));
+
     if (!bitarray_memoria_usuario){
         fprintf(stderr, "Error al crear puntero al bitarray");
         exit(EXIT_FAILURE);
     }
-    t_bitarray* mapa_de_bloques = bitarray_create_with_mode(bitarray_memoria_usuario, cant_bloques, LSB_FIRST); // se lee el bit - significativo primero
+    t_bitarray* mapa_de_bloques = bitarray_create_with_mode(bitarray_memoria_usuario, tamanioBitmap, LSB_FIRST); // se lee el bit - significativo primero
     if(mapa_de_bloques == NULL){
         free(bitarray_memoria_usuario);
         fprintf(stderr, "Error al crear el bitarray");
@@ -62,12 +64,8 @@ void cargar_bitmap() {
 
         bitmap = iniciar_bitmap_bloques(block_count);
 
-        if (!bitmap) {
-            perror("Error de memoria");
-            exit(EXIT_FAILURE);
-        }
+        size_t bytes_leidos = fread(bitmap->bitarray, block_count/8, 1, file);
 
-        fread(bitmap, size, 1, file);
         fclose(file);
     }
 
@@ -82,8 +80,7 @@ char* rutacompleta(char* nombre_archivo){
 }
 
 void guardar_bitmap() {
-    char bitmap_path[strlen(path_base_dialfs) + strlen("/bitmap.dat") + 1];
-    sprintf(bitmap_path, "%s/bitmap.dat", path_base_dialfs);
+    char* bitmap_path = rutacompleta("bitmap.dat");
 
     FILE* file = fopen(bitmap_path, "wb");
     if (!file) {
@@ -91,7 +88,7 @@ void guardar_bitmap() {
         exit(EXIT_FAILURE);
     }
 
-    fwrite(bitmap, (block_count + 7) / 8, 1, file);
+    size_t bytes_escritos = fwrite(bitmap->bitarray, block_count / 8, 1, file);
 
     fclose(file);
 
@@ -236,37 +233,42 @@ void compactar_fs(){
 */
 //ARCHIVOS
 
-bool chequearBloquesContiguosDisponibles(int tam, int bloque_inicial) {
-    for(int i = bloque_inicial+1; i < bloque_inicial+tam; i++) {
+bool chequearBloquesContiguosDisponibles(int bloques_necesarios, int bloque_inicial) {
+    for(int i = bloque_inicial+1; i < bloque_inicial+bloques_necesarios; i++) {
         if (bitarray_test_bit(bitmap, i)) return false;
-    }
-}
-
-bool verificarBloquesContiguos(int tam, int bloque_inicial) {
-    bool bloques_disp = chequearBloquesContiguosDisponibles(tam, bloque_inicial);
-
-    if (!bloques_disp) {
-        //compactar()
-    }
-
-    return chequearBloquesContiguosDisponibles(tam, bloque_inicial);   
-}
-
-bool asignar_bloques(int tam, int bloque_inicial) {
-
-    if (!verificarBloquesContiguos(tam, bloque_inicial)) {
-        //log_error(log, "No hay bloques libres disponibles");
-        return false;
-    }
-
-    for(int i = bloque_inicial; i < bloque_inicial + tam; i++) {
-        marcar_bloque(i, 1);
     }
 
     return true;
 }
 
-void crear_archivo_en_dialfs(char* nombre_archivo, int tam){
+bool verificarBloquesContiguos(int bloques_necesarios, int bloque_inicial) {
+    bool bloques_disp = chequearBloquesContiguosDisponibles(bloques_necesarios, bloque_inicial);
+
+    if (!bloques_disp) {
+        //compactar()
+        return chequearBloquesContiguosDisponibles(bloques_necesarios, bloque_inicial);   
+    }
+
+    return true;
+}
+
+bool asignar_bloques(int tam, int bloque_inicial) {
+
+    int bloques_necesarios = ceil(tam/block_size);
+
+    if (!verificarBloquesContiguos(bloques_necesarios, bloque_inicial)) {
+        //log_error(log, "No hay bloques libres disponibles");
+        return false;
+    }
+
+    for(int i = bloque_inicial; i < bloque_inicial + bloques_necesarios; i++) {
+        marcar_bloque(i, 0);
+    }
+
+    return true;
+}
+
+void crear_archivo_en_dialfs(char* nombre_archivo, int tam){ // CAMBIARLO PARA QUE SOLO CONSIDERE UN BLOQUE
     int bloque_libre = encontrar_bloque_libre();
 
     if (!asignar_bloques(tam, bloque_libre)) {
@@ -276,17 +278,16 @@ void crear_archivo_en_dialfs(char* nombre_archivo, int tam){
     crear_metadata(nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
 }
 
-
-
 void eliminar_archivo_en_dialfs(char* nombre_archivo){
+    char* archivo = rutacompleta(nombre_archivo);
     int bloque_inicial, tamano_archivo;
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo); //VER
     int bloques_necesarios = (tamano_archivo + block_size - 1) / block_size;
 
     for (int i = 0; i < bloques_necesarios; i++) {
-        marcar_bloque(bloque_inicial + i, 0); // Libera los bloques
+        marcar_bloque(bloque_inicial + i, 1); // Libera los bloques
     }
-
+    remove(archivo);
 }
 
 /*
@@ -327,69 +328,48 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
     fclose(file);
 }
 */
-void escribir_en_archivo_dialfs(char* nombre_archivo, char* texto){
-    char* ruta_completa = rutacompleta(nombre_archivo);
 
-    if (!ruta_completa) {
-        perror("Error al asignar memoria para la ruta completa");
-        exit(1);
+void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid){
+    int bloque_inicial, tamanio_archivo;
+
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamanio_archivo);
+
+    if (ubicacionPuntero + tamanio < tamanio_archivo) {
+        // log_error(muy mal)
+        exit(-1);
     }
 
-    FILE* file = fopen(ruta_completa, "a+");
-    if (!file) {
-        perror("Error abriendo archivo para escribir");
-        free(ruta_completa);
-        exit(1);
-    }
+    pedir_contenido_memoria((uint32_t)direccion, (uint32_t)tamanio, pid);
 
-    fprintf(file, "%s", texto);
+    void* datos_a_escribir = recibir_contenido_memoria();
 
-    fclose(file);
-    free(ruta_completa);
+    fseek(bloques_dat, bloque_inicial*block_size + ubicacionPuntero, SEEK_SET);
+
+    fwrite(datos_a_escribir, tamanio, 1, bloques_dat);
+
+    free(datos_a_escribir);
 }
 
-void leer_desde_archivo_dialfs(char* nombre_archivo){
-    char* ruta_completa = rutacompleta(nombre_archivo);
+void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid) {
 
-    if (!ruta_completa) {
-        perror("Error al asignar memoria para la ruta completa");
-        exit(1);
+    int bloque_inicial, tamanio_archivo;
+
+    leer_metadata(nombre_archivo, &bloque_inicial, &tamanio_archivo);
+    
+    if (ubicacionPuntero + tamanio < tamanio_archivo) {
+        // log_error(muy mal)
+        exit(-1);
     }
 
-    FILE* file = fopen(ruta_completa, "rb+");
-    if (!file) {
-        perror("Error abriendo archivo para lectura");
-        free(ruta_completa);
-        exit(1);
-    }
+    void* datos_a_leer = malloc(tamanio);
 
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    fseek(bloques_dat, bloque_inicial*block_size + ubicacionPuntero, SEEK_SET);
 
-    char* buffer = malloc(file_size + 1);
-    if (!buffer) {
-        perror("Error al asignar memoria para el buffer");
-        fclose(file);
-        free(ruta_completa);
-        exit(1);
-    }
+    fread(datos_a_leer, tamanio, 1, bloques_dat);
 
-    size_t read_size = fread(buffer, 1, file_size, file);
-    if (read_size != file_size) {
-        perror("Error leyendo el archivo");
-        free(buffer);
-        fclose(file);
-        free(ruta_completa);
-        exit(1);
-    }
-    buffer[file_size] = '\0'; // Asegura que el buffer es null para imprimirlo como una cadena
+    enviar_a_memoria_para_escribir((uint32_t)direccion, datos_a_leer, (uint32_t)tamanio, pid);
 
-    printf("%s", buffer);
-
-    free(buffer);
-    fclose(file);
-    free(ruta_completa);
+    free(datos_a_leer);
 }
 //ARCHIVOS
 
@@ -405,9 +385,9 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
 
     cargar_bitmap();
 
-    //guardar_bitmap();
+    crear_archivo_en_dialfs("goku", 1024);
 
-    crear_archivo_en_dialfs("goku", 128);
+    guardar_bitmap();
 
     return;
 
@@ -423,6 +403,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         }
         t_buffer* buffer = recibir_buffer(conexion_kernel);
 
+        int pid = buffer_read_int(buffer);
         char* nombre_archivo = buffer_read_string(buffer);
 
         switch (reciv) {
@@ -444,14 +425,18 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
                 break;
 
             case ENVIAR_DIALFS_WRITE:
-                char* texto = buffer_read_string(buffer); //
-                escribir_en_archivo_dialfs(nombre_archivo, texto);
+                int direccion = buffer_read_int(buffer);
+                int tamanio = buffer_read_int(buffer);
+                int ubicacionPuntero = buffer_read_int(buffer);
+                escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
                 free(nombre_archivo);
-                free(texto);
                 break;
 
             case ENVIAR_DIALFS_READ:
-                leer_desde_archivo_dialfs(nombre_archivo);
+                direccion = buffer_read_int(buffer);
+                tamanio = buffer_read_int(buffer);
+                ubicacionPuntero = buffer_read_int(buffer);
+                leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
                 free(nombre_archivo);
                 break;
             default:
