@@ -3,6 +3,8 @@
 #include "mmu.h"
 #include "cicloDeInstrucciones.h"
 
+// Funciones auxiliares
+
 void* obtenerRegistro(registrosCPU registro) {
    void* lista_de_registros[11] = {
         &pcb->registros.AX, &pcb->registros.BX, &pcb->registros.CX, &pcb->registros.DX,
@@ -64,6 +66,117 @@ void enviar_a_memoria_para_escritura(uint32_t direccion_fisica, void* datos_a_es
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 }
+
+void enviar_a_kernel_recurso(char* recurso, op_code cod_op){
+    t_paquete* paquete = crear_paquete(cod_op);
+    agregar_PCB_a_paquete(paquete, pcb);
+    agregar_string_a_paquete(paquete, recurso);
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
+
+void enviar_Direcciones_Fisicas_FS(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño, registrosCPU registroPunteroArchivo, op_code operacion){
+    void* reg_tam = obtenerRegistro(registroTamaño);
+    uint32_t tam;
+    void* reg_dir = obtenerRegistro(registroDireccion);
+    uint32_t direccion_logica;
+    void* reg_arc = obtenerRegistro(registroPunteroArchivo);
+    uint32_t posicion_inicial;
+
+    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
+        tam = *(uint32_t*)reg_tam;
+    } else {
+        tam = *(uint8_t*)reg_tam;
+    }
+    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
+        direccion_logica = *(uint32_t*)reg_dir;
+    } else {
+        direccion_logica = *(uint8_t*)reg_dir;
+    }
+    if (tamanioRegistro(registroPunteroArchivo) == sizeof(uint32_t)) {
+        posicion_inicial = *(uint32_t*)reg_arc;
+    } else {
+        posicion_inicial = *(uint8_t*)reg_arc;
+    }
+
+    t_paquete* paquete = crear_paquete(operacion);
+    agregar_PCB_a_paquete(paquete,pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+    agregar_string_a_paquete(paquete,nombre_archivo);
+    agregar_uint32_a_paquete(paquete,posicion_inicial);
+
+    if (tam > tamanio_pagina){
+        uint32_t bytes_a_enviar = tam;
+
+        while (bytes_a_enviar > 0){
+            uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
+
+            uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+
+            agregar_uint32_a_paquete(paquete, direccion_fisica);
+            agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
+
+            bytes_a_enviar -= cant_de_bytes_a_enviar;
+            direccion_logica += cant_de_bytes_a_enviar;
+        }
+    }
+    else{
+        uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+        agregar_uint32_a_paquete(paquete, direccion_fisica);
+        agregar_uint32_a_paquete(paquete, tam);
+    }
+
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
+
+void enviarDireccionesFisicasAKernel(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño, op_code operacion){
+    void* reg_tam = obtenerRegistro(registroTamaño);
+    uint32_t tam;
+    void* reg_dir = obtenerRegistro(registroDireccion);
+    uint32_t direccion_logica;
+
+    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
+        tam = *(uint32_t*)reg_tam;
+    } else {
+        tam = *(uint8_t*)reg_tam;
+    }
+    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
+        direccion_logica = *(uint32_t*)reg_dir;
+    } else {
+        direccion_logica = *(uint8_t*)reg_dir;
+    }
+
+    t_paquete* paquete = crear_paquete(operacion);
+    agregar_PCB_a_paquete(paquete,pcb);
+    agregar_string_a_paquete(paquete, interfaz);
+
+    if (tam > tamanio_pagina){
+        uint32_t bytes_a_enviar = tam;
+
+        while (bytes_a_enviar > 0){
+            uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
+
+            uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+
+            agregar_uint32_a_paquete(paquete, direccion_fisica);
+            agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
+
+            bytes_a_enviar -= cant_de_bytes_a_enviar;
+            direccion_logica += cant_de_bytes_a_enviar;
+        }
+    }
+    else{
+        uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+        agregar_uint32_a_paquete(paquete, direccion_fisica);
+        agregar_uint32_a_paquete(paquete, tam);
+    }
+
+    enviar_paquete(paquete, socket_kernel_d);
+    eliminar_paquete(paquete);
+}
+
+// Instrucciones
 
 void SET(registrosCPU registro, int valor){
     void *reg_a_setear= obtenerRegistro(registro);
@@ -266,7 +379,6 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
         }
 }
 
-
 void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
 
     void *reg_datos = obtenerRegistro(registroDatos);
@@ -360,52 +472,6 @@ void COPY_STRING(uint32_t tam){
     }
 }
 
-void enviarDireccionesFisicasAKernel(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño, op_code operacion){
-    void* reg_tam = obtenerRegistro(registroTamaño);
-    uint32_t tam;
-    void* reg_dir = obtenerRegistro(registroDireccion);
-    uint32_t direccion_logica;
-
-    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
-        tam = *(uint32_t*)reg_tam;
-    } else {
-        tam = *(uint8_t*)reg_tam;
-    }
-    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
-        direccion_logica = *(uint32_t*)reg_dir;
-    } else {
-        direccion_logica = *(uint8_t*)reg_dir;
-    }
-
-    t_paquete* paquete = crear_paquete(operacion);
-    agregar_PCB_a_paquete(paquete,pcb);
-    agregar_string_a_paquete(paquete, interfaz);
-
-    if (tam > tamanio_pagina){
-        uint32_t bytes_a_enviar = tam;
-
-        while (bytes_a_enviar > 0){
-            uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
-
-            uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-
-            agregar_uint32_a_paquete(paquete, direccion_fisica);
-            agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
-
-            bytes_a_enviar -= cant_de_bytes_a_enviar;
-            direccion_logica += cant_de_bytes_a_enviar;
-        }
-    }
-    else{
-        uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-        agregar_uint32_a_paquete(paquete, direccion_fisica);
-        agregar_uint32_a_paquete(paquete, tam);
-    }
-
-    enviar_paquete(paquete, socket_kernel_d);
-    eliminar_paquete(paquete);
-}
-
 void IO_STDIN_READ(char *interfaz, registrosCPU registroDireccion, registrosCPU registroTamaño){
     enviarDireccionesFisicasAKernel(interfaz, registroDireccion, registroTamaño, ENVIAR_IO_STDIN_READ);
 
@@ -420,14 +486,6 @@ void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCP
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
-}
-
-void enviar_a_kernel_recurso(char* recurso, op_code cod_op){
-    t_paquete* paquete = crear_paquete(cod_op);
-    agregar_PCB_a_paquete(paquete, pcb);
-    agregar_string_a_paquete(paquete, recurso);
-    enviar_paquete(paquete, socket_kernel_d);
-    eliminar_paquete(paquete);
 }
 
 void WAIT(char* recurso){
@@ -489,61 +547,6 @@ void IO_FS_TRUNCATE(char* interfaz, char* nombre_archivo, registrosCPU registroT
     pthread_mutex_unlock(&mutexInterrupt);
 }
 
-void enviar_Direcciones_Fisicas_FS(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño, registrosCPU registroPunteroArchivo, op_code operacion){
-    void* reg_tam = obtenerRegistro(registroTamaño);
-    uint32_t tam;
-    void* reg_dir = obtenerRegistro(registroDireccion);
-    uint32_t direccion_logica;
-    void* reg_arc = obtenerRegistro(registroPunteroArchivo);
-    uint32_t posicion_inicial;
-
-    if (tamanioRegistro(registroTamaño) == sizeof(uint32_t)) {
-        tam = *(uint32_t*)reg_tam;
-    } else {
-        tam = *(uint8_t*)reg_tam;
-    }
-    if (tamanioRegistro(registroDireccion) == sizeof(uint32_t)) {
-        direccion_logica = *(uint32_t*)reg_dir;
-    } else {
-        direccion_logica = *(uint8_t*)reg_dir;
-    }
-    if (tamanioRegistro(registroPunteroArchivo) == sizeof(uint32_t)) {
-        posicion_inicial = *(uint32_t*)reg_arc;
-    } else {
-        posicion_inicial = *(uint8_t*)reg_arc;
-    }
-
-    t_paquete* paquete = crear_paquete(operacion);
-    agregar_PCB_a_paquete(paquete,pcb);
-    agregar_string_a_paquete(paquete, interfaz);
-    agregar_string_a_paquete(paquete,nombre_archivo);
-    agregar_uint32_a_paquete(paquete,posicion_inicial);
-
-    if (tam > tamanio_pagina){
-        uint32_t bytes_a_enviar = tam;
-
-        while (bytes_a_enviar > 0){
-            uint32_t cant_de_bytes_a_enviar = (bytes_a_enviar > tamanio_pagina) ? tamanio_pagina : bytes_a_enviar;
-
-            uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-
-            agregar_uint32_a_paquete(paquete, direccion_fisica);
-            agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
-
-            bytes_a_enviar -= cant_de_bytes_a_enviar;
-            direccion_logica += cant_de_bytes_a_enviar;
-        }
-    }
-    else{
-        uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
-        agregar_uint32_a_paquete(paquete, direccion_fisica);
-        agregar_uint32_a_paquete(paquete, tam);
-    }
-
-    enviar_paquete(paquete, socket_kernel_d);
-    eliminar_paquete(paquete);
-}
-
 void IO_FS_WRITE(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño , registrosCPU registroPunteroArchivo){
     enviar_Direcciones_Fisicas_FS(interfaz, nombre_archivo, registroDireccion, registroTamaño, registroPunteroArchivo, ENVIAR_DIALFS_WRITE);
     
@@ -551,6 +554,7 @@ void IO_FS_WRITE(char* interfaz, char* nombre_archivo, registrosCPU registroDire
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
 }
+
 void IO_FS_READ(char* interfaz, char* nombre_archivo, registrosCPU registroDireccion, registrosCPU registroTamaño , registrosCPU registroPunteroArchivo){
     enviar_Direcciones_Fisicas_FS(interfaz, nombre_archivo, registroDireccion, registroTamaño, registroPunteroArchivo, ENVIAR_DIALFS_READ);
     
@@ -558,7 +562,6 @@ void IO_FS_READ(char* interfaz, char* nombre_archivo, registrosCPU registroDirec
     hay_interrupcion = 0;
     pthread_mutex_unlock(&mutexInterrupt);
 }
-
 
 void EXIT(){
     enviar_pcb(INSTRUCCION_EXIT);

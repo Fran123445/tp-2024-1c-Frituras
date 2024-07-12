@@ -46,18 +46,20 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
     uint32_t desplazamiento = obtener_desplazamineto_pagina(direccion_logica);
 
     numPagAux = numero_pagina; 
-    entrada_TLB* entradaExistenteEnTLB = (entrada_TLB*) list_find(TLB, esta_en_la_TLB);
 
-    if (entradaExistenteEnTLB != NULL) {
-        log_info(log_cpu, "PID: %u - TLB HIT - Pagina: %u", pcb->PID, numero_pagina);
-        log_info(log_cpu, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", pcb->PID, numero_pagina, entradaExistenteEnTLB->marco);
+    if(cant_entradas_TLB !=0){ // Hay TLB
+        entrada_TLB* entradaExistenteEnTLB = (entrada_TLB*) list_find(TLB, esta_en_la_TLB);
 
-        if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
-           mover_al_frente_de_la_estructura_LRU(entradaExistenteEnTLB);
+        if (entradaExistenteEnTLB != NULL) {
+            log_info(log_cpu, "PID: %u - TLB HIT - Pagina: %u", pcb->PID, numero_pagina);
+            log_info(log_cpu, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", pcb->PID, numero_pagina, entradaExistenteEnTLB->marco);
+
+            if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
+                mover_al_frente_de_la_estructura_LRU(entradaExistenteEnTLB);
+            }
+
+            return entradaExistenteEnTLB->marco * tamanio_pagina + desplazamiento;
         }
-
-        return entradaExistenteEnTLB->marco * tamanio_pagina + desplazamiento;
-    }
         else{
             log_info(log_cpu, "PID: %u - TLB MISS - Pagina: %u", pcb->PID, numero_pagina);
     
@@ -91,6 +93,16 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
             log_info(log_cpu, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", pcb->PID, numero_pagina, marco);
 
         return marco * tamanio_pagina + desplazamiento;
+        }
     }
+    else { // No hay TLB
+        pedir_marco(numero_pagina);
+        uint32_t marco = recibir_marco();
+
+        log_info(log_cpu, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", pcb->PID, numero_pagina, marco);
+        
+        return marco * tamanio_pagina + desplazamiento;
+    }
+
 }
 

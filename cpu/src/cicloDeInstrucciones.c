@@ -161,6 +161,8 @@ char* fetch(){
     enviar_PC_a_memoria(pcb->registros.PC);
     char* instruccionEncontrada = obtener_instruccion_de_memoria();
 
+    pcb->registros.PC++; // Para contemplar el caso del SET PC
+
     return instruccionEncontrada;
 }
 
@@ -466,8 +468,7 @@ void realizar_ciclo_de_instruccion(){
         t_instruccion* instruccion_a_ejecutar = decode(instruccion_a_decodificar);
         
         execute(instruccion_a_ejecutar);
-        pcb->registros.PC++;
-
+        
         t_tipoInstruccion tipo_de_instr = instruccion_a_ejecutar->tipo;
 
         //liberar_instruccion(instruccion_a_ejecutar);
@@ -476,7 +477,6 @@ void realizar_ciclo_de_instruccion(){
         case iRESIZE:
             op_code cod_op = recibir_operacion(socket_memoria);
             if(cod_op == OUT_OF_MEMORY){
-                pcb->registros.PC--;
                 enviar_pcb(cod_op);
                 terminar = 1;
             }
@@ -501,7 +501,7 @@ void realizar_ciclo_de_instruccion(){
             terminar = 1;
         }
     }
-    log_info(log_cpu, "FINALIZÓ EL PROCESO %u.", pcb->PID);
+    log_info(log_cpu, "FINALIZÓ EL CICLO DE INSTRUCCIÓN DEL PROCESO %u.", pcb->PID);
 }
 
 
