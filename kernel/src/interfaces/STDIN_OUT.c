@@ -57,8 +57,8 @@ void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
         planificar(op, solicitud->proceso, NULL);
         pthread_mutex_unlock(&mutexPlanificador);
 
-        list_destroy(solicitud->direcciones);
-        liberarSolicitudSTDIN_OUT(solicitud);
+        list_destroy_and_destroy_elements(solicitud->direcciones, free);
+        free(solicitud);
     }
 
     queue_destroy_and_destroy_elements(interfaz->procesosBloqueados, (void *) liberarSolicitudSTDIN_OUT);
