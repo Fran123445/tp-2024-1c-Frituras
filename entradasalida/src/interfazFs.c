@@ -14,7 +14,26 @@ char* cargar_lista_archivos() {
     if(!file) {
         archivos_metadata = string_new();
         
+    } else {
+        fseek(file, 0, SEEK_END);
+        long file_size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+        
+        archivos_metadata = malloc(file_size + 1);
+        if (archivos_metadata == NULL) {
+            perror("Error al asignar memoria para archivos_metadata");
+            fclose(file);
+            return NULL;
+        }
+        
+        fread(archivos_metadata, 1, file_size, file);
+        archivos_metadata[file_size] = '\0'; // Chequear  que la cadena termine en null
+
+        fclose(file);
     }
+    
+    free(listaArchivos);
+    return archivos_metadata;
 }
 
  //BITMAP
@@ -193,7 +212,22 @@ void mover_bloque(int bloque_origen, int bloque_destino) {
 }
 
 char* encontrar_archivo_por_bloque(int bloque) {
+    char* archivos_metadata_copia = strdup(archivos_metadata); // Crear una copia para manipular
+    char* token = strtok(archivos_metadata_copia, " ");
+    while (token != NULL) {
+        int bloque_inicial, tamano_archivo;
+        leer_metadata(token, &bloque_inicial, &tamano_archivo); //Consigo el bloque inicial y el tamaño
 
+        if (bloque >= bloque_inicial && bloque < bloque_inicial + tamano_archivo) { //Chequeo si el bloque esta dentro del rango del archivo
+            free(archivos_metadata_copia);
+            return strdup(token); // Devolver una copia del nombre del archivo
+        }
+
+        token = strtok(NULL, " ");
+    }
+
+    free(archivos_metadata_copia);
+    return NULL; // No se encontró un archivo que contenga el bloque
 }
 
 // METADATA
