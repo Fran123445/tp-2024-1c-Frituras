@@ -22,6 +22,7 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
     list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!
     pthread_mutex_unlock(&mutex_lista_procesos);
     log_info(log_memoria, "Creacion Tabla de Paginas - PID: %d- Tamaño: %d", proceso->pid, list_size(proceso->tabla_del_proceso));
+    
     return proceso;
 }
 
@@ -50,17 +51,18 @@ void abrir_archivo_path(int socket_kernel){
             perror("Error al copiar linea");
             free(linea);
             fclose(file);
+            free(path);
             return;
         }
         list_add(proceso->instrucciones, linea_copia);
     }
-    
     t_paquete* paquete = crear_paquete(PAQUETE); // NO BORRAR! esto es para que conecten bien los módulos 
     enviar_paquete(paquete, socket_kernel);
     eliminar_paquete(paquete);
 
     free(linea);
     fclose(file);
+    free(path);
 }
 
 void eliminar_proceso(int pid_proceso){

@@ -20,7 +20,6 @@ void destruir_proceso(t_proceso_memoria* proceso){
         if (proceso->tabla_del_proceso != NULL){
            list_destroy_and_destroy_elements(proceso->tabla_del_proceso, free);
         }
-        free(proceso->path);
         free(proceso); //libera la memoria asignada al propio proceso
     }
 }
