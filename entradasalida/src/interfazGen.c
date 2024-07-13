@@ -16,8 +16,8 @@ void iniciarInterfazGenerica(t_config* config, char* nombre){
     while (1) {
        ssize_t reciv = recibir_operacion(conexion_kernel);
 
-        if (reciv < 0) {
-            exit(-1);
+        if (reciv <= 0) {
+            return;
         }
         
         t_buffer* buffer = recibir_buffer(conexion_kernel);
