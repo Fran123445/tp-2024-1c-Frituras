@@ -347,7 +347,7 @@ void eliminar_archivo_en_dialfs(char* nombre_archivo){
     remove(archivo);
 }
 
-/*
+
 void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
     char* ruta_completa = rutacompleta(nombre_archivo);
     int bloque_inicial, tamano_archivo;
@@ -357,34 +357,28 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
 
     if (nuevo_tamano < tamano_archivo) {
         for (int i = bloques_necesarios_nuevo; i < bloques_necesarios_actual; i++) {
-            marcar_bloque(bloque_inicial + i, 0);
+            marcar_bloque(bloque_inicial + i, 0); // Reducir el tamaño del archivo si el nuevo tamaño es menor al actual
         }
-    } else if (nuevo_tamano > tamano_archivo) {
+    } else if (nuevo_tamano > tamano_archivo) { //Aumento el tamaño del archivo si el nuevo tamaño es mayor al actual
         int espacio_contiguo = 1;
-        for (int i = bloque_inicial + bloques_necesarios_actual; i < bloque_inicial + bloques_necesarios_nuevo; i++) {
-            if (i >= block_count || (bitmap[i / 8] & (1 << (i % 8)))) {
-                espacio_contiguo = 0;
+        for (int i = bloque_inicial + bloques_necesarios_actual; i < bloque_inicial + bloques_necesarios_nuevo; i++) { 
+            if (i >= block_count || bitarray_test_bit(bitmap, i)) { //Compruebo si el espacio contiguo esta ocupado
+                espacio_contiguo = 0;   
                 break;
             }
         }
-        if (!espacio_contiguo) {
+        if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
             compactar_fs();
             sleep(retraso_compactacion);
         }
         for (int i = bloques_necesarios_actual; i < bloques_necesarios_nuevo; i++) {
-            marcar_bloque(bloque_inicial + i, 1);
+            marcar_bloque(bloque_inicial + i, 1);   //Marco los nuevos bloques como ocupados
         }
     }
 
-    FILE* file = fopen(ruta_completa, "wb+");
-    if (!file) {
-        perror("Error actualizando archivo de metadata");
-        exit(1);
-    }
-    fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, nuevo_tamano);
-    fclose(file);
+    crear_metadata(nombre_archivo, bloque_inicial, nuevo_tamano);
 }
-*/
+
 
 void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid){
     int bloque_inicial, tamanio_archivo;
@@ -444,9 +438,19 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
 
     cargar_bitmap();
 
+    crear_archivo_en_dialfs("goku",1024);
+    
+    crear_archivo_en_dialfs("vegetta",1024);
+
+    crear_archivo_en_dialfs("piccoro",1024);
+
+    truncar_archivo_en_dialfs("goku", 512, 100);
+
     guardar_bitmap();
 
     guardar_lista_archivos();
+
+
 
     return;
 
