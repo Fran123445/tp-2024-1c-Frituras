@@ -12,7 +12,7 @@
 pthread_mutex_t mutex_bitarray_marcos_libres = PTHREAD_MUTEX_INITIALIZER;
 
 t_list* sacar_n_entradas_desde_final(int cant_pags_a_sacar, t_list* tabla_del_proceso){
-    int tamanio_tabla;
+    int tamanio_tabla = list_size(tabla_del_proceso);
     
     if(cant_pags_a_sacar > tamanio_tabla){
         fprintf(stderr, "Se quiere sacar mas paginas que las que hay actualmente");

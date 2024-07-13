@@ -136,9 +136,10 @@ int main(int argc, char *argv[]){
     pthread_t hilo_io;
     pthread_create(&hilo_io, NULL, escuchar_io, NULL);
 
+    pthread_detach(hilo_io);
+
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
-    pthread_join(hilo_io,NULL);
 
     
     free(escucha_cpu);
