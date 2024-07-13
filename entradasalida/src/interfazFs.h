@@ -13,7 +13,7 @@ void cargar_bitmap();
 void guardar_bitmap();
 int encontrar_bloque_libre();
 void marcar_bloque(int bloque, int ocupado);
-void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo);
+void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo, bool modificar);
 void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo);
 void compactar_fs();
 char* rutacompleta(char* nombre_archivo);

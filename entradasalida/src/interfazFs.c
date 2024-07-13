@@ -139,17 +139,17 @@ int encontrar_bloque_libre() {
     return -1;
 }
 
-void marcar_bloque(int bloque, int ocupado){
-    if (ocupado) {
-        bitarray_clean_bit(bitmap, bloque);
-    } else {
+void marcar_bloque(int bloque, int ocupar){
+    if (ocupar) {
         bitarray_set_bit(bitmap, bloque);
+    } else {
+        bitarray_clean_bit(bitmap, bloque);
     }
 }
  //BITMAP
 
 // METADATA
-void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo){
+void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo, bool modificar){
     char* ruta_completa = rutacompleta(nombre_archivo);
     if (!ruta_completa) {
         perror("Error al asignar memoria para la ruta completa");
@@ -165,7 +165,9 @@ void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo
     fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
     fclose(file);
 
-    string_append_with_format(&archivos_metadata, " %s", ruta_completa);
+    if (!modificar) {
+        string_append_with_format(&archivos_metadata, " %s", nombre_archivo);
+    }
 
     free(ruta_completa);
 }
@@ -196,28 +198,23 @@ void mover_bloque(int bloque_origen, int bloque_destino) {
     // Leer datos del bloque de origen
     if (fseek(bloques_dat, bloque_origen * block_size, SEEK_SET) != 0) {
         perror("Error posicionando el puntero de archivo en el bloque de origen");
-        fclose(bloques_dat);
         return;
     }
     if (fread(buffer, block_size, 1, bloques_dat) != 1) {
         perror("Error leyendo datos del bloque de origen");
-        fclose(bloques_dat);
         return;
     }
 
     // Escribir datos en el bloque de destino
     if (fseek(bloques_dat, bloque_destino * block_size, SEEK_SET) != 0) {
         perror("Error posicionando el puntero de archivo en el bloque de destino");
-        fclose(bloques_dat);
         return;
     }
     if (fwrite(buffer, block_size, 1, bloques_dat) != 1) {
         perror("Error escribiendo datos en el bloque de destino");
-        fclose(bloques_dat);
         return;
     }
 
-    fclose(bloques_dat);
 }
 
 char* encontrar_archivo_por_bloque(int bloque) {
@@ -228,8 +225,9 @@ char* encontrar_archivo_por_bloque(int bloque) {
         leer_metadata(token, &bloque_inicial, &tamano_archivo); //Consigo el bloque inicial y el tamaño
 
         if (bloque >= bloque_inicial && bloque < bloque_inicial + tamano_archivo) { //Chequeo si el bloque esta dentro del rango del archivo
+            char* token_retorno = strdup(token);
             free(archivos_metadata_copia);
-            return strdup(token); // Devolver una copia del nombre del archivo
+            return token_retorno; // Devolver una copia del nombre del archivo
         }
 
         token = strtok(NULL, " ");
@@ -239,11 +237,24 @@ char* encontrar_archivo_por_bloque(int bloque) {
     return NULL; // No se encontró un archivo que contenga el bloque
 }
 
+void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_archivo) {
+    for(int i = bloque_inicial; i < bloque_inicial + tamanio_archivo; i++) {
+        // Mover el contenido del bloque i al bloque bloque_libre_actual
+        mover_bloque(i, bloque_libre_actual);
+
+        // Marcar el bloque i como libre y el bloque bloque_libre_actual como ocupado
+        marcar_bloque(i, 0);
+        marcar_bloque(bloque_libre_actual, 1);
+
+        bloque_libre_actual++;
+    }
+}
+
 // METADATA
 void compactar_fs(){
     int bloque_libre_actual = 0;
     
-    while (bloque_libre_actual < block_count && !bitarray_test_bit(bitmap, bloque_libre_actual)) {
+    while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
         bloque_libre_actual++;
     }
 
@@ -263,18 +274,10 @@ void compactar_fs(){
             int bloque_inicial, tamano_archivo;
             leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
 
-            // Calcular el desplazamiento del bloque dentro del archivo
-            int desplazamiento_bloque = i - bloque_inicial;
-
-            // Mover el contenido del bloque i al bloque bloque_libre_actual
-            mover_bloque(i, bloque_libre_actual);
-
-            // Marcar el bloque i como libre y el bloque bloque_libre_actual como ocupado
-            marcar_bloque(i, 0);
-            marcar_bloque(bloque_libre_actual, 1);
+            mover_archivo(bloque_libre_actual, bloque_inicial, tamano_archivo);
 
             // Actualizar la metadata del archivo
-            crear_metadata(nombre_archivo, bloque_inicial + (bloque_libre_actual - i), tamano_archivo);
+            crear_metadata(nombre_archivo, bloque_inicial + (bloque_libre_actual - i), tamano_archivo, 1);
 
             free(nombre_archivo);
 
@@ -319,7 +322,7 @@ bool asignar_bloques(int tam, int bloque_inicial) {
     }
 
     for(int i = bloque_inicial; i < bloque_inicial + bloques_necesarios; i++) {
-        marcar_bloque(i, 0);
+        marcar_bloque(i, 1);
     }
 
     return true;
@@ -332,7 +335,19 @@ void crear_archivo_en_dialfs(char* nombre_archivo, int tam){ // CAMBIARLO PARA Q
         return;
     }
 
-    crear_metadata(nombre_archivo, bloque_libre, tam); // Archivo creado con tamaño 0
+    crear_metadata(nombre_archivo, bloque_libre, tam, 0); // Archivo creado con tamaño 0
+}
+
+void eliminar_archivo_de_lista(char* nombre_archivo) {
+    char* archivo_a_reemplazar = string_new();
+    string_append_with_format(&archivo_a_reemplazar, " %s ", nombre_archivo);
+
+    char* temp = string_replace(archivos_metadata, archivo_a_reemplazar, "");
+
+    free(archivos_metadata);
+    free(archivo_a_reemplazar);
+    archivos_metadata = temp;
+    string_trim(&archivos_metadata);
 }
 
 void eliminar_archivo_en_dialfs(char* nombre_archivo){
@@ -342,8 +357,11 @@ void eliminar_archivo_en_dialfs(char* nombre_archivo){
     int bloques_necesarios = (tamano_archivo + block_size - 1) / block_size;
 
     for (int i = 0; i < bloques_necesarios; i++) {
-        marcar_bloque(bloque_inicial + i, 1); // Libera los bloques
+        marcar_bloque(bloque_inicial + i, 0); // Libera los bloques
     }
+
+    eliminar_archivo_de_lista(nombre_archivo);
+
     remove(archivo);
 }
 
@@ -376,7 +394,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
         }
     }
 
-    crear_metadata(nombre_archivo, bloque_inicial, nuevo_tamano);
+    crear_metadata(nombre_archivo, bloque_inicial, nuevo_tamano, 1);
 }
 
 
@@ -424,6 +442,13 @@ void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio,
 }
 //ARCHIVOS
 
+void _printearBitarray() {
+    for(int i = 0; i < bitarray_get_max_bit(bitmap); i++) {
+        printf("%d", bitarray_test_bit(bitmap, i));
+    }
+    printf("\n");
+}
+
 void iniciarInterfazDialFS(t_config* config, char* nombre){
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
     block_size = config_get_int_value(config, "BLOCK_SIZE");
@@ -437,14 +462,28 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     abrir_bloques_dat();
 
     cargar_bitmap();
+    crear_archivo_en_dialfs("goku",4);
+    crear_archivo_en_dialfs("vegetta",2);
 
-    crear_archivo_en_dialfs("goku",1024);
+    _printearBitarray();
+
+    eliminar_archivo_en_dialfs("goku");
     
-    crear_archivo_en_dialfs("vegetta",1024);
+    _printearBitarray();
+
+    truncar_archivo_en_dialfs("vegetta", 4, 0);
+
+    _printearBitarray();
+
+    truncar_archivo_en_dialfs("vegetta", 6, 0);
+
+    _printearBitarray();
+    /*
 
     crear_archivo_en_dialfs("piccoro",1024);
 
     truncar_archivo_en_dialfs("goku", 512, 100);
+    */
 
     guardar_bitmap();
 
