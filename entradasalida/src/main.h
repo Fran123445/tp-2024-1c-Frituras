@@ -7,4 +7,4 @@
 #include <commons/bitarray.h>
 
 extern int conexion_memoria;
-extern conexion_kernel;
+extern int conexion_kernel;

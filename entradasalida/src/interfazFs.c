@@ -457,42 +457,6 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     int tam_bloq_dat = block_size*block_count;
 
-    cargar_lista_archivos();
-
-    abrir_bloques_dat();
-
-    cargar_bitmap();
-    crear_archivo_en_dialfs("goku",4);
-    crear_archivo_en_dialfs("vegetta",2);
-
-    _printearBitarray();
-
-    eliminar_archivo_en_dialfs("goku");
-    
-    _printearBitarray();
-
-    truncar_archivo_en_dialfs("vegetta", 4, 0);
-
-    _printearBitarray();
-
-    truncar_archivo_en_dialfs("vegetta", 6, 0);
-
-    _printearBitarray();
-    /*
-
-    crear_archivo_en_dialfs("piccoro",1024);
-
-    truncar_archivo_en_dialfs("goku", 512, 100);
-    */
-
-    guardar_bitmap();
-
-    guardar_lista_archivos();
-
-
-
-    return;
-
     t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
     enviar_paquete(paquete, conexion_memoria);
     eliminar_paquete(paquete);
@@ -545,7 +509,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
                 break;
         }
         free(buffer);
-        sleep(tiempo_pausa);
+        usleep(tiempo_pausa);
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);

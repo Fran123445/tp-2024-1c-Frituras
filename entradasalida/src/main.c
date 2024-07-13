@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     }
 
     if(!strcmp(tipo,"STDIN")){
-        iniciarInterfazSTDIN(nuevo_config, "TECLADO");
+        iniciarInterfazSTDIN(nuevo_config, argv[1]);
     }
 
     if (!strcmp(tipo, "STDOUT")) {
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (!strcmp(tipo, "DIALFS")) {
-        iniciarInterfazDialFS(nuevo_config, "FS");
+        iniciarInterfazDialFS(nuevo_config, argv[1]);
     }
 
     free(bitmap);

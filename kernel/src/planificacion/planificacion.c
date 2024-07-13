@@ -186,6 +186,10 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             cpuLibre = 1;
             break;
         case ENVIAR_IO_GEN_SLEEP:
+        case ENVIAR_DIALFS_CREATE:
+        case ENVIAR_DIALFS_DELETE:
+        case ENVIAR_DIALFS_TRUNCATE:
+        case ENVIAR_DIALFS_WRITE:
         case ENVIAR_IO_STDIN_READ:
         case ENVIAR_IO_STDOUT_WRITE:
             instIO(proceso, operacion, buffer);
