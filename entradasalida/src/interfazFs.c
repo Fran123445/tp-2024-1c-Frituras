@@ -36,6 +36,13 @@ char* cargar_lista_archivos() {
     return archivos_metadata;
 }
 
+void guardar_lista_archivos() {
+    char* listaArchivos = rutacompleta("archivosMetadata");
+    FILE* file = fopen(listaArchivos, "w+");
+
+    fwrite(listaArchivos, strlen(listaArchivos), 1, file);
+}
+
  //BITMAP
 t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
     int tamanioBitmap = cant_bloques / 8;
@@ -157,6 +164,8 @@ void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo
     }
     fprintf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
     fclose(file);
+
+    string_append_with_format(&archivos_metadata, " %s", ruta_completa);
 
     free(ruta_completa);
 }
@@ -429,17 +438,15 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     int tam_bloq_dat = block_size*block_count;
 
+    cargar_lista_archivos();
+
     abrir_bloques_dat();
 
     cargar_bitmap();
 
-    //crear_archivo_en_dialfs("goku", 1024);
-
-    escribir_en_archivo_dialfs("goku", 1, 0, 0, 0);
-    
-    leer_desde_archivo_dialfs("goku", 0, 13, 0, 0);
-
     guardar_bitmap();
+
+    guardar_lista_archivos();
 
     return;
 
