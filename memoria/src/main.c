@@ -108,7 +108,7 @@ void enviar_tamanio_pagina_a_cpu(){
 int main(int argc, char *argv[]){
     lista_de_procesos = list_create();
 
-    config = config_create("memoria.config");
+    config = config_create(argv[1]);
     if (config == NULL){
     fprintf(stderr, "Error en la configuracion");
         exit(1);

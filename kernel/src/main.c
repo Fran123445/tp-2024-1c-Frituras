@@ -73,7 +73,8 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
 }
 
 int main(int argc, char* argv[]) {
-    t_config* config = config_create("kernel.config");
+    
+    t_config* config = config_create(argv[1]);
     if (config == NULL) {
         exit(1);
     }; 

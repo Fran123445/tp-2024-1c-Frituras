@@ -98,7 +98,7 @@ void liberar_estructuras_TLB(){
 
 int main(int argc, char* argv[]) {
     
-    t_config* config = config_create("cpu.config");
+    t_config* config = config_create(argv[1]);
     if (config == NULL) {
         exit(1);
     }
