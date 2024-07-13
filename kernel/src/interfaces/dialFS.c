@@ -2,6 +2,7 @@
 
 void liberarSolicitudDialFS(t_solicitudDIALFS* solicitud) {
     enviarAExit(solicitud->proceso, INVALID_INTERFACE);
+    list_destroy(solicitud->direcciones);
     free(solicitud->nombreArchivo);
     free(solicitud);
 }
@@ -30,9 +31,13 @@ void administrarDIALFS(int* socket_cliente) {
                 break;
             case ENVIAR_DIALFS_READ:
             case ENVIAR_DIALFS_WRITE:
-                agregar_int_a_paquete(paquete, solicitud->direccion);
-                agregar_int_a_paquete(paquete, solicitud->tamanio);
-                agregar_int_a_paquete(paquete, solicitud->ubicacionPuntero);
+                while(list_size(solicitud->direcciones) > 0 ) {
+                    t_infoArchivo* info = list_remove(solicitud->direcciones, 0);
+                    agregar_int_a_paquete(paquete, info->direccion);
+                    agregar_int_a_paquete(paquete, info->tamanio);
+                    agregar_int_a_paquete(paquete, info->ubicacionPuntero);
+                    free(info);
+                }
                 break;
             default:
                 break;
@@ -53,6 +58,8 @@ void administrarDIALFS(int* socket_cliente) {
         planificar(op, solicitud->proceso, NULL);
         pthread_mutex_unlock(&mutexPlanificador);
 
+        list_destroy(solicitud->direcciones);
+        free(solicitud->nombreArchivo);
         free(solicitud);
     } 
 
@@ -60,10 +67,13 @@ void administrarDIALFS(int* socket_cliente) {
     liberarInterfazConectada(interfaz);
 }
 
+
+
 t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buffer* buffer) {
     t_solicitudDIALFS* solicitud = malloc(sizeof(t_solicitudDIALFS));
     solicitud->proceso = proceso;
     solicitud->operacion = operacion;
+    solicitud->direcciones = list_create();
 
     switch (operacion) {
         case ENVIAR_DIALFS_CREATE:
@@ -77,9 +87,15 @@ t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buf
         case ENVIAR_DIALFS_WRITE:
         case ENVIAR_DIALFS_READ:
             solicitud->nombreArchivo = buffer_read_string(buffer);
-            solicitud->direccion = buffer_read_int(buffer);
-            solicitud->tamanio  = buffer_read_int(buffer);
-            solicitud->ubicacionPuntero = buffer_read_int(buffer);
+
+            while(buffer->size > 0) {
+                t_infoArchivo* dir = malloc(sizeof(t_infoArchivo));
+                dir->direccion = buffer_read_int(buffer);
+                dir->tamanio = buffer_read_int(buffer);
+                dir->ubicacionPuntero = buffer_read_int(buffer);
+                list_add(solicitud->direcciones, dir);
+            }
+
             break;
         default:
             break;

@@ -15,12 +15,16 @@ extern t_log* logger;
 extern pthread_mutex_t mutexPlanificador;
 
 typedef struct {
-    PCB* proceso;
-    op_code operacion;
-    char* nombreArchivo;
     int direccion;
     int tamanio;
     int ubicacionPuntero;
+} t_infoArchivo;
+typedef struct {
+    PCB* proceso;
+    op_code operacion;
+    char* nombreArchivo;
+    int tamanio;
+    t_list* direcciones;
 } t_solicitudDIALFS;
 
 void administrarDIALFS(int* socket_cliente);

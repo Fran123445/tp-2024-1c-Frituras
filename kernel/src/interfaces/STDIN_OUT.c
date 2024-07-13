@@ -20,6 +20,7 @@ t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buff
 
 void liberarSolicitudSTDIN_OUT(t_solicitudIOSTDIN_OUT* solicitud) {
     free(solicitud->direcciones);
+    free(solicitud);
     enviarAExit(solicitud->proceso, INVALID_INTERFACE);
 }
 
