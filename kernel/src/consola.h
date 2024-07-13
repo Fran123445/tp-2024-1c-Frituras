@@ -8,6 +8,8 @@
 #include <planificacion/planificacion.h>
 #include <planificadorLP.h>
 
+extern int gradoMultiprogramacionActual;
+
 // Solicita input por consola al usuario
 void solicitarInput(void);
 

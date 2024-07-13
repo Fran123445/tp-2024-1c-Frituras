@@ -45,6 +45,16 @@ void ejecutarScript(char* path) {
     fclose(archivoScript);
 }
 
+void modificarGradoMultiprogramacion(int gradoNuevo) {
+    if (gradoNuevo > gradoMultiprogramacionActual) {
+        for(int i = gradoMultiprogramacionActual; i < gradoNuevo; i++, sem_post(&gradoMultiprogramacion));
+    } else if (gradoNuevo < gradoMultiprogramacionActual) {
+        for(int i = gradoMultiprogramacionActual; i > gradoNuevo; i--, sem_wait(&gradoMultiprogramacion));
+    }
+
+    gradoMultiprogramacionActual = gradoNuevo;
+}
+
 void interpretarInput(char* input) {
 
     char** comando = string_split(input, " ");
@@ -57,7 +67,7 @@ void interpretarInput(char* input) {
     } else if (!strcmp(*comando, "FINALIZAR_PROCESO")) {
         finalizarProceso(atoi(*(comando+1)));
     } else if (!strcmp(*comando, "MULTIPROGRAMACION")) {
-        //gradoMultiprogramacion =  atoi(*(comando+1)); <- esto hay que cambiarlo
+        modificarGradoMultiprogramacion(atoi(*(comando+1)));
     } else if (!strcmp(*comando, "DETENER_PLANIFICACION")) {
         pthread_mutex_lock(&mutexPlanificador);
     } else if (!strcmp(*comando, "INICIAR_PLANIFICACION")) {

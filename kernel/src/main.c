@@ -36,6 +36,8 @@ pthread_t pth_colaNew;
 pthread_t pth_colaReady;
 pthread_t pth_recibirProc;
 
+int gradoMultiprogramacionActual = 0;
+
 void inicializarColas() {
     colaNew = queue_create();
     colaPrioritaria = queue_create();
@@ -104,7 +106,8 @@ int main(int argc, char* argv[]) {
     logger = log_create("Kernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     inicializarColas();
-    inicializarSemaforosYMutex(config_get_int_value(config, "GRADO_MULTIPROGRAMACION"));
+    gradoMultiprogramacionActual = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
+    inicializarSemaforosYMutex(gradoMultiprogramacionActual);
 
     seleccionarAlgoritmoPlanificacion(config);
 
