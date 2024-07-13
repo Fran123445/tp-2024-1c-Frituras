@@ -498,11 +498,13 @@ void IO_STDOUT_WRITE(char *interfaz, registrosCPU registroDireccion, registrosCP
 
 void WAIT(char* recurso){
     enviar_a_kernel_recurso(recurso, INSTRUCCION_WAIT);
+    liberar_pcb(pcb);
     pcb = recibir_pcb();
 }
 
 void SIGNAL(char* recurso) {
     enviar_a_kernel_recurso(recurso, INSTRUCCION_SIGNAL);
+    liberar_pcb(pcb);
     pcb = recibir_pcb();
 }
 

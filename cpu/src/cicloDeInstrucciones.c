@@ -347,6 +347,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = strlen(list_get(lista,1))+1;
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento);
             free(argumento2);
             free(argumento3);
             break;
@@ -356,6 +357,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = strlen(list_get(lista,1))+1;
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento);
             free(argumento2);
             free(argumento3);
             break;
