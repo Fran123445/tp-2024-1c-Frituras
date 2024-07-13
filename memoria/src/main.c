@@ -18,7 +18,7 @@ t_conexion_escucha* escucha_io;
 t_config* config;
 t_bitarray* mapa_de_marcos;
 t_log* log_memoria;
-
+char* bitarray_memoria_usuario;
 
 void iniciar_servidores(t_config* config){
     t_log* log_servidor = log_create("memoriaa.log", "Memoria",true, LOG_LEVEL_TRACE);
@@ -30,6 +30,8 @@ void iniciar_servidores(t_config* config){
 
     socket_kernel = esperar_cliente(socket_servidor_memoria, MEMORIA);
     socket_cpu = esperar_cliente(socket_servidor_memoria, MEMORIA);
+
+    //log_destroy(log_servidor);
 }
 
 void* escuchar_cpu(){
@@ -52,8 +54,7 @@ void* escuchar_cpu(){
             escribir_memoria(socket_cpu);
             break;
         default:
-            exit(-1);
-            fprintf(stderr, "COD_OP inválido");
+            return -1;
             break;
         }
     }
@@ -70,6 +71,7 @@ void* escuchar_kernel(){
                 finalizar_proceso(socket_kernel);
                 break;
             default:
+                return -1;
                 break;
         }
     }
@@ -80,7 +82,7 @@ void* escuchar_io(){
 }
 
 t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
-    char* bitarray_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
+    bitarray_memoria_usuario = calloc(cant_marcos/8, sizeof(char));
     if (!bitarray_memoria_usuario){
         fprintf(stderr, "Error al crear puntero al bitarray");
         exit(EXIT_FAILURE);
@@ -88,6 +90,7 @@ t_bitarray* iniciar_bitmap_marcos(int cant_marcos){
     t_bitarray* mapa_de_marcos = bitarray_create_with_mode(bitarray_memoria_usuario, cant_marcos, LSB_FIRST); // se lee el bit - significativo primero
     if(mapa_de_marcos == NULL){
         free(bitarray_memoria_usuario);
+        free(mapa_de_marcos);
         fprintf(stderr, "Error al crear el bitarray");
         exit(EXIT_FAILURE);
     }
@@ -137,16 +140,18 @@ int main(int argc, char *argv[]){
     pthread_join(hilo_kernel, NULL);
     pthread_join(hilo_io,NULL);
 
-    config_destroy(config);
+    
     free(escucha_cpu);
     free(escucha_kernel);
     free(escucha_io);
     free(memoria_contigua);
+    free(bitarray_memoria_usuario);
 
     log_destroy(log_memoria);
-    list_destroy(lista_de_procesos);
     bitarray_destroy(mapa_de_marcos);
+    list_destroy(lista_de_procesos);
     pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
+    config_destroy(config);
 
     return 0;
 }

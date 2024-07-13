@@ -8,7 +8,7 @@ int conexion_kernel;
 
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create("fs.config");
+    t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
     }; 

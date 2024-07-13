@@ -128,6 +128,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu){
     enviar_paquete(paquete, socket_cpu);
 
     eliminar_paquete(paquete);
+    free(proceso);
 }
 
 void* resize_proceso(int socket_cpu){
