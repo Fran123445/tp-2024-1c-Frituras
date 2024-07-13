@@ -6,7 +6,16 @@ int block_size;
 int retraso_compactacion;
 char* path_base_dialfs;
 FILE* bloques_dat;
+char* archivos_metadata;
 
+char* cargar_lista_archivos() {
+    char* listaArchivos = rutacompleta("archivosMetadata");
+    FILE* file = fopen(listaArchivos, "r+");
+    if(!file) {
+        archivos_metadata = string_new();
+        
+    }
+}
 
  //BITMAP
 t_bitarray* iniciar_bitmap_bloques(int cant_bloques){
@@ -152,41 +161,46 @@ void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archiv
     fclose(file);
     free(ruta_completa);
 }
-/*
+
 void mover_bloque(int bloque_origen, int bloque_destino) {
     char buffer[block_size];
-    
+
     // Leer datos del bloque de origen
-    if (fseek(file, bloque_origen * block_size, SEEK_SET) != 0) {
+    if (fseek(bloques_dat, bloque_origen * block_size, SEEK_SET) != 0) {
         perror("Error posicionando el puntero de archivo en el bloque de origen");
-        fclose(file);
+        fclose(bloques_dat);
         return;
     }
-    if (fread(buffer, block_size, 1, file) != 1) {
+    if (fread(buffer, block_size, 1, bloques_dat) != 1) {
         perror("Error leyendo datos del bloque de origen");
-        fclose(file);
+        fclose(bloques_dat);
         return;
     }
 
     // Escribir datos en el bloque de destino
-    if (fseek(file, bloque_destino * block_size, SEEK_SET) != 0) {
+    if (fseek(bloques_dat, bloque_destino * block_size, SEEK_SET) != 0) {
         perror("Error posicionando el puntero de archivo en el bloque de destino");
-        fclose(file);
+        fclose(bloques_dat);
         return;
     }
-    if (fwrite(buffer, block_size, 1, file) != 1) {
+    if (fwrite(buffer, block_size, 1, bloques_dat) != 1) {
         perror("Error escribiendo datos en el bloque de destino");
-        fclose(file);
+        fclose(bloques_dat);
         return;
     }
 
-    fclose(file);
+    fclose(bloques_dat);
 }
+
+char* encontrar_archivo_por_bloque(int bloque) {
+
+}
+
 // METADATA
 void compactar_fs(){
     int bloque_libre_actual = 0;
     
-    while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
+    while (bloque_libre_actual < block_count && !bitarray_test_bit(bitmap, bloque_libre_actual)) {
         bloque_libre_actual++;
     }
 
@@ -230,7 +244,7 @@ void compactar_fs(){
 
     printf("Compactación de FS completada.\n");
 }
-*/
+
 //ARCHIVOS
 
 bool chequearBloquesContiguosDisponibles(int bloques_necesarios, int bloque_inicial) {
@@ -334,7 +348,7 @@ void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio
 
     leer_metadata(nombre_archivo, &bloque_inicial, &tamanio_archivo);
 
-    if (ubicacionPuntero + tamanio < tamanio_archivo) {
+    if (ubicacionPuntero + tamanio > tamanio_archivo) {
         // log_error(muy mal)
         exit(-1);
     }
@@ -356,7 +370,7 @@ void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio,
 
     leer_metadata(nombre_archivo, &bloque_inicial, &tamanio_archivo);
     
-    if (ubicacionPuntero + tamanio < tamanio_archivo) {
+    if (ubicacionPuntero + tamanio > tamanio_archivo) {
         // log_error(muy mal)
         exit(-1);
     }
@@ -385,7 +399,11 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
 
     cargar_bitmap();
 
-    crear_archivo_en_dialfs("goku", 1024);
+    //crear_archivo_en_dialfs("goku", 1024);
+
+    escribir_en_archivo_dialfs("goku", 1, 0, 0, 0);
+    
+    leer_desde_archivo_dialfs("goku", 0, 13, 0, 0);
 
     guardar_bitmap();
 
