@@ -27,7 +27,7 @@ void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
     op_code op;
 
     while (1) {
-        t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
+        t_paquete* paquete = crear_paquete(CONEXION_STDOUT);
         sem_wait(&interfaz->semaforo);
 
         pthread_mutex_lock(&interfaz->mutex);

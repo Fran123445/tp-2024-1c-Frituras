@@ -12,7 +12,7 @@ void administrarInterfazGenerica(int* socket_cliente) {
     op_code op;
 
     while (1) {
-        t_paquete* paquete = crear_paquete(PAQUETE); // despues lo cambio por uno que tenga mas sentido
+        t_paquete* paquete = crear_paquete(CONEXION_IOGENERICA);
         sem_wait(&interfaz->semaforo);
 
         pthread_mutex_lock(&interfaz->mutex);
