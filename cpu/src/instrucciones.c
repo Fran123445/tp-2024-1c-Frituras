@@ -303,6 +303,8 @@ void IO_GEN_SLEEP(char* interfaz,int unidades_de_trabajo){
     agregar_interfaz_generica_a_paquete(paquete, interfaz_a_enviar);
     enviar_paquete(paquete, socket_kernel_d);
     eliminar_paquete(paquete);
+
+    free(interfaz_a_enviar);
     
     pthread_mutex_lock(&mutexInterrupt);
     hay_interrupcion = 0;
@@ -375,6 +377,8 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
                 log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %u", direccion_fisica_actual, dato_a_leer_parcial);
                 memcpy(reg_datos + bytes_leidos, dato_leido, cant_bytes_a_leer_pagina);
                 bytes_leidos += cant_bytes_a_leer_pagina;
+
+                free(dato_leido);
             }
         }
 }
@@ -456,6 +460,8 @@ void COPY_STRING(uint32_t tam){
             enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam_a_escribir);
             log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, (char*)datos_de_si);
 
+            free(datos_de_si);
+        
             bytes_a_escribir -= tam_a_escribir;
             direccion_logica_si += tam_a_escribir;
             direccion_logica_di += tam_a_escribir;
@@ -469,6 +475,8 @@ void COPY_STRING(uint32_t tam){
         uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
         enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam);
         log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, (char*)datos_de_si);
+
+        free(datos_de_si);
     }
 }
 

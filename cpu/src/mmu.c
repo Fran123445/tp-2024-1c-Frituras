@@ -57,7 +57,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
             if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
                 mover_al_frente_de_la_estructura_LRU(entradaExistenteEnTLB);
             }
-
+            
             return entradaExistenteEnTLB->marco * tamanio_pagina + desplazamiento;
         }
         else{

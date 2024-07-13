@@ -10,5 +10,6 @@ extern t_list* estructura_LRU;
 void FIFO(entrada_TLB* nueva_entrada_TLB);
 void LRU(entrada_TLB* nueva_entrada_TLB);
 void mover_al_frente_de_la_estructura_LRU(entrada_TLB* entrada);
+void liberar_entrada_TLB(entrada_TLB* entrada_TLB);
 
 #endif /* algoritmosSustitucion_H_ */

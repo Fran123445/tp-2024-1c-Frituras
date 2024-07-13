@@ -40,15 +40,16 @@ void iniciar_servidores(t_config* config) {
 void* escuchar_dispatch() {
     while (1) {
         pcb = recibir_pcb();
+        if(!pcb) break;
         realizar_ciclo_de_instruccion();
-        free(pcb);
+        liberar_pcb(pcb);
     }
     return NULL;
 }
 
 void *escuchar_interrupt() {
     while (1) {
-        recibir_interrupcion();
+        if(recibir_interrupcion()) break;
     }
     return NULL;
 }
@@ -64,6 +65,36 @@ int recibir_tamanio_pagina(){
     return -1;
 }
 
+void liberar_estructuras_TLB(){
+    // Vacío la cola FIFO y las entradas que también coincidan con la TLB, para evitar leaks
+    if (strcmp(algoritmoSustitucionTLB, "FIFO") == 0) {
+        while (!queue_is_empty(cola_FIFO)) {
+            entrada_TLB* elemento_a_sacar = queue_pop(cola_FIFO);
+            list_remove_element(TLB, elemento_a_sacar);
+            free(elemento_a_sacar);
+        }
+        queue_destroy(cola_FIFO);
+    }
+    // Vacío la cola LRU y las entradas que coincidan con la TLB
+    else if (strcmp(algoritmoSustitucionTLB, "LRU") == 0) {
+        while (list_size(estructura_LRU) > 0) {
+            entrada_TLB* elemento_a_sacar = list_get(estructura_LRU, 0);
+            list_remove_element(TLB, elemento_a_sacar);
+            list_remove_element(estructura_LRU, elemento_a_sacar);
+            free(elemento_a_sacar);
+        }
+        list_destroy(estructura_LRU);
+    }
+
+    // No estoy seguro si deberían quedar elementos en la TLB, pero si quedaran, se eliminan.
+    while (list_size(TLB) > 0) {
+        entrada_TLB* elemento_a_sacar = list_get(TLB, 0);
+        list_remove_element(TLB, elemento_a_sacar);
+        free(elemento_a_sacar);
+    }
+    list_destroy(TLB);
+}
+
 
 int main(int argc, char* argv[]) {
     
@@ -74,19 +105,18 @@ int main(int argc, char* argv[]) {
 
     log_cpu = log_create("Cpu.log", "CPU", true, LOG_LEVEL_INFO);
 
-
-    TLB = list_create();
     cant_entradas_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
 
-    algoritmoSustitucionTLB = config_get_string_value(config, "ALGORITMO_TLB");
+    if(cant_entradas_TLB !=0){
+        TLB = list_create();
+        algoritmoSustitucionTLB = config_get_string_value(config, "ALGORITMO_TLB");
 
-    if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
-        cola_FIFO = queue_create();
-        free(estructura_LRU);
-    }
-    else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
-        estructura_LRU = list_create();
-        free(cola_FIFO);
+        if(strcmp(algoritmoSustitucionTLB, "FIFO") == 0){
+            cola_FIFO = queue_create();
+        }
+        else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
+            estructura_LRU = list_create();
+        }
     }
 
 
@@ -114,10 +144,15 @@ int main(int argc, char* argv[]) {
     pthread_join(threadEscuchaInterrupt, NULL);
 
     // Liberar la memoria
-    config_destroy(config);
     log_destroy(log_cpu);
     liberar_conexion(socket_memoria);
     pthread_mutex_destroy(&mutexInterrupt);
+
+    if(cant_entradas_TLB !=0){
+        liberar_estructuras_TLB();
+    }
+
+    config_destroy(config);
 
     return 0;
 }

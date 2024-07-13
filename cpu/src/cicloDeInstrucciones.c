@@ -94,19 +94,65 @@ t_list* dividir_cadena_en_tokens(const char* linea){
     char* token = strtok(cadena, " ");
 
     while(token != NULL){
-        list_add(lista,token);
+        list_add(lista, strdup(token));
         token = strtok(NULL," ");
     }
-    //free(cadena);
+
+    free(cadena);
+    free(linea);
+    
     return lista;
 }
 
-void liberar_instruccion(t_instruccion* instruccion){
-    free(instruccion->arg1);
-    free(instruccion->arg2);
-    free(instruccion->arg3);
-    free(instruccion->interfaz);
-    free(instruccion->archivo);
+void liberar_instruccion(t_instruccion* instruccion) {
+    switch(instruccion->tipo){
+        case iSET:
+        case iSUM:
+        case iSUB:
+        case iJNZ:
+        case iMOV_IN:
+        case iMOV_OUT:
+            free(instruccion->arg1);
+            free(instruccion->arg2);
+            break;
+        case iRESIZE:
+        case iCOPY_STRING:
+        case iWAIT:
+        case iSIGNAL:
+            free(instruccion->arg1);
+            break;
+        case iIO_GEN_SLEEP:
+            free(instruccion->interfaz);
+            free(instruccion->arg1);
+            break;
+        case iIO_STDOUT_WRITE:
+        case iIO_STDIN_READ:
+            free(instruccion->interfaz);
+            free(instruccion->arg1);
+            free(instruccion->arg2);
+            break;
+        case iIO_FS_CREATE:
+        case iIO_FS_DELETE:
+            free(instruccion->interfaz);
+            free(instruccion->archivo);
+            break;
+        case iIO_FS_TRUNCATE:
+            free(instruccion->interfaz);
+            free(instruccion->archivo);
+            free(instruccion->arg1);
+        case iIO_FS_WRITE:
+        case iIO_FS_READ:
+            free(instruccion->interfaz);
+            free(instruccion->archivo);
+            free(instruccion->arg1);
+            free(instruccion->arg2);
+            free(instruccion->arg3);
+            break;
+        case iEXIT:
+            break; // No hay nada que liberar para la instrucción de salida
+        default:
+            break;
+    }
     free(instruccion);
 }
 
@@ -154,9 +200,7 @@ char* obtener_instruccion_de_memoria(){
 //Ciclo de instrucciones
 
 char* fetch(){
-    int pid = pcb->PID;
- 
-    log_info(log_cpu, "PID: %u - FETCH - Program Counter: %u", pid, pcb->registros.PC);
+    log_info(log_cpu, "PID: %u - FETCH - Program Counter: %u", pcb->PID, pcb->registros.PC);
 
     enviar_PC_a_memoria(pcb->registros.PC);
     char* instruccionEncontrada = obtener_instruccion_de_memoria();
@@ -185,6 +229,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             *argumento2 = atoi(list_get(lista,2));
             instruccion->arg2 = argumento2;
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iSUM:
             instruccion->tipo = iSUM;
@@ -195,6 +240,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iSUB:
             instruccion->tipo = iSUB;
@@ -205,6 +251,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iJNZ:
             instruccion->tipo = iJNZ;
@@ -215,6 +262,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             *argumento2 = atoi(list_get(lista,2));
             instruccion->arg2 = argumento2;
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iIO_GEN_SLEEP:
             instruccion->tipo = iIO_GEN_SLEEP;
@@ -223,7 +271,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = sizeof(int);
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
-            instruccion->interfaz = list_get(lista,1);
+            instruccion->interfaz = strdup(list_get(lista,1));
+            free(argumento2);
+            free(argumento3);
             break;
         case iRESIZE:
             instruccion->tipo = iRESIZE;
@@ -232,6 +282,8 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = sizeof(uint32_t);
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento2);
+            free(argumento3);
             break;
         case iMOV_IN:
             instruccion->tipo = iMOV_IN;
@@ -242,6 +294,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iMOV_OUT:
             instruccion->tipo = iMOV_OUT;
@@ -252,6 +305,7 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,2)));
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iCOPY_STRING:
             instruccion->tipo = iCOPY_STRING;
@@ -260,10 +314,12 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = sizeof(uint32_t);
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento2);
+            free(argumento3);
             break;
         case iIO_STDIN_READ:
             instruccion->tipo = iIO_STDIN_READ;
-            instruccion->interfaz = list_get(lista, 1);
+            instruccion->interfaz = strdup(list_get(lista, 1));
             *argumento = string_a_registro(list_get(lista, 2));
             *argumento2 = string_a_registro(list_get(lista, 3));
             instruccion->arg1 = argumento;
@@ -271,10 +327,11 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,3)));
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iIO_STDOUT_WRITE:
             instruccion->tipo = iIO_STDOUT_WRITE;
-            instruccion->interfaz = list_get(lista,1);
+            instruccion->interfaz = strdup(list_get(lista,1));
             *argumento = string_a_registro(list_get(lista,2));
             *argumento2 = string_a_registro(list_get(lista,3));
             instruccion->arg1 = argumento;
@@ -282,20 +339,25 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->arg2 = argumento2;
             instruccion->sizeArg2 = tamanioRegistro(string_a_registro(list_get(lista,3)));
             instruccion->sizeArg3 = 0;
+            free(argumento3);
             break;
         case iWAIT:
             instruccion->tipo = iWAIT;
-            instruccion->arg1 = list_get(lista,1);
+            instruccion->arg1 = strdup(list_get(lista,1));
             instruccion->sizeArg1 = strlen(list_get(lista,1))+1;
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento2);
+            free(argumento3);
             break;
         case iSIGNAL:
             instruccion->tipo = iSIGNAL;
-            instruccion->arg1 = list_get(lista,1);
+            instruccion->arg1 = strdup(list_get(lista,1));
             instruccion->sizeArg1 = strlen(list_get(lista,1))+1;
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento2);
+            free(argumento3);
             break;
         case iIO_FS_CREATE:
             instruccion->tipo = iIO_FS_CREATE;
@@ -304,6 +366,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = 0;
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento);
+            free(argumento2);
+            free(argumento3);
         break;
         case iIO_FS_DELETE:
             instruccion->tipo = iIO_FS_DELETE;
@@ -312,6 +377,9 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = 0;
             instruccion->sizeArg2 = 0;
             instruccion->sizeArg3 = 0;
+            free(argumento);
+            free(argumento2);
+            free(argumento3);
         break;
         case iIO_FS_TRUNCATE:
             instruccion->tipo = iIO_FS_TRUNCATE;
@@ -322,6 +390,8 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
             instruccion->sizeArg3 = 0;
             instruccion->sizeArg2 = 0;
+            free(argumento2);
+            free(argumento3);
         break;
         case iIO_FS_WRITE:
             instruccion->tipo = iIO_FS_WRITE;
@@ -353,12 +423,15 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
         break;
         case iEXIT:
             instruccion->tipo = iEXIT;
+            free(argumento);
+            free(argumento2);
+            free(argumento3);
             break;
         default:
             break;
     }
 
-    list_destroy(lista);
+    list_destroy_and_destroy_elements(lista, free);
 
     return instruccion;
 }
@@ -471,8 +544,6 @@ void realizar_ciclo_de_instruccion(){
         
         t_tipoInstruccion tipo_de_instr = instruccion_a_ejecutar->tipo;
 
-        //liberar_instruccion(instruccion_a_ejecutar);
-
         switch (tipo_de_instr) {
         case iRESIZE:
             op_code cod_op = recibir_operacion(socket_memoria);
@@ -496,6 +567,8 @@ void realizar_ciclo_de_instruccion(){
             break;
         }
 
+        liberar_instruccion(instruccion_a_ejecutar);
+        
         if (check_interrupt()) {
             enviar_pcb(cod_op_int);
             terminar = 1;
