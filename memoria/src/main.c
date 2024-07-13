@@ -19,9 +19,9 @@ t_config* config;
 t_bitarray* mapa_de_marcos;
 t_log* log_memoria;
 char* bitarray_memoria_usuario;
-
+t_log* log_servidor;
 void iniciar_servidores(t_config* config){
-    t_log* log_servidor = log_create("memoriaa.log", "Memoria",true, LOG_LEVEL_TRACE);
+    log_servidor = log_create("memoriaa.log", "Memoria",true, LOG_LEVEL_TRACE);
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_servidor);
 
     escucha_io= malloc(sizeof(t_conexion_escucha));
@@ -141,17 +141,21 @@ int main(int argc, char *argv[]){
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
 
-    
+    pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
+
     free(escucha_cpu);
     free(escucha_kernel);
     free(escucha_io);
     free(memoria_contigua);
     free(bitarray_memoria_usuario);
 
-    log_destroy(log_memoria);
     bitarray_destroy(mapa_de_marcos);
     list_destroy(lista_de_procesos);
-    pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
+    log_destroy(log_memoria);
+
+    close(socket_servidor_memoria);
+    log_destroy(log_servidor);
+
     config_destroy(config);
 
     return 0;
