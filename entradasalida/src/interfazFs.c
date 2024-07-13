@@ -387,7 +387,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
         }
         if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
             compactar_fs();
-            sleep(retraso_compactacion);
+            usleep(retraso_compactacion);
         }
         for (int i = bloques_necesarios_actual; i < bloques_necesarios_nuevo; i++) {
             marcar_bloque(bloque_inicial + i, 1);   //Marco los nuevos bloques como ocupados
@@ -457,9 +457,20 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     int tam_bloq_dat = block_size*block_count;
 
-    t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
+   t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
+    agregar_string_a_paquete(paquete, nombre);
+    enviar_paquete(paquete, conexion_kernel);
+    eliminar_paquete(paquete);
+
+    paquete = crear_paquete(CONEXION_DIAL_FS);
     enviar_paquete(paquete, conexion_memoria);
     eliminar_paquete(paquete);
+
+    cargar_lista_archivos();
+
+    abrir_bloques_dat();
+
+    cargar_bitmap();
 
     while (1) {
         op_code reciv = recibir_operacion(conexion_kernel);
@@ -510,6 +521,10 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         }
         free(buffer);
         usleep(tiempo_pausa);
+        
+        guardar_bitmap();
+
+        guardar_lista_archivos();
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);

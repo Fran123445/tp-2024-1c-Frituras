@@ -22,9 +22,9 @@ void administrarDIALFS(int* socket_cliente) {
         agregar_string_a_paquete(paquete, solicitud->nombreArchivo);
 
         switch (solicitud->operacion) {
-            case ENVIAR_DIALFS_CREATE:
             case ENVIAR_DIALFS_DELETE:
                 break;
+            case ENVIAR_DIALFS_CREATE:
             case ENVIAR_DIALFS_TRUNCATE:
                 agregar_int_a_paquete(paquete, solicitud->tamanio);
                 break;
