@@ -38,6 +38,8 @@ int crear_conexion(char *ip, char* puerto, modulo_code modulo)
 
 	freeaddrinfo(server_info);
 
+	log_destroy(error);
+	
 	return socket_cliente;
 }
 
