@@ -35,5 +35,6 @@ int main(int argc, char* argv[]) {
     }
 
     free(bitmap);
+    config_destroy(nuevo_config);
     return 0;
 }

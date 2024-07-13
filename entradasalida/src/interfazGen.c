@@ -12,6 +12,7 @@ void iniciarInterfazGenerica(t_config* config, char* nombre){
     // esto esta unicamente para que no quede memoria colgada
     paquete = crear_paquete(CONEXION_IOGENERICA);
     enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
 
     while (1) {
        ssize_t reciv = recibir_operacion(conexion_kernel);
@@ -27,6 +28,7 @@ void iniciarInterfazGenerica(t_config* config, char* nombre){
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);
         eliminar_paquete(paquete);
+        liberar_buffer(buffer);
     }
 }
 

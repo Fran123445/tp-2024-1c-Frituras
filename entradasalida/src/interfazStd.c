@@ -75,7 +75,7 @@ void iniciarInterfazSTDIN(t_config* config, char* nombre){
             free(parte_texto);
             enviado += tam;
         }
-
+        free(texto);
         liberar_buffer(buffer);
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
