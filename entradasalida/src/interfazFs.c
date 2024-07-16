@@ -238,7 +238,7 @@ char* encontrar_archivo_por_bloque(int bloque) {
 }
 
 void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_archivo) {
-    for(int i = bloque_inicial; i < bloque_inicial + tamanio_archivo; i++) {
+    for(int i = bloque_inicial; i < tamanio_archivo; i++) {
         // Mover el contenido del bloque i al bloque bloque_libre_actual
         mover_bloque(i, bloque_libre_actual);
 
@@ -276,7 +276,7 @@ void compactar_fs(){
 
             mover_archivo(bloque_libre_actual, bloque_inicial, tamano_archivo);
 
-            // Actualizar la metadata del archivo
+            // Actualizar la metadata del archivo 
             crear_metadata(nombre_archivo, bloque_inicial + (bloque_libre_actual - i), tamano_archivo, 1);
 
             free(nombre_archivo);
@@ -388,12 +388,13 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
         if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
             compactar_fs();
             usleep(retraso_compactacion);
+            leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
         }
         for (int i = bloques_necesarios_actual; i < bloques_necesarios_nuevo; i++) {
             marcar_bloque(bloque_inicial + i, 1);   //Marco los nuevos bloques como ocupados
         }
+        
     }
-
     crear_metadata(nombre_archivo, bloque_inicial, nuevo_tamano, 1);
 }
 
@@ -471,7 +472,25 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     abrir_bloques_dat();
 
     cargar_bitmap();
+   /*
+    _printearBitarray();
+    crear_archivo_en_dialfs("goku",480);
 
+    _printearBitarray();
+    crear_archivo_en_dialfs("vegetta",32);
+    _printearBitarray();
+
+    eliminar_archivo_en_dialfs("goku");
+
+    _printearBitarray();
+
+    truncar_archivo_en_dialfs("vegetta", 64, 0);
+
+
+    _printearBitarray();
+    
+    return;
+*/
     while (1) {
         op_code reciv = recibir_operacion(conexion_kernel);
 
@@ -488,20 +507,24 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
                 int tam = buffer_read_int(buffer);
                 crear_archivo_en_dialfs(nombre_archivo,tam);
                 free(nombre_archivo);
+                _printearBitarray();
                 break;
 
             case ENVIAR_DIALFS_DELETE:
                 eliminar_archivo_en_dialfs(nombre_archivo);
                 free(nombre_archivo);
+                _printearBitarray();
                 break;
 
             case ENVIAR_DIALFS_TRUNCATE:
                 int nuevo_tamano = buffer_read_int(buffer);
                 truncar_archivo_en_dialfs(nombre_archivo, nuevo_tamano, retraso_compactacion);
+                _printearBitarray();
                 free(nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_WRITE:
+            
                 int direccion = buffer_read_int(buffer);
                 int tamanio = buffer_read_int(buffer);
                 int ubicacionPuntero = buffer_read_int(buffer);
@@ -525,6 +548,8 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         guardar_bitmap();
 
         guardar_lista_archivos();
+
+        _printearBitarray();
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);
