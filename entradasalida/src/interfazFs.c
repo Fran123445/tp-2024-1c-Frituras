@@ -375,11 +375,10 @@ void eliminar_archivo_en_dialfs(char* nombre_archivo){
 
 
 void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
-    char* ruta_completa = rutacompleta(nombre_archivo);
     int bloque_inicial, tamano_archivo;
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
-    int bloques_necesarios_nuevo = (nuevo_tamano + block_size - 1) / block_size;
-    int bloques_necesarios_actual = (tamano_archivo + block_size - 1) / block_size;
+    int bloques_necesarios_nuevo = ceil((nuevo_tamano) / (float) block_size);
+    int bloques_necesarios_actual = ceil((tamano_archivo) / (float) block_size);
 
     if (nuevo_tamano < tamano_archivo) {
         for (int i = bloques_necesarios_nuevo; i < bloques_necesarios_actual; i++) {
@@ -387,7 +386,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
         }
     } else if (nuevo_tamano > tamano_archivo) { //Aumento el tamaño del archivo si el nuevo tamaño es mayor al actual
         int espacio_contiguo = 1;
-        for (int i = bloque_inicial + bloques_necesarios_actual; i < bloque_inicial + bloques_necesarios_nuevo; i++) { 
+        for (int i = bloque_inicial + bloques_necesarios_actual + 1; i < bloque_inicial + bloques_necesarios_nuevo; i++) { 
             if (i >= block_count || bitarray_test_bit(bitmap, i)) { //Compruebo si el espacio contiguo esta ocupado
                 espacio_contiguo = 0;   
                 break;
@@ -458,7 +457,6 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     block_count = config_get_int_value(config, "BLOCK_COUNT");
     retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
-    int tam_bloq_dat = block_size*block_count;
 
    t_paquete* paquete = crear_paquete(CONEXION_DIAL_FS);
     agregar_string_a_paquete(paquete, nombre);
