@@ -10,7 +10,7 @@ void pedir_contenido_memoria(uint32_t direccion_fisica, uint32_t tam, int  pid){
     eliminar_paquete(paquete);
 }
 
-void* recibir_contenido_memoria(){
+void* recibir_contenido_memoria_fs(){
     op_code cod_op = recibir_operacion(conexion_memoria);
     if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
         t_buffer* buffer = recibir_buffer(conexion_memoria);
@@ -24,7 +24,7 @@ void* recibir_contenido_memoria(){
 
 void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam, int  pid){
     pedir_contenido_memoria(direccion_fisica, tam, pid);
-    void* contenido_leido = recibir_contenido_memoria();  //le pido a memoria el contenido de la pagina
+    void* contenido_leido = recibir_contenido_memoria_fs();  //le pido a memoria el contenido de la pagina
     // void* puntero_al_dato_leido = &contenido_leido; Me parece que esto ya no hace falta, veremos si hay seg. fault o no
     return contenido_leido;
 }

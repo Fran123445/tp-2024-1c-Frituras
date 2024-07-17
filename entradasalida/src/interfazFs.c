@@ -1,4 +1,5 @@
 #include "interfazFs.h"
+#include "interfazStd.h"
 
 t_bitarray* bitmap;
 int block_count;
@@ -7,6 +8,13 @@ int retraso_compactacion;
 char* path_base_dialfs;
 FILE* bloques_dat;
 char* archivos_metadata;
+
+void _printearBitarray() {
+    for(int i = 0; i < bitarray_get_max_bit(bitmap); i++) {
+        printf("%d", bitarray_test_bit(bitmap, i));
+    }
+    printf("\n");
+}
 
 char* cargar_lista_archivos() {
     char* listaArchivos = rutacompleta("archivosMetadata");
@@ -166,7 +174,7 @@ void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo
     fclose(file);
 
     if (!modificar) {
-        string_append_with_format(&archivos_metadata, " %s", nombre_archivo);
+        string_append_with_format(&archivos_metadata, "%s ", nombre_archivo);
     }
 
     free(ruta_completa);
@@ -219,12 +227,12 @@ void mover_bloque(int bloque_origen, int bloque_destino) {
 
 char* encontrar_archivo_por_bloque(int bloque) {
     char* archivos_metadata_copia = strdup(archivos_metadata); // Crear una copia para manipular
-    char* token = strtok(archivos_metadata_copia, " ");
+    char* token = strtok(archivos_metadata_copia," ");
     while (token != NULL) {
         int bloque_inicial, tamano_archivo;
         leer_metadata(token, &bloque_inicial, &tamano_archivo); //Consigo el bloque inicial y el tamaño
 
-        if (bloque >= bloque_inicial && bloque < bloque_inicial + tamano_archivo) { //Chequeo si el bloque esta dentro del rango del archivo
+        if (bloque >= bloque_inicial && bloque <= bloque_inicial + tamano_archivo) { //Chequeo si el bloque esta dentro del rango del archivo
             char* token_retorno = strdup(token);
             free(archivos_metadata_copia);
             return token_retorno; // Devolver una copia del nombre del archivo
@@ -238,7 +246,7 @@ char* encontrar_archivo_por_bloque(int bloque) {
 }
 
 void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_archivo) {
-    for(int i = bloque_inicial; i < tamanio_archivo; i++) {
+    for(int i = bloque_inicial; i <= bloque_inicial + tamanio_archivo; i++) {
         // Mover el contenido del bloque i al bloque bloque_libre_actual
         mover_bloque(i, bloque_libre_actual);
 
@@ -246,25 +254,25 @@ void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_arch
         marcar_bloque(i, 0);
         marcar_bloque(bloque_libre_actual, 1);
 
+        _printearBitarray();
+
         bloque_libre_actual++;
     }
 }
 
 // METADATA
-void compactar_fs(){
+void compactar_fs(int bloques_archivo_a_truncar){
     int bloque_libre_actual = 0;
     
-    while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
-        bloque_libre_actual++;
-    }
+    bloque_libre_actual = encontrar_bloque_libre();
 
     if (bloque_libre_actual >= block_count) {
         printf("No hay bloques libres para compactar.\n");
         return;
     }
 
-    for (int i = bloque_libre_actual + 1; i < block_count; i++) {
-        if (bitarray_test_bit(bitmap, i)) {
+    for (int i = bloque_libre_actual - 1 ; i < block_count; i++){
+        if (bitarray_test_bit(bitmap, i)){
             char* nombre_archivo = encontrar_archivo_por_bloque(i);
             if (!nombre_archivo) {
                 fprintf(stderr, "Error: no se encontró el archivo para el bloque %d\n", i);
@@ -277,12 +285,12 @@ void compactar_fs(){
             mover_archivo(bloque_libre_actual, bloque_inicial, tamano_archivo);
 
             // Actualizar la metadata del archivo 
-            crear_metadata(nombre_archivo, bloque_inicial + (bloque_libre_actual - i), tamano_archivo, 1);
+            crear_metadata(nombre_archivo, bloque_inicial + bloque_libre_actual - i, tamano_archivo, 0);
 
             free(nombre_archivo);
 
             // Encontrar el siguiente bloque libre
-            while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
+            while (bloque_libre_actual < bloques_archivo_a_truncar && bitarray_test_bit(bitmap, bloque_libre_actual)) {
                 bloque_libre_actual++;
             }
         }
@@ -321,7 +329,7 @@ bool asignar_bloques(int tam, int bloque_inicial) {
         return false;
     }
 
-    for(int i = bloque_inicial; i < bloque_inicial + bloques_necesarios; i++) {
+    for(int i = bloque_inicial; i <= bloque_inicial + bloques_necesarios; i++) {
         marcar_bloque(i, 1);
     }
 
@@ -386,7 +394,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
             }
         }
         if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
-            compactar_fs();
+            compactar_fs(bloques_necesarios_nuevo);
             usleep(retraso_compactacion);
             leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
         }
@@ -411,7 +419,7 @@ void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio
 
     pedir_contenido_memoria((uint32_t)direccion, (uint32_t)tamanio, pid);
 
-    void* datos_a_escribir = recibir_contenido_memoria();
+    void* datos_a_escribir = recibir_contenido_memoria_fs();
 
     fseek(bloques_dat, bloque_inicial*block_size + ubicacionPuntero, SEEK_SET);
 
@@ -443,12 +451,6 @@ void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio,
 }
 //ARCHIVOS
 
-void _printearBitarray() {
-    for(int i = 0; i < bitarray_get_max_bit(bitmap); i++) {
-        printf("%d", bitarray_test_bit(bitmap, i));
-    }
-    printf("\n");
-}
 
 void iniciarInterfazDialFS(t_config* config, char* nombre){
     int tiempo_pausa = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
@@ -472,25 +474,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     abrir_bloques_dat();
 
     cargar_bitmap();
-   /*
-    _printearBitarray();
-    crear_archivo_en_dialfs("goku",480);
 
-    _printearBitarray();
-    crear_archivo_en_dialfs("vegetta",32);
-    _printearBitarray();
-
-    eliminar_archivo_en_dialfs("goku");
-
-    _printearBitarray();
-
-    truncar_archivo_en_dialfs("vegetta", 64, 0);
-
-
-    _printearBitarray();
-    
-    return;
-*/
     while (1) {
         op_code reciv = recibir_operacion(conexion_kernel);
 
@@ -504,7 +488,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
 
         switch (reciv) {
             case ENVIAR_DIALFS_CREATE:
-                int tam = buffer_read_int(buffer);
+                int tam = 0;
                 crear_archivo_en_dialfs(nombre_archivo,tam);
                 free(nombre_archivo);
                 _printearBitarray();
@@ -524,19 +508,22 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
                 break;
 
             case ENVIAR_DIALFS_WRITE:
-            
-                int direccion = buffer_read_int(buffer);
-                int tamanio = buffer_read_int(buffer);
-                int ubicacionPuntero = buffer_read_int(buffer);
-                escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                while (buffer->size > 0) {
+                        int direccion = buffer_read_int(buffer);
+                        int tamanio = buffer_read_int(buffer);
+                        int ubicacionPuntero = buffer_read_int(buffer);
+                        escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                }
                 free(nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_READ:
-                direccion = buffer_read_int(buffer);
-                tamanio = buffer_read_int(buffer);
-                ubicacionPuntero = buffer_read_int(buffer);
-                leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                while (buffer->size > 0) {
+                        int direccion = buffer_read_int(buffer);
+                        int tamanio = buffer_read_int(buffer);
+                        int ubicacionPuntero = buffer_read_int(buffer);
+                        leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                }
                 free(nombre_archivo);
                 break;
             default:

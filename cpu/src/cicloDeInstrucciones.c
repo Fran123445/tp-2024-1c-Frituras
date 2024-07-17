@@ -140,6 +140,7 @@ void liberar_instruccion(t_instruccion* instruccion) {
             free(instruccion->interfaz);
             free(instruccion->archivo);
             free(instruccion->arg1);
+            break;
         case iIO_FS_WRITE:
         case iIO_FS_READ:
             free(instruccion->interfaz);
@@ -392,8 +393,8 @@ t_instruccion* decode(char* instruccion_sin_decodificar){
             instruccion->sizeArg1 = tamanioRegistro(string_a_registro(list_get(lista, 3)));
             instruccion->sizeArg3 = 0;
             instruccion->sizeArg2 = 0;
-            //free(argumento2);
-            //free(argumento3);
+            free(argumento2);
+            free(argumento3);
         break;
         case iIO_FS_WRITE:
             instruccion->tipo = iIO_FS_WRITE;
@@ -490,7 +491,7 @@ void execute(t_instruccion* instruccion){
         IO_STDIN_READ((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);   
         break;
     case iIO_STDOUT_WRITE:
-        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDIN_READ - Parametro 1: %p, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDOUT_WRITE - Parametro 1: %p, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         IO_STDOUT_WRITE((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);    
         break;
     case iIO_FS_CREATE:
@@ -563,9 +564,8 @@ void realizar_ciclo_de_instruccion(){
         case iIO_FS_READ:
         case iIO_FS_WRITE:
         case iEXIT:
-            terminar = 1; 
-            liberar_instruccion(instruccion_a_ejecutar); 
-            return;
+            terminar = 1;  
+            break;;
         default:
             break;
         }

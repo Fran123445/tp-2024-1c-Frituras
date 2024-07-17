@@ -15,9 +15,9 @@ extern t_log* logger;
 extern pthread_mutex_t mutexPlanificador;
 
 typedef struct {
-    int direccion;
-    int tamanio;
-    int ubicacionPuntero;
+    uint32_t direccion;
+    uint32_t tamanio;
+    uint32_t ubicacionPuntero;
 } t_infoArchivo;
 typedef struct {
     PCB* proceso;

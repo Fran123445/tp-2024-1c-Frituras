@@ -82,17 +82,18 @@ t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buf
             break;
         case ENVIAR_DIALFS_TRUNCATE:
             solicitud->nombreArchivo = buffer_read_string(buffer);
-            solicitud->tamanio = buffer_read_int(buffer);
+            solicitud->tamanio = buffer_read_uint32(buffer);
             break;
         case ENVIAR_DIALFS_WRITE:
         case ENVIAR_DIALFS_READ:
             solicitud->nombreArchivo = buffer_read_string(buffer);
+            uint32_t ubi_puntero = buffer_read_uint32(buffer);
 
             while(buffer->size > 0) {
                 t_infoArchivo* dir = malloc(sizeof(t_infoArchivo));
-                dir->direccion = buffer_read_int(buffer);
-                dir->tamanio = buffer_read_int(buffer);
-                dir->ubicacionPuntero = buffer_read_int(buffer);
+                dir->ubicacionPuntero= ubi_puntero;
+                dir->direccion = buffer_read_uint32(buffer);
+                dir->tamanio = buffer_read_uint32(buffer);
                 list_add(solicitud->direcciones, dir);
             }
 

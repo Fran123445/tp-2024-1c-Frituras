@@ -8,7 +8,7 @@ int conexion_kernel;
 
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create(argv[2]);
+    t_config* nuevo_config = config_create("fs.config");
     if (nuevo_config == NULL) {
         exit(1);
     }; 
@@ -31,10 +31,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (!strcmp(tipo, "DIALFS")) {
-        iniciarInterfazDialFS(nuevo_config, argv[1]);
+        iniciarInterfazDialFS(nuevo_config, "FS");
     }
 
     free(bitmap);
-    config_destroy(nuevo_config);
     return 0;
 }
