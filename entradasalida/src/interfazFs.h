@@ -4,6 +4,7 @@
 #include "main.h"
 #include "math.h"
 
+extern t_log* logger;
 extern t_bitarray* bitmap;
 extern int block_count;
 extern int block_size;

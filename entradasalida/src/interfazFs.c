@@ -8,6 +8,7 @@ int retraso_compactacion;
 char* path_base_dialfs;
 FILE* bloques_dat;
 char* archivos_metadata;
+int pid;
 
 void _printearBitarray() {
     for(int i = 0; i < bitarray_get_max_bit(bitmap); i++) {
@@ -135,7 +136,7 @@ void guardar_bitmap() {
 
     fclose(file);
 
-    printf("Bitmap guardado exitosamente en %s.\n", bitmap_path);
+    log_info(logger, "Bitmap guardado exitosamente en %s.", bitmap_path);
 }
 
 int encontrar_bloque_libre() {
@@ -254,8 +255,6 @@ void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_arch
         marcar_bloque(i, 0);
         marcar_bloque(bloque_libre_actual, 1);
 
-        _printearBitarray();
-
         bloque_libre_actual++;
     }
 }
@@ -263,11 +262,14 @@ void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_arch
 // METADATA
 void compactar_fs(int bloques_archivo_a_truncar){
     int bloque_libre_actual = 0;
+
+    log_info(logger, "PID: %d - Inicio Compactación.", pid);
     
     bloque_libre_actual = encontrar_bloque_libre();
 
     if (bloque_libre_actual >= block_count) {
-        printf("No hay bloques libres para compactar.\n");
+        log_warning(logger, "No hay bloques libres para compactar.");
+        log_info(logger, "PID: %d - Fin Compactación.", pid);
         return;
     }
 
@@ -275,7 +277,7 @@ void compactar_fs(int bloques_archivo_a_truncar){
         if (bitarray_test_bit(bitmap, i)){
             char* nombre_archivo = encontrar_archivo_por_bloque(i);
             if (!nombre_archivo) {
-                fprintf(stderr, "Error: no se encontró el archivo para el bloque %d\n", i);
+                log_error(logger, "PID: %d - No se encontró el archivo para el bloque %d.", pid, i);
                 continue;
             }
 
@@ -296,7 +298,7 @@ void compactar_fs(int bloques_archivo_a_truncar){
         }
     }
 
-    printf("Compactación de FS completada.\n");
+    log_info(logger, "PID: %d - Fin Compactación.", pid);
 }
 
 //ARCHIVOS
@@ -481,60 +483,57 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         }
         t_buffer* buffer = recibir_buffer(conexion_kernel);
 
-        int pid = buffer_read_int(buffer);
+        pid = buffer_read_int(buffer);
         char* nombre_archivo = buffer_read_string(buffer);
+
+
 
         switch (reciv) {
             case ENVIAR_DIALFS_CREATE:
                 int tam = 0;
                 crear_archivo_en_dialfs(nombre_archivo,tam);
-                free(nombre_archivo);
-                _printearBitarray();
+                log_info(logger, "PID: %d - Crear Archivo: %s", pid, nombre_archivo);
                 break;
-
             case ENVIAR_DIALFS_DELETE:
                 eliminar_archivo_en_dialfs(nombre_archivo);
-                free(nombre_archivo);
-                _printearBitarray();
+                log_info(logger, "PID: %d - Eliminar Archivo: %s", pid, nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_TRUNCATE:
                 int nuevo_tamano = buffer_read_int(buffer);
                 truncar_archivo_en_dialfs(nombre_archivo, nuevo_tamano, retraso_compactacion);
-                _printearBitarray();
-                free(nombre_archivo);
+                log_info(logger, "PID: %d - Truncar Archivo: %s - Tamaño: %d", pid, nombre_archivo, tam);
                 break;
 
             case ENVIAR_DIALFS_WRITE:
                 while (buffer->size > 0) {
-                        int direccion = buffer_read_int(buffer);
-                        int tamanio = buffer_read_int(buffer);
-                        int ubicacionPuntero = buffer_read_int(buffer);
-                        escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                    int direccion = buffer_read_int(buffer);
+                    int tamanio = buffer_read_int(buffer);
+                    int ubicacionPuntero = buffer_read_int(buffer);
+                    escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                    log_info("PID: %d - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
                 }
-                free(nombre_archivo);
                 break;
 
             case ENVIAR_DIALFS_READ:
                 while (buffer->size > 0) {
-                        int direccion = buffer_read_int(buffer);
-                        int tamanio = buffer_read_int(buffer);
-                        int ubicacionPuntero = buffer_read_int(buffer);
-                        leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                    int direccion = buffer_read_int(buffer);
+                    int tamanio = buffer_read_int(buffer);
+                    int ubicacionPuntero = buffer_read_int(buffer);
+                    leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
+                    log_info("PID: %d - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
                 }
-                free(nombre_archivo);
                 break;
             default:
                 break;
         }
         free(buffer);
         usleep(tiempo_pausa);
+        free(nombre_archivo);
         
         guardar_bitmap();
 
         guardar_lista_archivos();
-
-        _printearBitarray();
 
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);

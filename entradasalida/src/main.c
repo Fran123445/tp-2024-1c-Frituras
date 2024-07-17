@@ -5,13 +5,16 @@
 
 int conexion_memoria;
 int conexion_kernel;
+t_log* logger;
 
 int main(int argc, char* argv[]) {
 
-    t_config* nuevo_config = config_create("fs.config");
+    t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
     }; 
+
+    logger = log_create("IO.log", "IO", true, LOG_LEVEL_TRACE);
 
     conexion_kernel = crear_conexion(config_get_string_value(nuevo_config,"IP_KERNEL"), config_get_string_value(nuevo_config, "PUERTO_KERNEL"), IO);
     conexion_memoria = crear_conexion(config_get_string_value(nuevo_config, "IP_MEMORIA"), config_get_string_value(nuevo_config, "PUERTO_MEMORIA"), IO);
@@ -31,7 +34,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (!strcmp(tipo, "DIALFS")) {
-        iniciarInterfazDialFS(nuevo_config, "FS");
+        iniciarInterfazDialFS(nuevo_config, argv[1]);
     }
 
     free(bitmap);
