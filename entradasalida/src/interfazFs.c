@@ -135,8 +135,6 @@ void guardar_bitmap() {
     size_t bytes_escritos = fwrite(bitmap->bitarray, block_count / 8, 1, file);
 
     fclose(file);
-
-    log_info(logger, "Bitmap guardado exitosamente en %s.", bitmap_path);
 }
 
 int encontrar_bloque_libre() {
@@ -478,9 +476,10 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
     while (1) {
         op_code reciv = recibir_operacion(conexion_kernel);
 
-        if (reciv < 0) {
-            exit(-1);
+        if (reciv <= 0) {
+            break;
         }
+
         t_buffer* buffer = recibir_buffer(conexion_kernel);
 
         pid = buffer_read_int(buffer);
@@ -511,17 +510,16 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
                     int tamanio = buffer_read_int(buffer);
                     int ubicacionPuntero = buffer_read_int(buffer);
                     escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
-                    log_info("PID: %d - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
+                    log_info(logger, "PID: %d - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
                 }
                 break;
-
             case ENVIAR_DIALFS_READ:
                 while (buffer->size > 0) {
                     int direccion = buffer_read_int(buffer);
                     int tamanio = buffer_read_int(buffer);
                     int ubicacionPuntero = buffer_read_int(buffer);
-                    leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
-                    log_info("PID: %d - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
+                    leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);      
+                    log_info(logger, "PID: %d - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
                 }
                 break;
             default:
@@ -539,5 +537,4 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
         enviar_paquete(paquete ,conexion_kernel);
         eliminar_paquete(paquete);
     }
-    guardar_bitmap("bitmap.dat");
 }

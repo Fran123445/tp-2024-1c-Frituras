@@ -11,7 +11,7 @@ void administrarDIALFS(int* socket_cliente) {
     t_IOConectada* interfaz = IOConectado_create(*socket_cliente, INTERFAZ_DIALFS);
 
     while (1) {
-        t_paquete* paquete = crear_paquete(PAQUETE); // es posible que nunca lo cambie por algo que tenga mas sentido
+        t_paquete* paquete = crear_paquete(CONEXION_DIALFS); // es posible que nunca lo cambie por algo que tenga mas sentido
         sem_wait(&interfaz->semaforo);
 
         pthread_mutex_lock(&interfaz->mutex);
@@ -87,11 +87,10 @@ t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buf
         case ENVIAR_DIALFS_WRITE:
         case ENVIAR_DIALFS_READ:
             solicitud->nombreArchivo = buffer_read_string(buffer);
-            uint32_t ubi_puntero = buffer_read_uint32(buffer);
 
             while(buffer->size > 0) {
                 t_infoArchivo* dir = malloc(sizeof(t_infoArchivo));
-                dir->ubicacionPuntero= ubi_puntero;
+                dir->ubicacionPuntero = buffer_read_uint32(buffer);
                 dir->direccion = buffer_read_uint32(buffer);
                 dir->tamanio = buffer_read_uint32(buffer);
                 list_add(solicitud->direcciones, dir);

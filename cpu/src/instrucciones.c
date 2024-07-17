@@ -103,7 +103,6 @@ void enviar_Direcciones_Fisicas_FS(char* interfaz, char* nombre_archivo, registr
     agregar_PCB_a_paquete(paquete,pcb);
     agregar_string_a_paquete(paquete, interfaz);
     agregar_string_a_paquete(paquete,nombre_archivo);
-    agregar_uint32_a_paquete(paquete,posicion_inicial);
 
     if (tam > tamanio_pagina){
         uint32_t bytes_a_enviar = tam;
@@ -113,15 +112,18 @@ void enviar_Direcciones_Fisicas_FS(char* interfaz, char* nombre_archivo, registr
 
             uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
 
+            agregar_uint32_a_paquete(paquete, posicion_inicial);
             agregar_uint32_a_paquete(paquete, direccion_fisica);
             agregar_uint32_a_paquete(paquete, cant_de_bytes_a_enviar);
 
             bytes_a_enviar -= cant_de_bytes_a_enviar;
             direccion_logica += cant_de_bytes_a_enviar;
+            posicion_inicial += cant_de_bytes_a_enviar;
         }
     }
     else{
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccion_logica);
+        agregar_uint32_a_paquete(paquete, posicion_inicial);
         agregar_uint32_a_paquete(paquete, direccion_fisica);
         agregar_uint32_a_paquete(paquete, tam);
     }

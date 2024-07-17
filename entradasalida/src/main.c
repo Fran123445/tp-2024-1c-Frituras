@@ -37,6 +37,5 @@ int main(int argc, char* argv[]) {
         iniciarInterfazDialFS(nuevo_config, argv[1]);
     }
 
-    free(bitmap);
     return 0;
 }
