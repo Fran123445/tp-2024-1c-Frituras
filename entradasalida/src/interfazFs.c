@@ -152,13 +152,18 @@ int encontrar_bloque_libre() {
     return -1;
 }
 
-void marcar_bloque(int bloque, int ocupar){
+void marcar_bloque(int bloque, int ocupar) {
+    if (bloque < 0 || bloque >= block_count) {
+        fprintf(stderr, "Error: Bloque fuera de rango: %d\n", bloque);
+        return;
+    }
     if (ocupar) {
         bitarray_set_bit(bitmap, bloque);
     } else {
         bitarray_clean_bit(bitmap, bloque);
     }
 }
+
  //BITMAP
 
 // METADATA
@@ -268,7 +273,19 @@ void compactar_fs(int bloques_archivo_a_truncar){
     int bloque_libre_actual = 0;
 
     log_info(logger, "PID: %d - Inicio Compactación.", pid);
-    
+
+    bloque_libre_actual = encontrar_bloque_libre();
+
+
+}
+
+void compactar_fs(int bloques_archivo_a_truncar){
+    usleep(retraso_compactacion);
+
+    int bloque_libre_actual = 0;
+
+    log_info(logger, "PID: %d - Inicio Compactación.", pid);
+
     bloque_libre_actual = encontrar_bloque_libre();
 
     if (bloque_libre_actual >= block_count) {
@@ -277,8 +294,8 @@ void compactar_fs(int bloques_archivo_a_truncar){
         return;
     }
 
-    for (int i = bloque_libre_actual - 1 ; i < block_count; i++){
-        if (bitarray_test_bit(bitmap, i)){
+    for (int i = bloque_libre_actual + 1; i < block_count; i++) {
+        if (bitarray_test_bit(bitmap, i)) {
             char* nombre_archivo = encontrar_archivo_por_bloque(i);
             if (!nombre_archivo) {
                 log_error(logger, "PID: %d - No se encontró el archivo para el bloque %d.", pid, i);
@@ -291,12 +308,23 @@ void compactar_fs(int bloques_archivo_a_truncar){
             mover_archivo(bloque_libre_actual, bloque_inicial, tamano_archivo);
 
             // Actualizar la metadata del archivo 
-            crear_metadata(nombre_archivo, bloque_inicial + bloque_libre_actual - i, tamano_archivo, 0);
+            crear_metadata(nombre_archivo, bloque_libre_actual, tamano_archivo, 0);
+
+            // Liberar el bloque viejo en el bitmap
+            for (int j = bloque_inicial; j < bloque_inicial + tamano_archivo; j++) {
+                bitarray_clean_bit(bitmap, j);
+            }
+
+            // Ocupar el nuevo bloque en el bitmap
+            for (int j = bloque_libre_actual; j < bloque_libre_actual + tamano_archivo; j++) {
+                bitarray_set_bit(bitmap, j);
+            }
 
             free(nombre_archivo);
 
             // Encontrar el siguiente bloque libre
-            while (bloque_libre_actual < bloques_archivo_a_truncar && bitarray_test_bit(bitmap, bloque_libre_actual)) {
+            bloque_libre_actual += tamano_archivo;
+            while (bloque_libre_actual < block_count && bitarray_test_bit(bitmap, bloque_libre_actual)) {
                 bloque_libre_actual++;
             }
         }
@@ -386,6 +414,9 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int 
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios_nuevo = ceil((nuevo_tamano) / (float) block_size);
     int bloques_necesarios_actual = ceil((tamano_archivo) / (float) block_size);
+    if(bloques_necesarios_actual == 0){
+        bloques_necesarios_actual = 1;
+    }
 
     if (nuevo_tamano < tamano_archivo) {
         for (int i = bloques_necesarios_nuevo; i < bloques_necesarios_actual; i++) {
@@ -393,7 +424,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int 
         }
     } else if (nuevo_tamano > tamano_archivo) { //Aumento el tamaño del archivo si el nuevo tamaño es mayor al actual
         int espacio_contiguo = 1;
-        for (int i = bloque_inicial + bloques_necesarios_actual + 1; i < bloque_inicial + bloques_necesarios_nuevo; i++) { 
+        for (int i = bloque_inicial + bloques_necesarios_actual; i < bloque_inicial + bloques_necesarios_nuevo; i++) {
             if (i >= block_count || bitarray_test_bit(bitmap, i)) { //Compruebo si el espacio contiguo esta ocupado
                 espacio_contiguo = 0;   
                 break;
@@ -401,7 +432,6 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int 
         }
         if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
             compactar_fs(bloques_necesarios_nuevo);
-            usleep(retraso_compactacion);
             leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
         }
         for (int i = bloques_necesarios_actual; i < bloques_necesarios_nuevo; i++) {
@@ -531,6 +561,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
             default:
                 break;
         }
+        _printearBitarray();
         liberar_buffer(buffer);
         free(nombre_archivo);
         usleep(tiempo_pausa);

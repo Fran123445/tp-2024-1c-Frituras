@@ -565,7 +565,7 @@ void realizar_ciclo_de_instruccion(){
         case iIO_FS_WRITE:
         case iEXIT:
             terminar = 1;  
-            break;;
+            break;
         default:
             break;
         }
