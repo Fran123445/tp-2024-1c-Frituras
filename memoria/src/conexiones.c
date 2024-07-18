@@ -34,14 +34,18 @@ void manejoSTDIN(int* socket_cliente) {
 }
 
 void manejoDIALFS(int* socket_cliente) {
+
     while(1) {
         op_code code_op = recibir_operacion(*socket_cliente);
         if(code_op == ACCESO_ESPACIO_USUARIO_ESCRITURA){
             escribir_memoria(*socket_cliente);
-        }else {
+        }else if (code_op == ACCESO_ESPACIO_USUARIO_LECTURA){
             leer_memoria(*socket_cliente);
+        }else{
+            break;
+        }
+            
         }       
-    }
     free(socket_cliente);
     pthread_exit(NULL);
 }
