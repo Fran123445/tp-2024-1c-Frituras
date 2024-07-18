@@ -14,7 +14,7 @@ void* recibir_contenido_memoria_fs(){
     op_code cod_op = recibir_operacion(conexion_memoria);
     if(cod_op == ACCESO_ESPACIO_USUARIO_LECTURA){
         t_buffer* buffer = recibir_buffer(conexion_memoria);
-        void* data = malloc(read_buffer_tamanio(buffer)+1);
+        void* data = malloc(read_buffer_tamanio(buffer));
         buffer_read(buffer, data);
         liberar_buffer(buffer);
         return data;
@@ -22,10 +22,9 @@ void* recibir_contenido_memoria_fs(){
     return NULL;
 }
 
-void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam, int  pid){
+void* contenido_obtenido_de_memoria(uint32_t direccion_fisica, uint32_t tam, int pid) {
     pedir_contenido_memoria(direccion_fisica, tam, pid);
-    void* contenido_leido = recibir_contenido_memoria_fs();  //le pido a memoria el contenido de la pagina
-    // void* puntero_al_dato_leido = &contenido_leido; Me parece que esto ya no hace falta, veremos si hay seg. fault o no
+    void* contenido_leido = recibir_contenido_memoria_fs();
     return contenido_leido;
 }
 
@@ -110,14 +109,20 @@ void iniciarInterfazSTDOUT(t_config* config, char* nombre){
             uint32_t direccion_fisica = buffer_read_uint32(buffer);
             uint32_t tam = buffer_read_uint32(buffer);
 
-            texto_completo = (char*) contenido_obtenido_de_memoria(direccion_fisica, tam, pid);
-            texto_completo[tam+1] = '\0';
-                    
-            printf("%s", texto_completo);
+            char* texto_completo = (char*)contenido_obtenido_de_memoria(direccion_fisica, tam, pid);
+
+            if (texto_completo != NULL) {
+                texto_completo = realloc(texto_completo, tam + 1);
+                texto_completo[tam] = '\0';
+
+                printf("%s", texto_completo);
+                free(texto_completo);
+            }
         }
 
         printf("\n");
-        free(texto_completo);
+        //free(texto_completo);
+        liberar_buffer(buffer);
         
         paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);
