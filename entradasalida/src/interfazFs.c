@@ -49,7 +49,7 @@ void guardar_lista_archivos() {
     char* listaArchivos = rutacompleta("archivosMetadata");
     FILE* file = fopen(listaArchivos, "w+");
 
-    fwrite(listaArchivos, strlen(listaArchivos), 1, file);
+    fwrite(archivos_metadata, strlen(archivos_metadata)+1, 1, file);
 }
 
  //BITMAP
@@ -103,12 +103,12 @@ void cargar_bitmap() {
     } else {
         // Si el archivo existe lo cargo en memoria
         fseek(file, 0, SEEK_END);
-        long size = ftell(file);
+        ftell(file);
         fseek(file, 0, SEEK_SET);
 
         bitmap = iniciar_bitmap_bloques(block_count);
 
-        size_t bytes_leidos = fread(bitmap->bitarray, block_count/8, 1, file);
+        fread(bitmap->bitarray, block_count/8, 1, file);
 
         fclose(file);
     }
@@ -132,7 +132,7 @@ void guardar_bitmap() {
         exit(EXIT_FAILURE);
     }
 
-    size_t bytes_escritos = fwrite(bitmap->bitarray, block_count / 8, 1, file);
+    fwrite(bitmap->bitarray, block_count / 8, 1, file);
 
     fclose(file);
 }
@@ -489,8 +489,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
 
         switch (reciv) {
             case ENVIAR_DIALFS_CREATE:
-                int tam = 0;
-                crear_archivo_en_dialfs(nombre_archivo,tam);
+                crear_archivo_en_dialfs(nombre_archivo,0);
                 log_info(logger, "PID: %d - Crear Archivo: %s", pid, nombre_archivo);
                 break;
             case ENVIAR_DIALFS_DELETE:
@@ -501,7 +500,7 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
             case ENVIAR_DIALFS_TRUNCATE:
                 int nuevo_tamano = buffer_read_int(buffer);
                 truncar_archivo_en_dialfs(nombre_archivo, nuevo_tamano, retraso_compactacion);
-                log_info(logger, "PID: %d - Truncar Archivo: %s - Tamaño: %d", pid, nombre_archivo, tam);
+                log_info(logger, "PID: %d - Truncar Archivo: %s - Tamaño: %d", pid, nombre_archivo, nuevo_tamano);
                 break;
 
             case ENVIAR_DIALFS_WRITE:
