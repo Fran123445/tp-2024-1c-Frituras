@@ -23,6 +23,9 @@ char* algoritmoSustitucionTLB;
 int cant_entradas_TLB;
 int tamanio_pagina; 
 
+pthread_mutex_t mutexPCB;
+int hayPCB = 0;
+
 void iniciar_servidores(t_config* config) {
     t_log* log_serv_dispatch = log_create("servidorDispatch.log", "CPU", true, LOG_LEVEL_TRACE);
     t_log* log_serv_interrupt = log_create("servidorInterrupt.log", "CPU", true, LOG_LEVEL_TRACE);
@@ -41,8 +44,14 @@ void* escuchar_dispatch() {
     while (1) {
         pcb = recibir_pcb();
         if(!pcb) break;
+        hayPCB = 1;
+        
         realizar_ciclo_de_instruccion();
+
+        pthread_mutex_lock(&mutexPCB);
         liberar_pcb(pcb);
+        hayPCB = 0;
+        pthread_mutex_unlock(&mutexPCB);
     }
     return NULL;
 }
@@ -122,7 +131,8 @@ int main(int argc, char* argv[]) {
 
     // Inicialización del mutex
     pthread_mutex_init(&mutexInterrupt, NULL);
-   
+    pthread_mutex_init(&mutexPCB, NULL);
+
     // Inicialización de los servidores 
     iniciar_servidores(config);    
 

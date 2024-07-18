@@ -13,11 +13,17 @@ int recibir_interrupcion(){
 
     t_buffer* buffer = recibir_buffer(socket_kernel_i);
     int pid = buffer_read_int(buffer);
-    if ((cod_op_int == FINALIZAR_PROCESO && pid == pcb->PID )|| (cod_op_int == FIN_DE_Q && pid == pcb->PID)){ 
-        pthread_mutex_lock(&mutexInterrupt);
-        hay_interrupcion = 1;
-        pthread_mutex_unlock(&mutexInterrupt);
+
+    pthread_mutex_lock(&mutexPCB);
+    if(hayPCB != 0){
+        if ((cod_op_int == FINALIZAR_PROCESO && pid == pcb->PID ) || 
+            (cod_op_int == FIN_DE_Q && pid == pcb->PID)){ 
+                pthread_mutex_lock(&mutexInterrupt);
+                hay_interrupcion = 1;
+                pthread_mutex_unlock(&mutexInterrupt);
+        }   
     }
+    pthread_mutex_unlock(&mutexPCB);
 
     liberar_buffer(buffer);
     return 0;

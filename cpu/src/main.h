@@ -23,6 +23,9 @@ extern int socket_kernel_d;
 extern int socket_kernel_i;
 extern volatile int hay_interrupcion;
 
+extern pthread_mutex_t mutexPCB;
+extern int hayPCB;
+
 extern char* algoritmoSustitucionTLB;
 extern int cant_entradas_TLB;
 extern int tamanio_pagina;
