@@ -456,12 +456,16 @@ void COPY_STRING(uint32_t tam){
 
             uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
             void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam_a_escribir);
-            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, (char*)datos_de_si);
+
+            char *datos_de_si_imprimibles = strndup((char *)datos_de_si, tam_a_escribir);
+
+            log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, datos_de_si_imprimibles);
 
             uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
             enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam_a_escribir);
-            log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, (char*)datos_de_si);
+            log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, datos_de_si_imprimibles);
 
+            free(datos_de_si_imprimibles);
             free(datos_de_si);
         
             bytes_a_escribir -= tam_a_escribir;
@@ -472,12 +476,16 @@ void COPY_STRING(uint32_t tam){
     else{
         uint32_t direccion_fisica_si = traducir_direccion_logica_a_fisica(direccion_logica_si);
         void *datos_de_si = contenido_obtenido_de_memoria(direccion_fisica_si, tam);
-        log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, (char*)datos_de_si);
+
+        char *datos_de_si_imprimibles = strndup((char *)datos_de_si, tam);
+
+        log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %s", direccion_fisica_si, datos_de_si_imprimibles);
 
         uint32_t direccion_fisica_di = traducir_direccion_logica_a_fisica(direccion_logica_di);
         enviar_a_memoria_para_escritura(direccion_fisica_di, datos_de_si, tam);
-        log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, (char*)datos_de_si);
+        log_info(log_cpu, "Acción: ESCRIBIR - Dirección física = %d - Valor: %s", direccion_fisica_di, datos_de_si_imprimibles);
 
+        free(datos_de_si_imprimibles);
         free(datos_de_si);
     }
 }
