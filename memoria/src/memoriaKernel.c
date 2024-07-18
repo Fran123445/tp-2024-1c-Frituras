@@ -49,7 +49,6 @@ void abrir_archivo_path(int socket_kernel){
         char *linea_copia = strdup(linea);
         if (linea_copia == NULL){
             perror("Error al copiar linea");
-            free(linea);
             fclose(file);
             free(path);
             free(proceso);

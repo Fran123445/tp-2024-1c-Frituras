@@ -205,6 +205,7 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             instSignal(proceso, buffer);
             break;
         case INSTRUCCION_EXIT:
+        case OUT_OF_MEMORY:
             instExit(proceso);
             break;
         case FIN_DE_Q:

@@ -148,21 +148,8 @@ void* resize_proceso(int socket_cpu){
 
             eliminar_paquete(paquete);
             liberar_buffer(buffer);
-            pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
-            free(escucha_cpu);
-            free(escucha_kernel);
-            free(escucha_io);
-            free(memoria_contigua);
-            free(bitarray_memoria_usuario);
-            bitarray_destroy(mapa_de_marcos);
-            list_destroy(lista_de_procesos);
-            log_destroy(log_memoria);
-            close(socket_servidor_memoria);
-            log_destroy(log_servidor);
+            return;
 
-            config_destroy(config);
-
-            exit(EXIT_FAILURE);
         }
         int cant_paginas_viejas = ceil((float)proceso->tamanio_proceso/tam_pagina);
         int cant_paginas_nuevas = ceil(((float)tamanio_nuevo/tam_pagina));
