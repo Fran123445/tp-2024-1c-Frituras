@@ -106,13 +106,12 @@ void enviar_tamanio_pagina_a_cpu(){
 
 
 int main(int argc, char *argv[]){
-    lista_de_procesos = list_create();
-
-    config = config_create(argv[1]);
+    config = config_create("mem_y_tlb.config");
     if (config == NULL){
     fprintf(stderr, "Error en la configuracion");
         exit(1);
     }
+    lista_de_procesos = list_create();
 
     iniciar_servidores(config);
     log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
@@ -136,9 +135,9 @@ int main(int argc, char *argv[]){
     pthread_t hilo_io;
     pthread_create(&hilo_io, NULL, escuchar_io, NULL);
 
-
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
+
     pthread_detach(hilo_io);
 
     pthread_mutex_destroy(&mutex_bitarray_marcos_libres);

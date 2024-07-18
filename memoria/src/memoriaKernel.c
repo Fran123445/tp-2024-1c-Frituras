@@ -52,6 +52,7 @@ void abrir_archivo_path(int socket_kernel){
             free(linea);
             fclose(file);
             free(path);
+            free(proceso);
             return;
         }
         list_add(proceso->instrucciones, linea_copia);

@@ -148,6 +148,19 @@ void* resize_proceso(int socket_cpu){
 
             eliminar_paquete(paquete);
             liberar_buffer(buffer);
+            pthread_mutex_destroy(&mutex_bitarray_marcos_libres);
+            free(escucha_cpu);
+            free(escucha_kernel);
+            free(escucha_io);
+            free(memoria_contigua);
+            free(bitarray_memoria_usuario);
+            bitarray_destroy(mapa_de_marcos);
+            list_destroy(lista_de_procesos);
+            log_destroy(log_memoria);
+            close(socket_servidor_memoria);
+            log_destroy(log_servidor);
+
+            config_destroy(config);
 
             exit(EXIT_FAILURE);
         }
@@ -197,11 +210,13 @@ void* acceso_tabla_paginas(int socket_cpu){
 
     if(proceso == NULL){
         fprintf(stderr, "No se encuentra el PID en la lista de procesos");
+        free(proceso);
         liberar_buffer(buffer);
         return NULL;
     }
     if(pagina_a_buscar < 0 || pagina_a_buscar >= list_size(proceso->tabla_del_proceso)){
         fprintf(stderr, "Error: Nro de página no válido");
+        free(proceso);
         liberar_buffer(buffer);
         return NULL;
     }
