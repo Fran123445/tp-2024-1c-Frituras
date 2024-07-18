@@ -50,6 +50,9 @@ void guardar_lista_archivos() {
     FILE* file = fopen(listaArchivos, "w+");
 
     fwrite(archivos_metadata, strlen(archivos_metadata)+1, 1, file);
+
+    free(listaArchivos);
+    fclose(file);
 }
 
  //BITMAP
@@ -76,10 +79,11 @@ void abrir_bloques_dat(){
     bloques_dat = fopen(path, "rb+");
     if (!bloques_dat) {
         bloques_dat = fopen(path, "wb+");
+        
         ftruncate(fileno(bloques_dat), block_count*block_size);
-        return;
     }
 
+    free(path);
 }
 
 void cargar_bitmap() {
@@ -114,6 +118,7 @@ void cargar_bitmap() {
     }
 
     printf("Bitmap cargado exitosamente desde %s.\n", bitmap_path);
+    free(bitmap_path);
 }
 
 char* rutacompleta(char* nombre_archivo){
@@ -134,6 +139,7 @@ void guardar_bitmap() {
 
     fwrite(bitmap->bitarray, block_count / 8, 1, file);
 
+    free(bitmap_path);
     fclose(file);
 }
 
@@ -371,10 +377,11 @@ void eliminar_archivo_en_dialfs(char* nombre_archivo){
     eliminar_archivo_de_lista(nombre_archivo);
 
     remove(archivo);
+    free(archivo);
 }
 
 
-void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion){
+void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int retraso_compactacion){
     int bloque_inicial, tamano_archivo;
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios_nuevo = ceil((nuevo_tamano) / (float) block_size);
@@ -406,7 +413,7 @@ void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retra
 }
 
 
-void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid){
+void escribir_en_archivo_dialfs(char* nombre_archivo, uint32_t direccion, uint32_t tamanio, uint32_t ubicacionPuntero, int pid){
     int bloque_inicial, tamanio_archivo;
 
     leer_metadata(nombre_archivo, &bloque_inicial, &tamanio_archivo);
@@ -416,7 +423,7 @@ void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio
         exit(-1);
     }
 
-    pedir_contenido_memoria((uint32_t)direccion, (uint32_t)tamanio, pid);
+    pedir_contenido_memoria(direccion, tamanio, pid);
 
     void* datos_a_escribir = recibir_contenido_memoria_fs();
 
@@ -427,7 +434,7 @@ void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio
     free(datos_a_escribir);
 }
 
-void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid) {
+void leer_desde_archivo_dialfs(char* nombre_archivo, uint32_t direccion, uint32_t tamanio, uint32_t ubicacionPuntero, int pid) {
 
     int bloque_inicial, tamanio_archivo;
 
@@ -444,7 +451,7 @@ void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio,
 
     fread(datos_a_leer, tamanio, 1, bloques_dat);
 
-    enviar_a_memoria_para_escribir((uint32_t)direccion, datos_a_leer, (uint32_t)tamanio, pid);
+    enviar_a_memoria_para_escribir(direccion, datos_a_leer, tamanio, pid);
 
     free(datos_a_leer);
 }
@@ -498,25 +505,25 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
                 break;
 
             case ENVIAR_DIALFS_TRUNCATE:
-                int nuevo_tamano = buffer_read_int(buffer);
+                uint32_t nuevo_tamano = buffer_read_uint32(buffer);
                 truncar_archivo_en_dialfs(nombre_archivo, nuevo_tamano, retraso_compactacion);
                 log_info(logger, "PID: %d - Truncar Archivo: %s - Tamaño: %d", pid, nombre_archivo, nuevo_tamano);
                 break;
 
             case ENVIAR_DIALFS_WRITE:
                 while (buffer->size > 0) {
-                    int direccion = buffer_read_int(buffer);
-                    int tamanio = buffer_read_int(buffer);
-                    int ubicacionPuntero = buffer_read_int(buffer);
+                    uint32_t direccion = buffer_read_uint32(buffer);
+                    uint32_t tamanio = buffer_read_uint32(buffer);
+                    uint32_t ubicacionPuntero = buffer_read_uint32(buffer);
                     escribir_en_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);
                     log_info(logger, "PID: %d - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
                 }
                 break;
             case ENVIAR_DIALFS_READ:
                 while (buffer->size > 0) {
-                    int direccion = buffer_read_int(buffer);
-                    int tamanio = buffer_read_int(buffer);
-                    int ubicacionPuntero = buffer_read_int(buffer);
+                    uint32_t direccion = buffer_read_uint32(buffer);
+                    uint32_t tamanio = buffer_read_uint32(buffer);
+                    uint32_t ubicacionPuntero = buffer_read_uint32(buffer);
                     leer_desde_archivo_dialfs(nombre_archivo, direccion, tamanio, ubicacionPuntero, pid);      
                     log_info(logger, "PID: %d - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d", pid, nombre_archivo, tamanio, ubicacionPuntero);
                 }
@@ -524,16 +531,20 @@ void iniciarInterfazDialFS(t_config* config, char* nombre){
             default:
                 break;
         }
-        free(buffer);
-        usleep(tiempo_pausa);
+        liberar_buffer(buffer);
         free(nombre_archivo);
-        
+        usleep(tiempo_pausa);
+
         guardar_bitmap();
 
         guardar_lista_archivos();
-
+    
         t_paquete* paquete = crear_paquete(OPERACION_FINALIZADA);
         enviar_paquete(paquete ,conexion_kernel);
         eliminar_paquete(paquete);
-    }
+    } 
+    free(bitmap->bitarray);
+    bitarray_destroy(bitmap);
+    fclose(bloques_dat);
+    free(archivos_metadata);
 }

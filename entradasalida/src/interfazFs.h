@@ -20,9 +20,9 @@ void compactar_fs();
 char* rutacompleta(char* nombre_archivo);
 void crear_archivo_en_dialfs(char* nombre_archivo, int tam);
 void eliminar_archivo_en_dialfs(char* nombre_archivo);
-void truncar_archivo_en_dialfs(char* nombre_archivo, int nuevo_tamano, int retraso_compactacion);
-void escribir_en_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid);
-void leer_desde_archivo_dialfs(char* nombre_archivo, int direccion, int tamanio, int ubicacionPuntero, int pid);
+void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int retraso_compactacion);
+void escribir_en_archivo_dialfs(char* nombre_archivo, uint32_t direccion, uint32_t tamanio, uint32_t ubicacionPuntero, int pid);
+void leer_desde_archivo_dialfs(char* nombre_archivo, uint32_t direccion, uint32_t tamanio, uint32_t ubicacionPuntero, int pid);
 void iniciarInterfazDialFS(t_config* config, char* nombre);
 
 typedef struct {

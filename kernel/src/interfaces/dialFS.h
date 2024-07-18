@@ -23,7 +23,7 @@ typedef struct {
     PCB* proceso;
     op_code operacion;
     char* nombreArchivo;
-    int tamanio;
+    uint32_t tamanio;
     t_list* direcciones;
 } t_solicitudDIALFS;
 

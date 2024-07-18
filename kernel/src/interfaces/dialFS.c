@@ -27,15 +27,15 @@ void administrarDIALFS(int* socket_cliente) {
                 break;
             case ENVIAR_DIALFS_CREATE:
             case ENVIAR_DIALFS_TRUNCATE:
-                agregar_int_a_paquete(paquete, solicitud->tamanio);
+                agregar_uint32_a_paquete(paquete, solicitud->tamanio);
                 break;
             case ENVIAR_DIALFS_READ:
             case ENVIAR_DIALFS_WRITE:
                 while(list_size(solicitud->direcciones) > 0 ) {
                     t_infoArchivo* info = list_remove(solicitud->direcciones, 0);
-                    agregar_int_a_paquete(paquete, info->direccion);
-                    agregar_int_a_paquete(paquete, info->tamanio);
-                    agregar_int_a_paquete(paquete, info->ubicacionPuntero);
+                    agregar_uint32_a_paquete(paquete, info->direccion);
+                    agregar_uint32_a_paquete(paquete, info->tamanio);
+                    agregar_uint32_a_paquete(paquete, info->ubicacionPuntero);
                     free(info);
                 }
                 break;

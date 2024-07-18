@@ -37,5 +37,7 @@ int main(int argc, char* argv[]) {
         iniciarInterfazDialFS(nuevo_config, argv[1]);
     }
 
+    log_destroy(logger);
+    config_destroy(nuevo_config);
     return 0;
 }
