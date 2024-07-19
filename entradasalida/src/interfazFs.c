@@ -307,7 +307,7 @@ void compactar_fs(int bloques_archivo_a_truncar){
             mover_archivo(bloque_libre_actual, bloque_inicial, tamanio_en_bloques);
 
             // Actualizar la metadata del archivo 
-            crear_metadata(nombre_archivo, bloque_libre_actual, tamano_archivo, 0);
+            crear_metadata(nombre_archivo, bloque_libre_actual, tamano_archivo, 1);
 
             free(nombre_archivo);
 
