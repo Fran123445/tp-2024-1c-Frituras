@@ -164,8 +164,6 @@ void marcar_bloque(int bloque, int ocupar) {
     }
 }
 
- //BITMAP
-
 // METADATA
 void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo, bool modificar){
     char* ruta_completa = rutacompleta(nombre_archivo);
@@ -273,7 +271,7 @@ void mover_archivo(int bloque_libre_actual, int bloque_inicial, int tamanio_arch
 
 // METADATA
 
-void compactar_fs(int bloques_archivo_a_truncar){
+void compactar_fs(){
     usleep(retraso_compactacion);
 
     int bloque_libre_actual = 0;
@@ -292,7 +290,6 @@ void compactar_fs(int bloques_archivo_a_truncar){
 
     for (int i = bloque_libre_actual + 1; i < block_count; i += bloque_libre_actual + 1) {
         if (bitarray_test_bit(bitmap, i)) {
-            _printearBitarray();
             char* nombre_archivo = encontrar_archivo_por_bloque(i);
             if (!nombre_archivo) {
                 log_error(logger, "PID: %d - No se encontró el archivo para el bloque %d.", pid, i);
@@ -376,7 +373,7 @@ int existeEspacioContiguo(int bloquesNecesariosArchivo) {
     for (int i = 0; i < block_count; i++) {
         if (!bitarray_test_bit(bitmap, i)) {
             cantidad_contiguos++;
-            if (cantidad_contiguos > bloquesNecesariosArchivo) return i-bloquesNecesariosArchivo;
+            if (cantidad_contiguos >= bloquesNecesariosArchivo) return i-bloquesNecesariosArchivo; //al ser >= se come el ultimo bloque de pesado en fs_4 al truncar arch1 a 70, porque 31-5 da 26 y deberia dar 27
         } else {
             cantidad_contiguos = 0;
         }
@@ -385,42 +382,61 @@ int existeEspacioContiguo(int bloquesNecesariosArchivo) {
     return 0;
 }
 
-void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int retraso_compactacion){
+void truncar_archivo_en_dialfs(char* nombre_archivo, uint32_t nuevo_tamano, int retraso_compactacion) {
     int bloque_inicial, tamano_archivo;
     leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
     int bloques_necesarios_nuevo = ceil((nuevo_tamano) / (float) block_size);
     int bloques_necesarios_actual = ceil((tamano_archivo) / (float) block_size);
     int espacio_contiguo;
-
-    if(bloques_necesarios_actual == 0){
+    
+    if (bloques_necesarios_actual == 0) {
         bloques_necesarios_actual = 1;
     }
 
-    if (nuevo_tamano < tamano_archivo) {
+    if (nuevo_tamano < tamano_archivo) {// Reducir el tamaño del archivo si el nuevo tamaño es menor al actual
+
         for (int i = bloques_necesarios_nuevo; i < bloques_necesarios_actual; i++) {
-            marcar_bloque(bloque_inicial + i, 0); // Reducir el tamaño del archivo si el nuevo tamaño es menor al actual
+            marcar_bloque(bloque_inicial + i, 0);
         }
-    } else if (nuevo_tamano > tamano_archivo) { //Aumento el tamaño del archivo si el nuevo tamaño es mayor al actual
-        espacio_contiguo = existeEspacioContiguo(bloques_necesarios_nuevo);
 
-        if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
-            compactar_fs(bloques_necesarios_nuevo);
-            leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
-            espacio_contiguo = existeEspacioContiguo(bloques_necesarios_nuevo);
-
-            if (espacio_contiguo) {
-                mover_archivo(espacio_contiguo, bloque_inicial, bloques_necesarios_actual);
-                asignar_bloques(espacio_contiguo, bloques_necesarios_nuevo);
-            } else {
-                log_error(logger, "PID: %d - No hay espacio contiguo disponible", pid);
+    } else if (nuevo_tamano > tamano_archivo) {//Aumento el tamaño del archivo si el nuevo tamaño es mayor al actual
+        
+        int espacio_extra_disponible = 1;
+        for (int i = bloques_necesarios_actual; i < bloques_necesarios_nuevo; i++) { // Verificar si hay suficiente espacio en los bloques actuales
+            if (bitarray_test_bit(bitmap, bloque_inicial + i)) {
+                espacio_extra_disponible = 0;
+                break;
             }
 
+        }
+        if (espacio_extra_disponible){// No es necesario mover el archivo, solo ajustar el tamaño
+            
+            asignar_bloques(bloque_inicial, bloques_necesarios_nuevo);
+            crear_metadata(nombre_archivo, bloque_inicial, nuevo_tamano, 1);
+
         } else {
-            mover_archivo(espacio_contiguo, bloque_inicial, bloques_necesarios_actual);
-            asignar_bloques(espacio_contiguo, bloques_necesarios_nuevo);  
+            espacio_contiguo = existeEspacioContiguo(bloques_necesarios_nuevo);
+
+            if (!espacio_contiguo) { //Si no hay espacio contiguo Compacto
+                compactar_fs();
+                leer_metadata(nombre_archivo, &bloque_inicial, &tamano_archivo);
+                espacio_contiguo = existeEspacioContiguo(bloques_necesarios_nuevo);
+
+                if (espacio_contiguo) {
+                    mover_archivo(espacio_contiguo, bloque_inicial, bloques_necesarios_actual);
+                    asignar_bloques(espacio_contiguo, bloques_necesarios_nuevo);
+                    crear_metadata(nombre_archivo, espacio_contiguo, nuevo_tamano, 1);
+                } else {
+                    log_error(logger, "PID: %d - No hay espacio contiguo disponible", pid);
+                }
+
+            } else {
+                mover_archivo(espacio_contiguo, bloque_inicial, bloques_necesarios_actual);
+                asignar_bloques(espacio_contiguo, bloques_necesarios_nuevo);
+                crear_metadata(nombre_archivo, espacio_contiguo, nuevo_tamano, 1);
+            }
         }
     }
-    crear_metadata(nombre_archivo, espacio_contiguo, nuevo_tamano, 1);
 }
 
 

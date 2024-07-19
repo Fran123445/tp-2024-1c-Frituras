@@ -8,7 +8,7 @@ int conexion_kernel;
 t_log* logger;
 
 int main(int argc, char* argv[]) {
-
+    //argv[2] "fs.config"
     t_config* nuevo_config = config_create(argv[2]);
     if (nuevo_config == NULL) {
         exit(1);
@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     if (!strcmp(tipo, "STDOUT")) {
         iniciarInterfazSTDOUT(nuevo_config, argv[1]);
     }
-
+    //argv[1] "FS"
     if (!strcmp(tipo, "DIALFS")) {
         iniciarInterfazDialFS(nuevo_config, argv[1]);
     }

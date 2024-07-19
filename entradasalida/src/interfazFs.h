@@ -16,7 +16,7 @@ int encontrar_bloque_libre();
 void marcar_bloque(int bloque, int ocupado);
 void crear_metadata(char* nombre_archivo, int bloque_inicial, int tamano_archivo, bool modificar);
 void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archivo);
-void compactar_fs(int bloques_archivo_a_truncar);
+void compactar_fs();
 char* rutacompleta(char* nombre_archivo);
 void crear_archivo_en_dialfs(char* nombre_archivo, int tam);
 void eliminar_archivo_en_dialfs(char* nombre_archivo);
