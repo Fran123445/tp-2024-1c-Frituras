@@ -373,7 +373,7 @@ int existeEspacioContiguo(int bloquesNecesariosArchivo) {
     for (int i = 0; i < block_count; i++) {
         if (!bitarray_test_bit(bitmap, i)) {
             cantidad_contiguos++;
-            if (cantidad_contiguos >= bloquesNecesariosArchivo) return i-bloquesNecesariosArchivo; //al ser >= se come el ultimo bloque de pesado en fs_4 al truncar arch1 a 70, porque 31-5 da 26 y deberia dar 27
+            if (cantidad_contiguos >= bloquesNecesariosArchivo) return i-bloquesNecesariosArchivo + 1; 
         } else {
             cantidad_contiguos = 0;
         }
