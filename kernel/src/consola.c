@@ -52,6 +52,7 @@ void modificarGradoMultiprogramacion(int gradoNuevo) {
         for(int i = gradoMultiprogramacionActual; i > gradoNuevo; i--, sem_wait(&gradoMultiprogramacion));
     }
 
+    log_info(logger, "Cambio de grado de multiprogramación. Anterior: %d, actual: %d.", gradoMultiprogramacionActual, gradoNuevo);
     gradoMultiprogramacionActual = gradoNuevo;
 }
 
