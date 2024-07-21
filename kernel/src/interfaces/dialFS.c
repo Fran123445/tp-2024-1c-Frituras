@@ -24,8 +24,8 @@ void administrarDIALFS(int* socket_cliente) {
 
         switch (solicitud->operacion) {
             case ENVIAR_DIALFS_DELETE:
-                break;
             case ENVIAR_DIALFS_CREATE:
+                break;
             case ENVIAR_DIALFS_TRUNCATE:
                 agregar_uint32_a_paquete(paquete, solicitud->tamanio);
                 break;
@@ -74,20 +74,17 @@ t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buf
     solicitud->proceso = proceso;
     solicitud->operacion = operacion;
     solicitud->direcciones = list_create();
+    solicitud->nombreArchivo = buffer_read_string(buffer);
 
     switch (operacion) {
         case ENVIAR_DIALFS_CREATE:
         case ENVIAR_DIALFS_DELETE:
-            solicitud->nombreArchivo = buffer_read_string(buffer);
             break;
         case ENVIAR_DIALFS_TRUNCATE:
-            solicitud->nombreArchivo = buffer_read_string(buffer);
             solicitud->tamanio = buffer_read_uint32(buffer);
             break;
         case ENVIAR_DIALFS_WRITE:
         case ENVIAR_DIALFS_READ:
-            solicitud->nombreArchivo = buffer_read_string(buffer);
-
             while(buffer->size > 0) {
                 t_infoArchivo* dir = malloc(sizeof(t_infoArchivo));
                 dir->ubicacionPuntero = buffer_read_uint32(buffer);
@@ -95,7 +92,6 @@ t_solicitudDIALFS* solicitudDIALFS_create(PCB* proceso, op_code operacion, t_buf
                 dir->tamanio = buffer_read_uint32(buffer);
                 list_add(solicitud->direcciones, dir);
             }
-
             break;
         default:
             break;
