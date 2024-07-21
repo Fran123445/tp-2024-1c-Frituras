@@ -50,7 +50,7 @@ void administrarDIALFS(int* socket_cliente) {
         if (op <= 0) {
             log_error(logger, "La operación de File System no se pudo completar exitosamente");
             enviarAExit(solicitud->proceso, INVALID_INTERFACE);
-            free(solicitud);
+            liberarSolicitudDialFS(solicitud);
             break;
         }
         
