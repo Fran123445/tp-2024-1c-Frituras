@@ -35,4 +35,6 @@ void signalRecurso(t_recurso* recurso, PCB* proceso);
 // Libera todos los recursos utilizados por un proceso
 void liberarRecursos(PCB* proceso);
 
+void freeRec(t_recurso* recurso);
+
 #endif /* RECS_H */

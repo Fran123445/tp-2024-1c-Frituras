@@ -98,3 +98,9 @@ void liberarRecursos(PCB* proceso) {
         signalRecurso(recurso, proceso);
     }
 }
+
+void freeRec(t_recurso* recurso) {
+    free(recurso->nombre);
+    queue_destroy_and_destroy_elements(recurso->procesosBloqueados, liberar_pcb);
+    free(recurso);
+}
