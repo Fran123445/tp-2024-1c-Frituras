@@ -185,6 +185,10 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             enviarAExit(proceso, INTERRUPTED_BY_USER);
             cpuLibre = 1;
             break;
+        case OUT_OF_MEMORY:
+            enviarAExit(proceso, OOM);
+            cpuLibre = 1;
+            break;
         case ENVIAR_IO_GEN_SLEEP:
         case ENVIAR_DIALFS_CREATE:
         case ENVIAR_DIALFS_DELETE:
@@ -205,7 +209,6 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             instSignal(proceso, buffer);
             break;
         case INSTRUCCION_EXIT:
-        case OUT_OF_MEMORY:
             instExit(proceso);
             break;
         case FIN_DE_Q:
