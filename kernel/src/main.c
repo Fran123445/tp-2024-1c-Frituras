@@ -49,11 +49,12 @@ void inicializarColas() {
 
 void liberarVariablesGlobales() {    
     log_destroy(logger);
-    queue_destroy_and_destroy_elements(colaNew, free);
+    queue_destroy_and_destroy_elements(colaNew, (void*)liberar_pcb);
     queue_destroy_and_destroy_elements(colaExit, free);
-    queue_destroy_and_destroy_elements(colaReady, free);
-    list_destroy(interfacesConectadas); //seguramente tenga que hager un destroy and destroy eleements
-    list_destroy(listadoProcesos); // si hay un proceso en exec me queda leakeando memoria, tengo que ver como lo arreglo
+    queue_destroy_and_destroy_elements(colaReady, (void*)liberar_pcb);
+    list_destroy_and_destroy_elements(interfacesConectadas, free); // las queues no las libera pero bue, esto se llama cuando termina el programa asi que tampoco le voy a dedicar tanto
+    list_destroy_and_destroy_elements(listaRecursos, (void*)freeRec);
+    list_destroy(listadoProcesos);
     liberar_conexion(socketCPUDispatch);
     liberar_conexion(socketCPUInterrupt);
     liberar_conexion(socketMemoria);
