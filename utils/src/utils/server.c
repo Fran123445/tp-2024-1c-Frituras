@@ -45,7 +45,7 @@ int esperar_cliente(int socket_servidor, modulo_code modulo)
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 	size_t bytes;
 
-	int handshake_recibido;
+	int handshake_recibido = -1;
 	int resultOk = 0;
 	int resultError = -1;
 
