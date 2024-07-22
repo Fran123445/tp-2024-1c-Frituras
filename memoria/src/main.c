@@ -106,7 +106,7 @@ void enviar_tamanio_pagina_a_cpu(){
 
 
 int main(int argc, char *argv[]){
-    config = config_create("mem_y_tlb.config");
+    config = config_create(argv[1]);
     if (config == NULL){
     fprintf(stderr, "Error en la configuracion");
         exit(1);
