@@ -32,7 +32,7 @@ int crear_conexion(char *ip, char* puerto, modulo_code modulo)
 	bytes = send(socket_cliente, &modulo, sizeof(int), 0);
 	bytes = recv(socket_cliente, &result, sizeof(int), MSG_WAITALL);
 
-	if (result != 0) {
+	if (result != 0 || bytes < 0) {
     	exit (-1);
 	}
 

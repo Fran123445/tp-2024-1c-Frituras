@@ -51,13 +51,18 @@ int esperar_cliente(int socket_servidor, modulo_code modulo)
 
 	bytes = recv(socket_cliente, &handshake_recibido, sizeof(int), MSG_WAITALL);
 
+	if (bytes < 0) {
+		log_error(loggerServ, "Chocamo");
+		exit(-1);
+	}
+
 	if (compararHandshake(modulo, handshake_recibido))
 	{
-		bytes = send(socket_cliente, &resultOk, sizeof(int), 0);
+		send(socket_cliente, &resultOk, sizeof(int), 0);
 	}
 	else
 	{
-		bytes = send(socket_cliente, &resultError, sizeof(int), 0);
+		send(socket_cliente, &resultError, sizeof(int), 0);
 		log_info(loggerServ, "Ups! Te confundiste");
 	}
 
