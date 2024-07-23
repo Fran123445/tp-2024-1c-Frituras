@@ -88,7 +88,7 @@ t_tipoInstruccion string_a_tipo_instruccion (char* ins_char){
     exit(EXIT_FAILURE);
 }
 
-t_list* dividir_cadena_en_tokens(const char* linea){
+t_list* dividir_cadena_en_tokens(char* linea){
     t_list* lista = list_create();
     char* cadena = strdup(linea);
     char* token = strtok(cadena, " ");
