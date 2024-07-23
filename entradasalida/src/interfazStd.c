@@ -84,9 +84,6 @@ void iniciarInterfazSTDIN(t_config* config, char* nombre){
 }
 
 void iniciarInterfazSTDOUT(t_config* config, char* nombre){
-
-    char* texto_completo = NULL;
-
     t_paquete* paquete = crear_paquete(CONEXION_STDOUT);
     agregar_string_a_paquete(paquete, nombre);
     enviar_paquete(paquete, conexion_kernel);
