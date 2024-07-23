@@ -17,7 +17,7 @@ void logProcesosEnCola(char* nombreCola, t_queue* cola, bool IO) {
     };
 
     if (IO) func = _agregarPIDBloqueadoPorIOALista;
-    else func = _agregarPIDALista;
+    else func =  (void (*)(void *)) _agregarPIDALista;
 
     list_iterate(cola->elements, (void *) func);
     string[strlen(string)-2] = '\0';
