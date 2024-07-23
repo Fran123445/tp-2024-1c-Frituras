@@ -131,7 +131,7 @@ void mandar_instruccion_cpu(int socket_kernel, int socket_cpu){
     free(proceso);
 }
 
-void* resize_proceso(int socket_cpu){
+void resize_proceso(int socket_cpu){
     t_buffer* buffer = recibir_buffer(socket_cpu);
     int pid = buffer_read_int(buffer);
     int tamanio_nuevo = buffer_read_int(buffer);
@@ -179,7 +179,7 @@ void* resize_proceso(int socket_cpu){
     }else{
         log_info(log_memoria, "Resize pedido es el tamanio que ya tiene el proceso");
         liberar_buffer(buffer);
-        return NULL;
+        return;
     }
 
     paquete = crear_paquete(RESIZE_ACEPTADO);
@@ -189,7 +189,7 @@ void* resize_proceso(int socket_cpu){
     liberar_buffer(buffer); 
 }
 
-void* acceso_tabla_paginas(int socket_cpu){
+void acceso_tabla_paginas(int socket_cpu){
     t_buffer* buffer = recibir_buffer(socket_cpu);
     int pid = buffer_read_int(buffer);
     int pagina_a_buscar = buffer_read_int(buffer);
@@ -199,13 +199,13 @@ void* acceso_tabla_paginas(int socket_cpu){
         fprintf(stderr, "No se encuentra el PID en la lista de procesos");
         free(proceso);
         liberar_buffer(buffer);
-        return NULL;
+        return;
     }
     if(pagina_a_buscar < 0 || pagina_a_buscar >= list_size(proceso->tabla_del_proceso)){
         fprintf(stderr, "Error: Nro de página no válido");
         free(proceso);
         liberar_buffer(buffer);
-        return NULL;
+        return;
     }
 
     usleep(tiempo_retardo * 1000);

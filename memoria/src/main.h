@@ -34,7 +34,7 @@ extern t_conexion_escucha* escucha_io;
 extern pthread_t hilo_io;
 extern pthread_t hilo_cpu;
 extern pthread_t hilo_kernel;
-void* escuchar_cpu();
+void escuchar_cpu();
 
 
 #endif /*MAIN_H */

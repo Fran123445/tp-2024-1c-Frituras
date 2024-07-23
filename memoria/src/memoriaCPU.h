@@ -14,7 +14,7 @@ void chequear_espacio_memoria (int cant_pags, int socket_cpu);
 void asignar_frames_a_paginas (int cant_pags_total, t_proceso_memoria* proceso);
 t_proceso_memoria* recibir_proceso_cpu(int socket_cpu);
 void mandar_instruccion_cpu(int socket_kernel, int socket_cpu);
-void* resize_proceso(int socket_cpu);
-void* acceso_tabla_paginas(int socket_cpu);
+void resize_proceso(int socket_cpu);
+void acceso_tabla_paginas(int socket_cpu);
 
 #endif

@@ -34,7 +34,7 @@ void iniciar_servidores(t_config* config){
     //log_destroy(log_servidor);
 }
 
-void* escuchar_cpu(){
+void escuchar_cpu(){
     while(1){
     op_code cod_op = recibir_operacion(socket_cpu);
     switch (cod_op) {
@@ -54,13 +54,12 @@ void* escuchar_cpu(){
             escribir_memoria(socket_cpu);
             break;
         default:
-            return -1;
-            break;
+            return;
         }
     }
 }
 
-void* escuchar_kernel(){
+void escuchar_kernel(){
     while(1){
         op_code cod_op = recibir_operacion(socket_kernel);
         switch (cod_op) {
@@ -71,13 +70,12 @@ void* escuchar_kernel(){
                 finalizar_proceso(socket_kernel);
                 break;
             default:
-                return -1;
-                break;
+                return;
         }
     }
 }
 
-void* escuchar_io(){
+void escuchar_io(){
     esperar_clientes_IO(escucha_io);
 }
 
@@ -127,13 +125,13 @@ int main(int argc, char *argv[]){
     enviar_tamanio_pagina_a_cpu();
 
     pthread_t hilo_kernel;
-    pthread_create(&hilo_kernel,NULL, escuchar_kernel, NULL);
+    pthread_create(&hilo_kernel,NULL, (void*)escuchar_kernel, NULL);
 
     pthread_t hilo_cpu;
-    pthread_create(&hilo_cpu, NULL, escuchar_cpu, NULL);
+    pthread_create(&hilo_cpu, NULL, (void*)escuchar_cpu, NULL);
 
     pthread_t hilo_io;
-    pthread_create(&hilo_io, NULL, escuchar_io, NULL);
+    pthread_create(&hilo_io, NULL, (void*)escuchar_io, NULL);
 
     pthread_join(hilo_cpu, NULL);
     pthread_join(hilo_kernel, NULL);
