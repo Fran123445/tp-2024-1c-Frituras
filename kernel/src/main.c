@@ -36,6 +36,10 @@ pthread_t pth_colaNew;
 pthread_t pth_colaReady;
 pthread_t pth_recibirProc;
 
+t_config* config;
+
+char* path_scripts;
+
 int gradoMultiprogramacionActual = 0;
 
 void inicializarColas() {
@@ -80,6 +84,8 @@ int main(int argc, char* argv[]) {
         exit(1);
     }; 
 
+    path_scripts = config_get_string_value(config, "PATH_SCRIPTS");
+
     t_log* logServidor = log_create("ServidorKernel.log", "Kernel", false, LOG_LEVEL_TRACE);
 
     pthread_t esperarClientes;
@@ -113,7 +119,7 @@ int main(int argc, char* argv[]) {
 
     seleccionarAlgoritmoPlanificacion(config);
 
-    leerRecursosDeConfig(config);
+    leerRecursosDeConfig();
 
     solicitarInput();
     

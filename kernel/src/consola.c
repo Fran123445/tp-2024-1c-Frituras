@@ -28,7 +28,9 @@ void listarProcesos(void) {
     list_destroy(listaOrdenadaPorEstado);
 }
 
-void ejecutarScript(char* path) {
+void ejecutarScript(char* nombre) {
+    char* path = strdup(path_scripts);
+    string_append(&path, nombre);
     FILE* archivoScript = fopen(path, "r");
     char* instruccion = malloc(sizeof(char)*64);
 
@@ -42,6 +44,7 @@ void ejecutarScript(char* path) {
     pthread_mutex_unlock(&mutexPlanificador);
 
     free(instruccion);
+    free(path);
     fclose(archivoScript);
 }
 

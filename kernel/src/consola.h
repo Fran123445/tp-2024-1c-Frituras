@@ -8,6 +8,8 @@
 #include <planificacion/planificacion.h>
 #include <planificadorLP.h>
 
+extern char* path_scripts;
+
 extern int gradoMultiprogramacionActual;
 
 // Solicita input por consola al usuario
