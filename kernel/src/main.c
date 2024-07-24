@@ -68,10 +68,13 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
     char* algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 
     if(!strcmp(algoritmo, "FIFO")) {
+        log_info(logger, "Algoritmo de planificacion seleccionado: FIFO");
         setFIFO();
     } else if (!strcmp(algoritmo, "RR")) {
+        log_info(logger, "Algoritmo de planificacion seleccionado: RR");
         setRR();
     } else {
+        log_info(logger, "Algoritmo de planificacion seleccionado: VRR");
         setVRR();
     }
     iniciarPlanificacion();
@@ -79,7 +82,7 @@ void seleccionarAlgoritmoPlanificacion(t_config* config) {
 
 int main(int argc, char* argv[]) {
     
-    t_config* config = config_create(argv[1]);
+    config = config_create(argv[1]);
     if (config == NULL) {
         exit(1);
     }; 
