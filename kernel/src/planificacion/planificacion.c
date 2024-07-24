@@ -115,6 +115,7 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
                 break;
             default:
                 enviarAExit(proceso, INVALID_INTERFACE);
+		log_info(logger, "Interfaz no encontrada - NOMBRE DE LA INTERFAZ: %s", nombreInterfaz);
                 free(nombreInterfaz);
                 return; 
         }
