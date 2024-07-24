@@ -20,6 +20,7 @@ t_bitarray* mapa_de_marcos;
 t_log* log_memoria;
 char* bitarray_memoria_usuario;
 t_log* log_servidor;
+char* path_instrucciones;
 void iniciar_servidores(t_config* config){
     log_servidor = log_create("memoriaa.log", "Memoria",true, LOG_LEVEL_TRACE);
     socket_servidor_memoria = iniciar_servidor(config_get_string_value(config, "PUERTO_ESCUCHA"),log_servidor);
@@ -112,6 +113,7 @@ int main(int argc, char *argv[]){
     lista_de_procesos = list_create();
 
     iniciar_servidores(config);
+    path_instrucciones = config_get_string_value(config, "PATH_INSTRUCCIONES");
     log_memoria = log_create("memoria.log", "Memoria",true, LOG_LEVEL_TRACE);
 
     tiempo_retardo = config_get_int_value(config, "RETARDO_RESPUESTA");

@@ -11,12 +11,18 @@ t_proceso_memoria* creacion_proceso(int socket_kernel) {
     int pid_proceso= buffer_read_int(buffer);
 
     proceso->pid=pid_proceso;
-    char* path_proceso = buffer_read_string(buffer);
-    proceso->path= path_proceso;
+    char* path_inst_proceso = strdup(path_instrucciones);
+    char* archivoInstrucciones = buffer_read_string(buffer);
+    string_append(&path_inst_proceso, archivoInstrucciones);
+    
+    proceso->path = path_inst_proceso;
     proceso->tabla_del_proceso = list_create(); // info arranca como lista vacía ya q arranca todo vacío
     proceso->tamanio_proceso = 0;
     proceso->instrucciones = list_create(); // arranca vacía pq todavia no le llegan las instrucciones
     proceso->pc = 0; // esto es para ya tenerlo seteado, pero luego se va a cambiar
+
+    free(archivoInstrucciones);
+
     liberar_buffer(buffer);
     pthread_mutex_lock (&mutex_lista_procesos);
     list_add(lista_de_procesos,proceso); // guardo en la lista de los procesos el proceso!

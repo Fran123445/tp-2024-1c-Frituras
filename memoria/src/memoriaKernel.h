@@ -6,6 +6,7 @@
 #include <utils/serializacion.h>
 #include <commons/collections/list.h>
 #include <commons/bitarray.h>
+#include <commons/string.h>
 #include "estructuras.h"
 #include "memoriaDeInstrucciones.h"
 #include "memoriaCPU.h"
@@ -15,6 +16,8 @@ extern pthread_mutex_t mutex_lista_procesos;
 extern t_log* log_memoria;
 extern int tiempo_retardo;
 extern t_bitarray* mapa_de_marcos;
+extern t_config* config;
+extern char* path_instrucciones;
 
 t_proceso_memoria* creacion_proceso(int socket_kernel);
 void abrir_archivo_path(int socket_kernel);
