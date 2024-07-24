@@ -35,7 +35,12 @@ char* cargar_lista_archivos() {
             return NULL;
         }
         
-        fread(archivos_metadata, 1, file_size, file);
+        int cantidadLeido = fread(archivos_metadata, 1, file_size, file);
+
+        if (cantidadLeido != 1) {
+            log_error(logger, "No se pudo leer la lista de archivos");
+        }
+
         archivos_metadata[file_size] = '\0'; // Chequear  que la cadena termine en null
 
         fclose(file);
@@ -80,7 +85,10 @@ void abrir_bloques_dat(){
     if (!bloques_dat) {
         bloques_dat = fopen(path, "wb+");
         
-        ftruncate(fileno(bloques_dat), block_count*block_size);
+        int resultado = ftruncate(fileno(bloques_dat), block_count*block_size);
+        if (resultado != 0) {
+            log_error(logger, "PID: %d - Error al truncar", pid);
+        }
     }
 
     free(path);
@@ -106,13 +114,13 @@ void cargar_bitmap() {
         fclose(file);
     } else {
         // Si el archivo existe lo cargo en memoria
-        fseek(file, 0, SEEK_END);
-        ftell(file);
-        fseek(file, 0, SEEK_SET);
-
         bitmap = iniciar_bitmap_bloques(block_count);
 
-        fread(bitmap->bitarray, block_count/8, 1, file);
+        int cantidadLeida = fread(bitmap->bitarray, block_count/8, 1, file);
+
+        if (cantidadLeida != 1) {
+            log_error(logger, "Error al leer bitmap.dat");
+        }
 
         fclose(file);
     }
@@ -203,7 +211,12 @@ void leer_metadata(char* nombre_archivo, int* bloque_inicial, int* tamano_archiv
         exit(1);
     }
 
-    fscanf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
+    int cantidadLeida = fscanf(file, "BLOQUE_INICIAL=%d\nTAMANIO_ARCHIVO=%d\n", bloque_inicial, tamano_archivo);
+
+    if (cantidadLeida != 2) {
+        log_error(logger, "PID: %d - Error al leer metadata de %s", pid, nombre_archivo);
+    }
+
     fclose(file);
     free(ruta_completa);
 }
@@ -476,7 +489,11 @@ void leer_desde_archivo_dialfs(char* nombre_archivo, uint32_t direccion, uint32_
 
     fseek(bloques_dat, bloque_inicial*block_size + ubicacionPuntero, SEEK_SET);
 
-    fread(datos_a_leer, tamanio, 1, bloques_dat);
+    int cantidadLeida = fread(datos_a_leer, tamanio, 1, bloques_dat);
+
+    if (cantidadLeida != 1) {
+        log_error(logger, "PID: %d - Error al leer %s", pid, nombre_archivo);
+    }
 
     enviar_a_memoria_para_escribir(direccion, datos_a_leer, tamanio, pid);
 
