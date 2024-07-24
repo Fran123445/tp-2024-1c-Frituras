@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 
     path_scripts = config_get_string_value(config, "PATH_SCRIPTS");
 
-    t_log* logServidor = log_create("ServidorKernel.log", "Kernel", false, LOG_LEVEL_TRACE);
+    t_log* logServidor = log_create("ServidorKernel.log", "Kernel", true, LOG_LEVEL_TRACE);
 
     pthread_t esperarClientes;
 
