@@ -11,6 +11,8 @@
 #include <utils/pcb.h>
 #include <planificadorLP.h>
 
+extern t_config* config;
+
 typedef struct {
     char* nombre;
     int instancias;
@@ -19,7 +21,7 @@ typedef struct {
 
 // Lee los recursos del archivo de configuracion e instancia para cada uno
 // un t_recurso
-void leerRecursosDeConfig(t_config* config);
+void leerRecursosDeConfig();
 
 // Retorna el recurso que matchee el nombre pasado por parametro
 t_recurso* hallarRecurso(char* nombre);

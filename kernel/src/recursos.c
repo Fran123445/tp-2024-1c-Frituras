@@ -2,7 +2,7 @@
 
 t_list* listaRecursos;
 
-void leerRecursosDeConfig(t_config* config) {
+void leerRecursosDeConfig() {
     char** recursos = config_get_array_value(config, "RECURSOS");
     char** instancias = config_get_array_value(config, "INSTANCIAS_RECURSOS");
 
