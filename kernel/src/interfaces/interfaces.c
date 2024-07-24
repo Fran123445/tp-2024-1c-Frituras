@@ -26,6 +26,7 @@ void esperarClientesIO(t_conexion_escucha* params) {
                 break;
             case CONEXION_DIAL_FS:
                 func = &administrarDIALFS;
+                break;
             default:
                 log_error(logger, "Conexión inválida de una interfaz");
                 free(socket_cliente);
