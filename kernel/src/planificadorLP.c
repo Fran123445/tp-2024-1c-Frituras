@@ -45,7 +45,7 @@ char* enumEstadoAString(estado_proceso estado) {
         case ESTADO_READY: string = "READY"; break;
         case ESTADO_BLOCKED: string = "BLOCKED"; break;
         case ESTADO_EXEC: string = "EXEC"; break;
-        case ESTADO_EXIT: string = "EXIT"; break;
+        default: string = "EXIT"; break; // ESTADO_EXIT
     }
 
     return string;
@@ -112,7 +112,7 @@ void vaciarExit() {
                 motivo = "INVALID INTERFACE"; break;
             case OOM:
                 motivo = "OUT OF MEMORY"; break;
-            case INTERRUPTED_BY_USER:
+            default: // INTERRUPTED_BY_USER
                 motivo = "INTERRUPTED BY USER"; break;
         }
 

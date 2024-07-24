@@ -28,7 +28,8 @@ void esperarClientesIO(t_conexion_escucha* params) {
                 func = &administrarDIALFS;
             default:
                 log_error(logger, "Conexión inválida de una interfaz");
-                break;
+                free(socket_cliente);
+                continue;
         }
         
         pthread_create(&hilo,

@@ -114,7 +114,9 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
                 solicitud = solicitudDIALFS_create(proceso, operacion, buffer);
                 break;
             default:
-                break; 
+                enviarAExit(proceso, INVALID_INTERFACE);
+                free(nombreInterfaz);
+                return; 
         }
 
         pthread_mutex_lock(&interfaz->mutex);
