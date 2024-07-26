@@ -39,6 +39,18 @@ bool esta_en_la_TLB(void* data) {
     return (entrada->id_proceso == pcb->PID) && (entrada->pagina == numPagAux);
 }
 
+/* Por si hiciera falta ver el estado de alguna de las estructuras (TLB o LRU)
+
+void print_list(t_list *list) {
+    printf("Estado de la lista: [ ");
+    for (int i = 0; i < list_size(list); i++) {
+        entrada_TLB *element = list_get(list, i);
+        printf("%d, ", element->pagina);
+    }
+    printf("] \n");
+}
+*/
+
 
 uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
 
@@ -56,6 +68,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
 
             if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
                 mover_al_frente_de_la_estructura_LRU(entradaExistenteEnTLB);
+                //print_list(estructura_LRU);
             }
             
             return entradaExistenteEnTLB->marco * tamanio_pagina + desplazamiento;
@@ -78,7 +91,8 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
                     queue_push(cola_FIFO, entradaTLB);
                 }
                 else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
-                    list_add(estructura_LRU,entradaTLB);
+                    list_add_in_index(estructura_LRU, 0, entradaTLB);
+                    //print_list(estructura_LRU);
                 }
             }
             else{
@@ -87,6 +101,7 @@ uint32_t traducir_direccion_logica_a_fisica(uint32_t direccion_logica){
                 }
                 else if(strcmp(algoritmoSustitucionTLB, "LRU") == 0){
                     LRU(entradaTLB);
+                    //print_list(estructura_LRU);
                 }
             }           
 
