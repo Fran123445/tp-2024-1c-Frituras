@@ -19,9 +19,9 @@ t_solicitudIOSTDIN_OUT* solicitudIOSTDIN_OUT_create(PCB* proceso, t_buffer* buff
 }
 
 void liberarSolicitudSTDIN_OUT(t_solicitudIOSTDIN_OUT* solicitud) {
+    enviarAExit(solicitud->proceso, INVALID_INTERFACE);
     free(solicitud->direcciones);
     free(solicitud);
-    enviarAExit(solicitud->proceso, INVALID_INTERFACE);
 }
 
 void manejarSTDINOUT(int* socket_cliente, t_IOConectada* interfaz) {
