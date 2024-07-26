@@ -127,10 +127,8 @@ int main(int argc, char* argv[]) {
     solicitarInput();
     
     config_destroy(config);
-    shutdown(servidorIO, SHUT_RD);
     free(servidorKernel);
     liberarVariablesGlobales();
-    pthread_join(esperarClientes, NULL);
     log_destroy(logServidor);
 
     return 0;
