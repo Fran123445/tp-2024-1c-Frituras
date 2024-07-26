@@ -35,7 +35,7 @@ char* cargar_lista_archivos() {
             return NULL;
         }
         
-        int cantidadLeido = fread(archivos_metadata, 1, file_size, file);
+        int cantidadLeido = fread(archivos_metadata, file_size, 1, file);
 
         if (cantidadLeido != 1) {
             log_error(logger, "No se pudo leer la lista de archivos");
