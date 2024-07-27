@@ -187,9 +187,9 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             pthread_mutex_unlock(&mutexNew);
             break;
         case FINALIZAR_PROCESO:
-            enviarAExit(proceso, INTERRUPTED_BY_USER);
             if (proceso->estado == ESTADO_EXEC) cpuLibre = 1;
-            break;
+        enviarAExit(proceso, INTERRUPTED_BY_USER);    
+	break;
         case OUT_OF_MEMORY:
             enviarAExit(proceso, OOM);
             cpuLibre = 1;
