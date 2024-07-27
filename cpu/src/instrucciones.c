@@ -339,14 +339,11 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
 
         void* dato_leido = contenido_obtenido_de_memoria(direccionFisica, tamanio_a_leer);
 
-        uint32_t dato_a_leer;     
-        if (tamanioRegistro(registroDatos) == sizeof(uint32_t)) {
-            dato_a_leer = *(uint32_t*)dato_leido;
-        } else {
-            dato_a_leer = *(uint8_t*)dato_leido;
-        }
-  
+        uint32_t dato_a_leer = 0;     
+        uint32_t* p_dato_a_leer = &dato_a_leer;
+        memcpy(p_dato_a_leer, dato_leido, tamanio_a_leer);
         log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %u", direccionFisica, dato_a_leer);
+        
         memcpy(reg_datos, dato_leido, tamanio_a_leer);
         free(dato_leido);
     }
@@ -363,10 +360,13 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
             if (cant_bytes_a_leer_pagina > (tamanio_a_leer - bytes_leidos)) { // Ajustar la cantidad de bytes a leer si es mayor que la cantidad restante (esto es para la última página, debido a lo que calcula en realidad la cuenta anterior)
                 cant_bytes_a_leer_pagina = tamanio_a_leer - bytes_leidos;
             }   
+            //printf("Cant bytes a leer: %u\n", cant_bytes_a_leer_pagina);
 
             void* dato_leido = contenido_obtenido_de_memoria(direccion_fisica_actual, cant_bytes_a_leer_pagina);
 
-            uint32_t dato_a_leer_parcial = *(uint8_t*)dato_leido;
+            uint32_t dato_a_leer_parcial = 0; 
+            uint32_t* p_dato_a_leer = &dato_a_leer_parcial;
+            memcpy(p_dato_a_leer, dato_leido, cant_bytes_a_leer_pagina);
             log_info(log_cpu, "Acción: LEER - Dirección física = %d - Valor: %u", direccion_fisica_actual, dato_a_leer_parcial);
 
             memcpy(reg_datos + bytes_leidos, dato_leido, cant_bytes_a_leer_pagina);
@@ -375,6 +375,14 @@ void MOV_IN(registrosCPU registroDatos, registrosCPU registroDireccion){
             free(dato_leido);
         }
     }
+
+    uint32_t nuevo_contenido;     
+    if (tamanioRegistro(registroDatos) == sizeof(uint32_t)) {
+        nuevo_contenido = *(uint32_t*)reg_datos;
+    } else {
+        nuevo_contenido = *(uint8_t*)reg_datos;
+    }
+    log_info(log_cpu,"El valor traído de memoría al registro %s es: %u", registro_a_string(registroDatos), nuevo_contenido);    
 }
 
 void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
@@ -397,15 +405,13 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
     uint32_t pagina_final = obtener_numero_pagina(direccionLogicaInicial + tamanio_a_escribir - 1); 
 
     if(pagina_inicial == pagina_final){         
-        uint32_t dato_a_escribir;
-        if (tamanioRegistro(registroDatos) == sizeof(uint32_t)) {
-            dato_a_escribir = *(uint32_t*)reg_datos;
-        } else {
-            dato_a_escribir = *(uint8_t*)reg_datos;
-        }
-
         uint32_t direccion_fisica = traducir_direccion_logica_a_fisica(direccionLogicaInicial);
+
+        uint32_t dato_a_escribir = 0;     
+        uint32_t* p_dato_a_escribir = &dato_a_escribir;
+        memcpy(p_dato_a_escribir, reg_datos, tamanio_a_escribir);
         log_info(log_cpu, "Acción: ESCRITURA - Dirección física = %d - Valor: %u", direccion_fisica, dato_a_escribir);
+
         enviar_a_memoria_para_escritura(direccion_fisica, reg_datos, tamanio_a_escribir);
     }
     else{ 
@@ -420,8 +426,11 @@ void MOV_OUT(registrosCPU registroDireccion, registrosCPU registroDatos){
             if (cant_bytes_a_escribir_pagina > (tamanio_a_escribir - bytes_escritos)) { 
                 cant_bytes_a_escribir_pagina = tamanio_a_escribir - bytes_escritos;
             }
+            //printf("Cant bytes a escribir: %u\n", cant_bytes_a_escribir_pagina);
 
-            uint32_t dato_a_escribir_parcial = *(uint8_t*)(reg_datos+bytes_escritos);
+            uint32_t dato_a_escribir_parcial = 0; 
+            uint32_t* p_dato_a_escribir = &dato_a_escribir_parcial;
+            memcpy(p_dato_a_escribir, reg_datos+bytes_escritos, cant_bytes_a_escribir_pagina);
             log_info(log_cpu, "Acción: ESCRITURA - Dirección física = %d - Valor: %u", direccion_fisica_actual, dato_a_escribir_parcial);
 
             enviar_a_memoria_para_escritura(direccion_fisica_actual, reg_datos + bytes_escritos, cant_bytes_a_escribir_pagina);
