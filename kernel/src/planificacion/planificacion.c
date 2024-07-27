@@ -188,7 +188,7 @@ void planificar(op_code operacion, PCB* proceso, t_buffer* buffer) {
             break;
         case FINALIZAR_PROCESO:
             enviarAExit(proceso, INTERRUPTED_BY_USER);
-            cpuLibre = 1;
+            if (proceso->estado == ESTADO_EXEC) cpuLibre = 1;
             break;
         case OUT_OF_MEMORY:
             enviarAExit(proceso, OOM);
