@@ -577,7 +577,6 @@ void realizar_ciclo_de_instruccion(){
             terminar = 1;
         }
     }
-    log_info(log_cpu, "FINALIZÓ EL CICLO DE INSTRUCCIÓN DEL PROCESO %u.", pcb->PID);
 }
 
 
