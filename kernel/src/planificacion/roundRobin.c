@@ -3,8 +3,9 @@
 bool procesoInterrumpido;
 
 void esperarQuantumCompleto(PCB* proceso) {
+    int pid = proceso->PID;
     usleep(proceso->quantum*1000);
-    enviarInterrupcion(proceso->PID, FIN_DE_Q);
+    enviarInterrupcion(pid, FIN_DE_Q);
 
     procesoInterrumpido = 1;
 }

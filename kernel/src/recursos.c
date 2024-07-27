@@ -73,6 +73,8 @@ void sacarRecursoTomado(PCB* proceso, char* nombreRecurso) {
         recurso = recursosAsignadosActualmente[i];
         if(strcmp(recurso, nombreRecurso)) {
             string_array_push(&recursos, recurso);
+        } else {
+            free(recurso);
         }
     }
 
