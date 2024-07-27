@@ -1,5 +1,10 @@
 #include <planificadorLP.h>
 
+void logBloqueo(int pid, char* nombreInt_Rec) {
+    log_info(logger, "PID: %d - Bloqueado por: %s", pid, nombreInt_Rec);
+}
+
+
 void logProcesosEnCola(char* nombreCola, t_queue* cola, bool IO) {
     // rompe la abstraccion pero bue, a esta altura es lo que hay
 

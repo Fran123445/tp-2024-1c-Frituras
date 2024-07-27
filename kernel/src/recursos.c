@@ -45,6 +45,8 @@ int waitRecurso(t_recurso* recurso, PCB* proceso) {
         queue_push(recurso->procesosBloqueados, proceso);
         cambiarEstado(proceso, ESTADO_BLOCKED);
 
+        logBloqueo(proceso->PID, recurso->nombre);
+    
         char* str = string_new();
         string_append_with_format(&str, "BLOCKED %s", recurso->nombre);
         logProcesosEnCola(str, recurso->procesosBloqueados, false);

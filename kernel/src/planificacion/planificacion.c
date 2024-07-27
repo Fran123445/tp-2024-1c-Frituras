@@ -125,6 +125,8 @@ void enviarAIO(PCB* proceso, op_code operacion, t_buffer* buffer) {
         queue_push(interfaz->procesosBloqueados, solicitud);
         cambiarEstado(proceso, ESTADO_BLOCKED);
 
+        logBloqueo(proceso->PID, interfaz->nombreInterfaz);
+
         char* str = string_new();
         string_append_with_format(&str, "BLOCKED %s", interfaz->nombreInterfaz);
         logProcesosEnCola(str, interfaz->procesosBloqueados, true);

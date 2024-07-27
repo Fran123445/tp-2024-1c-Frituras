@@ -51,6 +51,8 @@ extern t_list* listaRecursos;
 
 extern int siguientePID;
 
+void logBloqueo(int pid, char* nombreInt_Rec);
+
 void logProcesosEnCola(char* nombreCola, t_queue* cola, bool IO);
 
 // Envia una interrupcion a CPU
