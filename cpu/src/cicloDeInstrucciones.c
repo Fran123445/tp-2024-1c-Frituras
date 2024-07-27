@@ -491,7 +491,7 @@ void execute(t_instruccion* instruccion){
         IO_STDIN_READ((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);   
         break;
     case iIO_STDOUT_WRITE:
-        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDOUT_WRITE - Parametro 1: %p, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
+        log_info(log_cpu, "PID: %u - Ejecutando: IO_STDOUT_WRITE - Parametro 1: %s, Parametro 2: %s, Parametro 3: %s", pcb->PID, (char*)instruccion->interfaz, registro_a_string(*(registrosCPU*)instruccion->arg1), registro_a_string(*(registrosCPU*)instruccion->arg2));
         IO_STDOUT_WRITE((char*)instruccion->interfaz, *(registrosCPU *)instruccion->arg1, *(registrosCPU *)instruccion->arg2);    
         break;
     case iIO_FS_CREATE:
