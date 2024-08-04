@@ -9,6 +9,8 @@ pthread_mutex_t mutexColaPrioritaria;
 t_queue* colaPrioritaria;
 t_temporal* tiempoTranscurrido;
 
+/* En realidad esto estaría mal, ya que VRR no envia una interrupcion cuando un proceso llega
+a READY+, pero yo en ese momento pensaba que si. */
 void enviarAColaPrioritaria(PCB* proceso) {
     pthread_mutex_lock(&mutexColaPrioritaria);
     cambiarEstado(proceso, ESTADO_READY);
@@ -17,7 +19,7 @@ void enviarAColaPrioritaria(PCB* proceso) {
     pthread_mutex_unlock(&mutexColaPrioritaria);
 
     if (!ultimoPrioritario) {
-        enviarInterrupcion(pidProcesoEnEjecucion, FIN_DE_Q); // habria que o crear un opcode nuevo o cambiarle el nombre a ese
+        enviarInterrupcion(pidProcesoEnEjecucion, FIN_DE_Q);
         ultimoPrioritario = 1;
     }
 }
